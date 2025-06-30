@@ -1,3 +1,5 @@
+// main.js
+
 import { drawFootballField } from './fieldDrawer.js';
 import { staticPlayers } from './players.js';
 import DrawingManager from './drawingManager.js';
@@ -9,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicialización de módulos
     const playerManager = new PlayerManager(staticPlayers);
     const tacticsManager = new TacticsManager();
-    const drawingManager = new DrawingManager('drawing-canvas');
+    const drawingManager = new DrawingManager('drawing-canvas'); // El canvas de dibujo
     const uiManager = new UIManager();
 
     // Estado global
@@ -23,45 +25,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     uiManager.init({
         playerManager,
         tacticsManager,
-        drawingManager,
+        drawingManager, // Pasamos el drawingManager
         state
     });
 
-    // Actualizar contador de selección
-    document.getElementById('squad-player-list').addEventListener('click', () => {
-        uiManager.updateSelectedCount();
-    });
-
-    document.getElementById('squad-player-list').addEventListener('click', () => {
-        const selectedCount = document.querySelectorAll('.squad-player-item.selected').length;
-        document.getElementById('selected-count').textContent = `${selectedCount} seleccionados`;
-
-        if (selectedCount > 11) {
-            document.getElementById('selected-count').classList.add('bg-danger');
-        } else {
-            document.getElementById('selected-count').classList.remove('bg-danger');
-        }
-    });
-
-    // Inicializar campo
+    // --- Lógica del campo de fútbol ---
     const pitchContainer = document.getElementById('pitch-container');
     const footballFieldCanvas = document.getElementById('football-field');
     const fieldCtx = footballFieldCanvas.getContext('2d');
 
-    function resizeCanvases() {
+    // Función para dibujar el campo, que se llamará al redimensionar
+    // Esta función solo se encarga del fondo del campo.
+    function renderFootballField() {
         const rect = pitchContainer.getBoundingClientRect();
-
         footballFieldCanvas.width = rect.width;
         footballFieldCanvas.height = rect.height;
-
-        drawingManager.resize(rect.width, rect.height);
-
         drawFootballField(footballFieldCanvas, fieldCtx);
+        console.log('main.js: Campo de fútbol de fondo redibujado.');
     }
 
-    window.addEventListener('resize', resizeCanvases);
-    resizeCanvases();
+    // El UIManager ya tiene un listener para 'resize' que llama a drawingManager.resizeCanvas()
+    // y repositionPlayersOnPitch(). Aquí solo necesitamos asegurarnos de que el campo de fondo
+    // también se redibuje.
+    let resizeFieldTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeFieldTimeout);
+        resizeFieldTimeout = setTimeout(() => {
+            renderFootballField(); // Redibujar el fondo del campo
+        }, 250); // Mismo debounce que en UIManager para sincronizar
+    });
 
-    // Cargar jugadores iniciales
+
+    // Ejecutar renderizado inicial del campo
+    renderFootballField();
+
+    // Cargar jugadores iniciales en el modal de selección
     playerManager.renderPlayerSelectionList();
+
+    // NOTA: Los dos event listeners para 'click' en 'squad-player-list'
+    // que actualizan el contador están duplicados y la lógica está
+    // mejor centralizada en uiManager.updateSelectedCount().
+    // He eliminado el duplicado aquí. uiManager.updateSelectedCount() ya se encarga de esto.
 });

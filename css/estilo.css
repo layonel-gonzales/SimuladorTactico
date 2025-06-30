@@ -1,26 +1,52 @@
 :root {
-    --primary-color: #00ff80;
-    --dark-bg: #1a1a1a;
-    --medium-bg: #2a2a2a;
-    --light-bg: #333;
-    --text-color: #f0f0f0;
-    --pitch-green: #2d8a2d;
-    --pitch-line: #ffffff;
+    --primary-color: #00ff80; /* Un verde vibrante, puedes probar #FFD700 (oro) o #00BFFF (azul cielo) */
+    --dark-bg: #1a1a1a;       /* Fondo oscuro principal, puedes probar #2c3e50 (gris azulado) */
+    --medium-bg: #2a2a2a;     /* Fondo oscuro secundario, puedes probar #34495e */
+    --light-bg: #333;        /* Fondo más claro, puedes probar #ecf0f1 (casi blanco) */
+    --text-color: #f0f0f0;    /* Color de texto principal (blanco), puedes probar #2c3e50 (oscuro) */
+    --pitch-green: #2d8a2d;   /* Verde del campo, puedes probar #4CAF50 (verde más claro) */
+    --pitch-line: #ffffff;   /* Líneas del campo (blanco), puedes probar #CCCCCC (gris claro) */
+    --gold-color: gold;       /* Color dorado para ratings */
+    --info-color: #17a2b8;    /* Color para botones de info (Bootstrap info) */
+    --warning-color: #ffc107; /* Color para botones de warning (Bootstrap warning) */
+    --light-color: #f8f9fa;   /* Color para botones light (Bootstrap light) */
+    --secondary-color: #6c757d; /* Color para botones secondary (Bootstrap secondary) */
+    --success-color: #28a745; /* Color para insignias de éxito (Bootstrap success) */
+    --danger-color: #dc3545;  /* Color para insignias de peligro (Bootstrap danger) */
+    --border-color-medium: var(--medium-bg); /* Un color de borde basado en el bg */
+    --border-color-secondary: var(--secondary-color); /* Otro color de borde */
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
-    overflow: hidden;
+    background-color: var(--light-bg); /* Usando variable */
+    overflow: hidden; /* Esto es importante para evitar el scroll del body */
     height: 100vh;
+    margin: 0; /* Asegúrate de que no haya margen por defecto en el body */
+    display: flex; /* Usamos flexbox para el layout principal */
+    flex-direction: column; /* Apila el contenido verticalmente si es necesario */
 }
 
+/* Contenedor principal para la aplicación */
+#app-container {
+    display: flex;
+    flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
+    position: relative; /* Necesario para posicionar elementos dentro */
+    width: 100vw; /* Asegurar que ocupa todo el ancho */
+    height: 100vh; /* Asegurar que ocupa toda la altura */
+}
+
+/* Estilos para el campo de juego */
 #pitch-container {
-    background-color: var(--pitch-green);
-    background-image: 
+    background-color: var(--pitch-green); /* Usando variable */
+    background-image:
         linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
         linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
-    background-size: 100px 100px;
+    background-size: 100px 100px; /* Tamaño de las "líneas" de césped */
+    flex-grow: 1; /* Ocupa el espacio restante horizontalmente */
+    position: relative;
+    /* Aseguramos que el campo no tenga overflow, es para que los tokens no salgan */
+    overflow: hidden;
 }
 
 canvas {
@@ -36,21 +62,21 @@ canvas {
 }
 
 #drawing-canvas {
-    z-index: 10;
+    z-index: 10; /* Por encima del campo */
     cursor: crosshair;
+    pointer-events: auto; /* Crucial: Asegura que el canvas reciba eventos del ratón/touch */
+    /* El color de la línea se define en drawingManager.js, pero puedes poner un default aquí */
+    /* stroke-color: var(--pitch-line);  Esto no funciona aquí, el color de línea se establece en JS */
 }
 
-#drawing-canvas.drawing-mode {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' fill='%23ffffff'/%3E%3C/svg%3E") 0 24, auto;
-}
-
+/* Estilos de las "minicards" generales (usadas por player-token y squad-player-item) */
 .minicard-overall {
     position: absolute;
     top: 15px;
     left: 10px;
     font-size: 1.2em;
     font-weight: bold;
-    color: gold;
+    color: var(--gold-color); /* Usando variable */
     background-color: rgba(0, 0, 0, 0.6);
     width: 25px;
     height: 25px;
@@ -58,20 +84,8 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Estilos para el modal de selección */
-#squad-selection-modal .modal-content {
-    background: #1a1a1a;
-    border: 1px solid #333;
-}
-
-#squad-selection-modal .modal-header {
-    border-bottom: 1px solid #333;
-}
-
-#squad-selection-modal .modal-footer {
-    border-top: 1px solid #333;
+    text-align: center;
+    line-height: 1; /* Asegura que el texto se centre verticalmente */
 }
 
 .minicard-position {
@@ -80,10 +94,11 @@ canvas {
     right: 10px;
     font-size: 0.8em;
     font-weight: bold;
-    color: white;
+    color: var(--text-color); /* Usando variable */
     background-color: rgba(0, 0, 0, 0.6);
     padding: 2px 5px;
     border-radius: 3px;
+    text-align: center;
 }
 
 .minicard-player-image {
@@ -95,24 +110,26 @@ canvas {
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid white;
+    border: 2px solid var(--text-color); /* Usando variable */
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 .minicard-name {
     position: absolute;
     bottom: 25px;
-    left: 11px;
+    left: 11px; /* Ajuste para centrar visualmente */
     right: 0;
     text-align: center;
     font-size: 0.67em;
     font-weight: bold;
-    color: white;
+    color: var(--text-color); /* Usando variable */
     background-color: rgba(0, 0, 0, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 81%;
+    width: 81%; /* Ajuste para ocupar el ancho del marco */
+    padding: 0 5px; /* Pequeño padding horizontal */
+    box-sizing: border-box; /* Incluir padding en el width */
 }
 
 .minicard-jersey-number {
@@ -122,35 +139,43 @@ canvas {
     transform: translateX(-50%);
     font-size: 1.2em;
     font-weight: bold;
-    color: white;
+    color: var(--text-color); /* Usando variable */
     text-shadow: 0 0 3px black;
 }
 
-.center-logo-watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 20%;
-    padding-bottom: 20%;
-    background-image: url('../img/logoStoiko.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.1;
-    pointer-events: none;
-    z-index: 2;
+
+/* Estilos para el modal de selección de jugadores */
+#squad-selection-modal .modal-content {
+    background: var(--dark-bg); /* Usando variable */
+    border: 1px solid var(--medium-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
 }
 
-#info-panel {
-    max-width: 400px;
-    z-index: 1000;
+#squad-selection-modal .modal-header,
+#squad-selection-modal .modal-footer {
+    border-color: var(--medium-bg); /* Usando variable */
 }
 
+#squad-selection-modal .modal-title {
+    color: var(--primary-color); /* Usando variable */
+}
+
+/* Lista de jugadores en el modal */
+#squad-player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centra los elementos */
+    gap: 10px; /* Espacio entre las tarjetas */
+    max-height: 70vh; /* Para que sea scrollable si hay muchos jugadores */
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Estilo para cada ítem de jugador en el modal de selección */
 .squad-player-item {
     position: relative;
-    width: 130px; /* Ancho del marco */
-    height: 168px; /* Alto del marco (proporción de marco3.png) */
+    width: 130px;
+    height: 168px;
     background-image: url('../img/marco3.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -158,10 +183,10 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: center; /* Asegura el contenido centrado */
     cursor: pointer;
     transition: all 0.3s ease;
-    margin: 5px;
+    flex-shrink: 0; /* Evita que las tarjetas se achiquen si no hay espacio */
 }
 
 .squad-player-item:hover {
@@ -172,17 +197,19 @@ canvas {
 .squad-player-item.selected {
     filter: brightness(0.7) saturate(1.1);
     transform: scale(0.95);
+    border: 2px solid var(--primary-color); /* Usando variable */
+    box-shadow: 0 0 10px var(--primary-color); /* Usando variable */
 }
 
-
+/* Elementos dentro de squad-player-item, ajustados para el marco */
 .squad-player-item img {
     width: 70px;
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    margin-top: 20px; /* Ajuste para posicionar dentro del marco */
-    border: 2px solid #00ff80;
-    box-shadow: 0 0 8px rgba(0, 255, 128, 0.5);
+    margin-top: 20px; /* Ajuste para posicionar la imagen dentro del marco */
+    border: 2px solid var(--primary-color); /* Usando variable */
+    box-shadow: 0 0 8px var(--primary-color); /* Usando variable con opacidad */
 }
 
 .squad-player-item .player-name {
@@ -190,7 +217,7 @@ canvas {
     margin-top: 5px;
     font-size: 0.8em;
     text-align: center;
-    color: white;
+    color: var(--text-color); /* Usando variable */
     background-color: rgba(0, 0, 0, 0.5);
     padding: 2px 5px;
     border-radius: 3px;
@@ -202,169 +229,433 @@ canvas {
 
 .squad-player-item .player-position {
     font-size: 0.7em;
-    color: #ccc;
-    margin-top: 2px;
+    color: #ccc; /* Mantener este color si no quieres que cambie con text-color */
 }
 
+/* Reutilizando minicard-overall y minicard-jersey-number para squad-player-item */
 .squad-player-item .minicard-overall {
-    position: absolute;
-    top: 20px;
+    top: 20px; /* Ajuste específico para este marco */
     left: 10px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: gold;
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .squad-player-item .minicard-jersey-number {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.2em;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 0 3px black;
+    bottom: 40px; /* Ajuste específico para este marco */
 }
 
-.player-card {
-  position: absolute;
-  z-index: 10;  /* Mayor que el del campo (ej: z-index: 1) */
-  cursor: grab;  /* Cambia el cursor */
-}
 
-.player-card {
-  pointer-events: auto; /* Habilita interacción */
-}
-
-.player-token:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-.player-token.dragging {
-    transform: scale(1.1);
-    filter: brightness(1.2);
-    z-index: 100;
-}
-
-/* Estilos para las tarjetas en la cancha (player-token) */
+/* Estilos para los tokens de jugador en la cancha (player-token) */
 .player-token {
     position: absolute;
-    width: 125px; /* Ancho del marco */
-    height: 145px; /* Alto del marco (proporción) */
+    width: 125px;
+    height: 145px;
     background-image: url('../img/marco3.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
     cursor: grab;
-    z-index: 15;
-    transition: transform 0.2s, filter 0.2s;
+    z-index: 15; /* Por encima del drawing-canvas (10) */
+    transition: transform 0.2s, filter 0.2s; /* Animación para hover/dragging */
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    pointer-events: auto; /* Asegura que el token sea clickeable/arrastrable */
 }
 
+.player-token:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+
+.player-token.dragging {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+    z-index: 100; /* Asegura que el jugador arrastrado esté por encima de todo lo demás en el campo */
+}
+
+/* Elementos dentro de player-token, ajustados para el marco del campo */
 .player-token .minicard-overall {
-    position: absolute;
-    top: 21px;
-    left: 10px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: gold;
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 25px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    top: 21px; /* Ajuste para este marco */
 }
 
 .player-token .minicard-position {
-    position: absolute;
-    top: 21px;
-    right: 10px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 25px;
+    top: 21px; /* Ajuste para este marco */
+    border-radius: 25px; /* Más redondo */
 }
 
 .player-token .minicard-player-image {
-    position: absolute;
-    top: 45px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    top: 45px; /* Ajuste para este marco */
 }
 
 .player-token .minicard-jersey-number {
+    bottom: 40px; /* Ajuste para este marco */
+}
+
+
+/* Estilos para el modal de visualización de jugador (player-modal) */
+#player-modal .modal-content {
+    background: var(--dark-bg); /* Usando variable */
+    border: 1px solid var(--medium-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+}
+
+#player-modal .modal-header,
+#player-modal .modal-footer {
+    border-color: var(--medium-bg); /* Usando variable */
+}
+
+/* Estilos para la tarjeta de jugador detallada (usada en player-modal) */
+.fifa-card {
+    background-color: var(--dark-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    max-width: 350px; /* Ancho máximo para la tarjeta */
+    margin: auto; /* Centrar en el modal */
+}
+
+.fifa-card img {
+    border: 3px solid var(--primary-color); /* Usando variable */
+    box-shadow: 0 0 10px var(--primary-color); /* Usando variable con opacidad */
+}
+
+.fifa-card .display-4 {
+    color: var(--gold-color); /* Usando variable */
+}
+
+.fifa-card .badge {
+    background-color: var(--primary-color) !important; /* Usando variable */
+    color: var(--dark-bg) !important; /* Usando variable */
+}
+
+.fifa-card h5 {
+    color: var(--text-color); /* Usando variable */
+}
+
+.fifa-card small {
+    color: #bbb !important; /* Mantener este color específico si no se quiere variable */
+}
+
+.fifa-card span, .fifa-card strong {
+    color: var(--text-color); /* Usando variable */
+    font-size: 0.95em;
+}
+
+/* Watermark */
+.center-logo-watermark {
     position: absolute;
-    bottom: 40px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.2em;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 0 3px black;
+    transform: translate(-50%, -50%);
+    width: 20%; /* Tamaño relativo */
+    padding-bottom: 20%; /* Mantiene la proporción 1:1 */
+    background-image: url('../img/logoStoiko.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.1;
+    pointer-events: none; /* Crucial: no debe interceptar clics */
+    z-index: 2; /* Por encima del campo pero debajo del drawing-canvas */
 }
 
-/* Para el modal de selección */
-#squad-player-list {
+/* --- Panel de Controles (Sidebar) --- */
+/* Por defecto, los controles de escritorio */
+/* Importante: este #info-panel ahora está dentro de #controls-wrapper */
+#info-panel {
+    background-color: var(--dark-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+    padding: 15px;
+    box-sizing: border-box;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-height: 70vh;
+    flex-direction: column;
     overflow-y: auto;
-    padding: 10px;
+}
+
+/* Estilo para el botón de toggle de controles en móviles */
+#mobile-controls-toggle-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 2001; /* Por encima de todo */
+    background-color: var(--primary-color); /* Usando variable */
+    color: var(--dark-bg); /* Usando variable */
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: none; /* Oculto por defecto en escritorio */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    pointer-events: auto; /* Asegura que el botón sea clickeable */
+}
+
+/* Contenedor deslizante de los controles para móvil */
+#controls-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px; /* Ancho del menú desplegable */
+    background-color: var(--dark-bg); /* Usando variable */
+    z-index: 2000; /* Asegúrate de que esté por encima de todo cuando se muestra */
+    transform: translateX(-100%); /* Oculto por defecto */
+    transition: transform 0.3s ease-out; /* Animación de deslizamiento */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    padding: 0;
+    color: var(--text-color); /* Usando variable */
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: none; /* Oculto por defecto, se muestra con JS en móvil */
+    pointer-events: none; /* Por defecto, no intercepta eventos si está oculto */
+}
+
+#controls-wrapper.show-controls {
+    transform: translateX(0);
+    display: flex;
+    pointer-events: auto;
+}
+
+/* Overlay cuando el menú está abierto */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1999; /* Debajo de controls-wrapper */
+    display: none;
+    pointer-events: none;
+}
+
+.overlay.show-overlay {
+    display: block;
+    pointer-events: auto;
+}
+
+/* Clases de Bootstrap adaptadas para usar variables (si no quieres !important) */
+.bg-dark { background-color: var(--dark-bg) !important; }
+.text-white { color: var(--text-color) !important; } /* Puede ser text-color si es blanco */
+.text-primary { color: var(--primary-color) !important; }
+.bg-secondary { background-color: var(--medium-bg) !important; } /* Usar medium-bg para secondary */
+.border-secondary { border-color: var(--border-color-secondary) !important; }
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--dark-bg) !important; /* Texto oscuro para botón primario claro */
+}
+.btn-info {
+    background-color: var(--info-color) !important;
+    border-color: var(--info-color) !important;
+    color: var(--text-color) !important;
+}
+.btn-warning {
+    background-color: var(--warning-color) !important;
+    border-color: var(--warning-color) !important;
+    color: var(--dark-bg) !important; /* Texto oscuro para botón warning claro */
+}
+.btn-light {
+    background-color: var(--light-color) !important;
+    border-color: var(--light-color) !important;
+    color: var(--dark-bg) !important; /* Texto oscuro para botón light claro */
+}
+.btn-secondary {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    color: var(--text-color) !important;
+}
+.btn-close-white {
+    filter: invert(1); /* Para que el icono de cierre blanco sea visible en fondos oscuros */
+}
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+.badge.bg-danger {
+    background-color: var(--danger-color) !important;
 }
 
 
+/* NUEVOS ESTILOS PARA MODAL */
+/* Aumentar el z-index de los modales para que estén por encima de los controles */
+.custom-z-index-modal.modal {
+    z-index: 2002; /* Mayor que controls-wrapper (2000) y mobile-controls-toggle-btn (2001) */
+}
 
-/* Modo móvil */
-@media (max-width: 768px) {
+/* Asegurar que el backdrop del modal también tenga un z-index alto */
+.custom-z-index-modal.modal-backdrop {
+    z-index: 2001; /* Entre el menú y el modal */
+}
+
+/* Media Queries para Responsividad */
+@media (min-width: 768px) {
+    #controls-wrapper {
+        position: static;
+        width: 350px;
+        transform: translateX(0);
+        box-shadow: none;
+        display: flex;
+        pointer-events: auto;
+        flex-shrink: 0;
+    }
+
+    #mobile-controls-toggle-btn {
+        display: none;
+    }
+
+    .overlay {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    #info-panel {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    #mobile-controls-toggle-btn {
+        display: block;
+    }
+
+    #controls-wrapper {
+        flex-direction: column;
+    }
+
+    /* Ajustes para los tokens de jugador en el campo */
     .player-token {
         width: 60px;
         height: 75px;
     }
-    
-    .minicard-overall {
+
+    .player-token .minicard-overall {
         top: 10px;
         left: 5px;
         font-size: 1em;
         width: 20px;
         height: 20px;
     }
-    
-    .minicard-position {
+
+    .player-token .minicard-position {
         top: 10px;
         right: 5px;
         font-size: 0.7em;
+        padding: 1px 3px;
     }
-    
-    .minicard-player-image {
-        top: 35px;
+
+    .player-token .minicard-player-image {
+        top: 30px;
         width: 40px;
         height: 40px;
     }
-    
-    .minicard-name {
+
+    .player-token .minicard-name {
         bottom: 10px;
-        font-size: 0.65em;
+        font-size: 0.6em;
+        width: 80%;
+        padding: 1px 2px;
+        left: 50%;
+        transform: translateX(-50%);
     }
-    
-    .minicard-jersey-number {
-        bottom: 30px;
+
+    .player-token .minicard-jersey-number {
+        bottom: 25px;
+        font-size: 0.9em;
+    }
+
+    /* Ajustes para las tarjetas en el modal de selección */
+    .squad-player-item {
+        width: 90px;
+        height: 110px;
+        margin: 2px;
+    }
+
+    .squad-player-item img {
+        width: 50px;
+        height: 50px;
+        margin-top: 15px;
+    }
+
+    .squad-player-item .player-name {
+        font-size: 0.65em;
+        max-width: 70px;
+        bottom: 15px;
+    }
+
+    .squad-player-item .player-position {
+        font-size: 0.6em;
+        margin-top: 0px;
+    }
+
+    .squad-player-item .minicard-overall {
+        top: 10px;
+        left: 5px;
         font-size: 1em;
+        width: 20px;
+        height: 20px;
+    }
+
+    .squad-player-item .minicard-jersey-number {
+        bottom: 30px;
+        font-size: 0.9em;
+    }
+
+    #squad-player-list {
+        gap: 5px;
+        padding: 5px;
+    }
+
+    /* Reducir el tamaño del watermark en móvil si es necesario */
+    .center-logo-watermark {
+        width: 40%;
+        padding-bottom: 40%;
+    }
+}
+
+/* Media Query para pantallas muy pequeñas (ej. iPhone SE) */
+@media (max-width: 400px) {
+    .player-token {
+        width: 50px;
+        height: 65px;
+    }
+    .player-token .minicard-overall,
+    .squad-player-item .minicard-overall {
+        font-size: 0.9em;
+        width: 18px;
+        height: 18px;
+        top: 8px;
+        left: 3px;
+    }
+    .player-token .minicard-position,
+    .squad-player-item .minicard-position {
+        font-size: 0.6em;
+        padding: 0px 2px;
+        top: 8px;
+        right: 3px;
+    }
+    .player-token .minicard-player-image,
+    .squad-player-item .minicard-player-image {
+        width: 35px;
+        height: 35px;
+        top: 25px;
+    }
+    .player-token .minicard-name,
+    .squad-player-item .minicard-name {
+        font-size: 0.55em;
+        bottom: 8px;
+    }
+    .player-token .minicard-jersey-number,
+    .squad-player-item .minicard-jersey-number {
+        font-size: 0.8em;
+        bottom: 20px;
+    }
+
+    .squad-player-item {
+        width: 80px;
+        height: 100px;
+    }
+    .squad-player-item img {
+        width: 40px;
+        height: 40px;
+        margin-top: 10px;
+    }
+    .squad-player-item .player-name {
+        max-width: 60px;
     }
 }
