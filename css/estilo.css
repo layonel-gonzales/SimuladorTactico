@@ -197,8 +197,6 @@ canvas {
 .squad-player-item.selected {
     filter: brightness(0.7) saturate(1.1);
     transform: scale(0.95);
-    border: 2px solid var(--primary-color); /* Usando variable */
-    box-shadow: 0 0 10px var(--primary-color); /* Usando variable */
 }
 
 /* Elementos dentro de squad-player-item, ajustados para el marco */
@@ -331,7 +329,7 @@ canvas {
 }
 
 .fifa-card small {
-    color: #bbb !important; /* Mantener este color específico si no se quiere variable */
+    color: #bbb !important; /* Mantener este color específico si no quieres variable */
 }
 
 .fifa-card span, .fifa-card strong {
@@ -483,6 +481,31 @@ canvas {
     z-index: 2001; /* Entre el menú y el modal */
 }
 
+/* MENSAJE DE ORIENTACIÓN EN MÓVILES (NUEVO) */
+#orientation-message {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--dark-bg); /* Fondo oscuro */
+    color: var(--text-color); /* Texto claro */
+    z-index: 3000; /* Por encima de todo */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    flex-direction: column;
+}
+
+#orientation-message img {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
 /* Media Queries para Responsividad */
 @media (min-width: 768px) {
     #controls-wrapper {
@@ -507,15 +530,21 @@ canvas {
     #info-panel {
         flex-grow: 1;
     }
+
+    #orientation-message {
+        display: none !important; /* Ocultar en escritorio */
+    }
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 767.98px) { /* Estilos para tablets y móviles en general */
     #mobile-controls-toggle-btn {
         display: block;
     }
 
     #controls-wrapper {
         flex-direction: column;
+        width: 250px; /* Un poco más estrecho para móvil */
+        padding: 5px; /* Reducir padding general del wrapper */
     }
 
     /* Ajustes para los tokens de jugador en el campo */
@@ -606,13 +635,35 @@ canvas {
         width: 40%;
         padding-bottom: 40%;
     }
+
+    /* Estilos específicos para orientación vertical en móviles */
+    @media (orientation: portrait) {
+        #app-container {
+            display: none; /* Ocultar la aplicación principal */
+        }
+
+        #orientation-message {
+            display: flex; /* Mostrar el mensaje de orientación */
+        }
+    }
+
+    /* Estilos específicos para orientación horizontal en móviles */
+    @media (orientation: landscape) {
+        #app-container {
+            display: flex; /* Mostrar la aplicación principal */
+        }
+
+        #orientation-message {
+            display: none; /* Ocultar el mensaje de orientación */
+        }
+    }
 }
 
-/* Media Query para pantallas muy pequeñas (ej. iPhone SE) */
+/* Media Query para pantallas muy pequeñas (ej. iPhone SE) - Afinamos aún más */
 @media (max-width: 400px) {
     .player-token {
-        width: 50px;
-        height: 65px;
+        width: 55px; /* Ligeramente más pequeño */
+        height: 70px; /* Ligeramente más pequeño */
     }
     .player-token .minicard-overall,
     .squad-player-item .minicard-overall {
@@ -631,8 +682,8 @@ canvas {
     }
     .player-token .minicard-player-image,
     .squad-player-item .minicard-player-image {
-        width: 35px;
-        height: 35px;
+        width: 38px; /* Ligeramente más pequeño */
+        height: 38px; /* Ligeramente más pequeño */
         top: 25px;
     }
     .player-token .minicard-name,
@@ -647,15 +698,19 @@ canvas {
     }
 
     .squad-player-item {
-        width: 80px;
-        height: 100px;
+        width: 85px; /* Ligeramente más pequeño */
+        height: 105px; /* Ligeramente más pequeño */
     }
     .squad-player-item img {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         margin-top: 10px;
     }
     .squad-player-item .player-name {
-        max-width: 60px;
+        max-width: 65px;
+    }
+
+    #controls-wrapper {
+        width: 230px; /* Aún más estrecho */
     }
 }

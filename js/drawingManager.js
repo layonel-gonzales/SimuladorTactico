@@ -10,74 +10,94 @@ export default class DrawingManager {
         this.initialWidth = 0; // Ancho inicial del canvas cuando se dibuja una línea
         this.initialHeight = 0; // Alto inicial del canvas cuando se dibuja una línea
 
+        // Propiedades de la línea que deben persistir
+        this.lineProperties = {
+            width: 5,       // Grosor de la línea
+            color: 'yellow' // Color de la línea
+        };
+
         this.setupCanvas();
         this.setupEventListeners();
     }
 
     setupCanvas() {
-        // Al configurar el canvas inicialmente, asegúrate de que ocupe todo el contenedor
         const pitchContainer = this.canvas.parentElement;
         this.canvas.width = pitchContainer.clientWidth;
         this.canvas.height = pitchContainer.clientHeight;
-        // Estas dimensiones iniciales se usarán como referencia para la escala de los dibujos.
-        // Se actualizarán cada vez que se empiece a dibujar una nueva línea para reflejar el tamaño actual.
         this.initialWidth = this.canvas.width;
         this.initialHeight = this.canvas.height;
 
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeStyle = 'yellow';
-        this.ctx.lineCap = 'round';
-        this.ctx.lineJoin = 'round';
+        // Asegurarse de que el contexto siempre tenga las propiedades correctas
+        this.applyContextProperties();
+
         console.log('DrawingManager: Canvas de dibujo configurado.');
     }
 
-    // --- MÉTODO CLAVE PARA REDIMENSIONAMIENTO ---
+    applyContextProperties() {
+        this.ctx.lineWidth = this.lineProperties.width;
+        this.ctx.strokeStyle = this.lineProperties.color;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+    }
+
     resizeCanvas() {
         const pitchContainer = this.canvas.parentElement;
         const newWidth = pitchContainer.clientWidth;
         const newHeight = pitchContainer.clientHeight;
 
-        // Si el tamaño no ha cambiado, no hagas nada
         if (newWidth === this.canvas.width && newHeight === this.canvas.height) {
-            return;
+            return; // No redimensionar si el tamaño no ha cambiado
         }
 
-        // Actualiza el tamaño del canvas
         this.canvas.width = newWidth;
         this.canvas.height = newHeight;
 
-        // Redibuja todas las líneas escalando sus puntos al nuevo tamaño del canvas
+        // Vuelve a aplicar las propiedades del contexto después del redimensionamiento
+        this.applyContextProperties();
+
         this.redrawLines();
         console.log('DrawingManager: Canvas de dibujo redimensionado y redibujado.');
     }
 
     redrawLines() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.beginPath(); // Siempre iniciar una nueva ruta para redibujar
+        this.applyContextProperties(); // Asegurarse de que las propiedades estén configuradas antes de dibujar
 
         this.lines.forEach(lineData => {
-            // lineData ahora incluye initialWidth y initialHeight cuando se dibujó
             const line = lineData.points;
             const originalWidth = lineData.initialWidth;
             const originalHeight = lineData.initialHeight;
 
             if (line.length > 0) {
-                // Mueve el punto inicial de cada línea al nuevo tamaño escalado
+                this.ctx.beginPath();
                 this.ctx.moveTo(
                     (line[0].x / originalWidth) * this.canvas.width,
                     (line[0].y / originalHeight) * this.canvas.height
                 );
                 for (let i = 1; i < line.length; i++) {
-                    // Dibuja el resto de los puntos escalados
                     this.ctx.lineTo(
                         (line[i].x / originalWidth) * this.canvas.width,
                         (line[i].y / originalHeight) * this.canvas.height
                     );
                 }
+                this.ctx.stroke();
+
+                // Dibuja la punta de flecha al final de la línea
+                const lastPoint = line[line.length - 1];
+                const secondLastPoint = line[line.length - 2] || line[0]; // Usar el penúltimo o el primero si solo hay 1-2 puntos
+
+                // Escalar puntos para dibujar la flecha
+                const scaledLastX = (lastPoint.x / originalWidth) * this.canvas.width;
+                const scaledLastY = (lastPoint.y / originalHeight) * this.canvas.height;
+                const scaledSecondLastX = (secondLastPoint.x / originalWidth) * this.canvas.width;
+                const scaledSecondLastY = (secondLastPoint.y / originalHeight) * this.canvas.height;
+
+                this.drawArrowhead(
+                    scaledSecondLastX, scaledSecondLastY,
+                    scaledLastX, scaledLastY
+                );
             }
         });
-        this.ctx.stroke(); // Dibuja todas las líneas
-        this.ctx.closePath(); // Cierra la ruta
     }
 
     startDrawing(e) {
@@ -85,7 +105,6 @@ export default class DrawingManager {
         this.isDrawing = true;
         this.currentLine = [];
 
-        // Captura el tamaño actual del canvas cuando se empieza a dibujar una nueva línea
         this.initialWidth = this.canvas.width;
         this.initialHeight = this.canvas.height;
 
@@ -99,6 +118,7 @@ export default class DrawingManager {
         if (!this.isDrawing || !this.canvas || !this.ctx) return;
         const { x, y } = this.getCanvasCoordinates(e);
         this.currentLine.push({ x, y });
+        // Redraw current line to ensure persistence
         this.ctx.lineTo(x, y);
         this.ctx.stroke();
     }
@@ -106,15 +126,99 @@ export default class DrawingManager {
     endDrawing() {
         if (!this.canvas || !this.ctx) return;
         this.isDrawing = false;
-        if (this.currentLine.length > 0) {
-            // Almacenar la línea junto con el tamaño del canvas en el momento del dibujo
-            this.lines.push({
-                points: this.currentLine,
-                initialWidth: this.initialWidth,
-                initialHeight: this.initialHeight
-            });
+        this.ctx.closePath(); // Cierra el path actual de la línea en progreso
+
+        if (this.currentLine.length > 1) { // Necesitamos al menos 2 puntos para una línea
+            // Aplicar un suavizado o simplificación a la línea antes de guardarla
+            // Reducir la tolerancia para líneas más precisas pero aún con suavizado ligero
+            const simplifiedLine = this.simplifyLine(this.currentLine, 0.75);
+
+            // Asegurarse de que haya al menos 2 puntos para dibujar la flecha
+            if (simplifiedLine.length < 2) {
+                // Si la simplificación la reduce a menos de 2 puntos, usar los originales si son al menos 2
+                if (this.currentLine.length >= 2) {
+                    this.lines.push({
+                        points: this.currentLine,
+                        initialWidth: this.initialWidth,
+                        initialHeight: this.initialHeight
+                    });
+                }
+            } else {
+                this.lines.push({
+                    points: simplifiedLine, // Guardar la línea simplificada
+                    initialWidth: this.initialWidth,
+                    initialHeight: this.initialHeight
+                });
+            }
         }
-        this.ctx.closePath(); // Cierra la ruta actual para el siguiente dibujo
+        // Redibujar todas las líneas, incluyendo la nueva, con sus puntas de flecha
+        this.redrawLines();
+    }
+
+    // Método para dibujar una punta de flecha al final de una línea
+    drawArrowhead(fromX, fromY, toX, toY) {
+        const headlen = 15; // longitud de la punta de flecha
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(toX, toY);
+        this.ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        this.ctx.moveTo(toX, toY);
+        this.ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        this.ctx.stroke();
+        this.ctx.closePath();
+    }
+
+    // Método: Simplificar línea (Douglas-Peucker muy básico para suavizar)
+    // Reduce puntos para hacer la línea más "recta" si el pulso es irregular
+    simplifyLine(points, tolerance) {
+        if (points.length <= 2) return points;
+
+        let maxDist = 0;
+        let index = 0;
+        const end = points.length - 1;
+        const lineStart = points[0];
+        const lineEnd = points[end];
+
+        for (let i = 1; i < end; i++) {
+            const d = this.perpendicularDistance(points[i], lineStart, lineEnd);
+            if (d > maxDist) {
+                maxDist = d;
+                index = i;
+            }
+        }
+
+        if (maxDist > tolerance) {
+            const recResults1 = this.simplifyLine(points.slice(0, index + 1), tolerance);
+            const recResults2 = this.simplifyLine(points.slice(index), tolerance);
+
+            return recResults1.slice(0, recResults1.length - 1).concat(recResults2);
+        } else {
+            return [lineStart, lineEnd];
+        }
+    }
+
+    // Función auxiliar para calcular la distancia perpendicular de un punto a una línea
+    perpendicularDistance(point, lineStart, lineEnd) {
+        const x0 = point.x;
+        const y0 = point.y;
+        const x1 = lineStart.x;
+        const y1 = lineStart.y;
+        const x2 = lineEnd.x;
+        const y2 = lineEnd.y;
+
+        const numerator = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1));
+        const denominator = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+        if (denominator === 0) return this.distance(point, lineStart); // Si la línea es un punto
+        return numerator / denominator;
+    }
+
+    // Función auxiliar para calcular la distancia euclidiana entre dos puntos
+    distance(p1, p2) {
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     clearCanvas() {
@@ -136,7 +240,6 @@ export default class DrawingManager {
             clientY = e.clientY;
         }
 
-        // Devolver las coordenadas relativas al canvas en su tamaño actual
         return {
             x: clientX - rect.left,
             y: clientY - rect.top
@@ -152,7 +255,7 @@ export default class DrawingManager {
         this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
         this.canvas.addEventListener('mousemove', (e) => this.draw(e));
         this.canvas.addEventListener('mouseup', () => this.endDrawing());
-        this.canvas.addEventListener('mouseout', () => { // Detener dibujo si el ratón sale del canvas
+        this.canvas.addEventListener('mouseout', () => {
             if (this.isDrawing) this.endDrawing();
         });
 
@@ -160,7 +263,7 @@ export default class DrawingManager {
         this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.startDrawing(e); }, { passive: false });
         this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); this.draw(e); }, { passive: false });
         this.canvas.addEventListener('touchend', () => this.endDrawing());
-        this.canvas.addEventListener('touchcancel', () => { // Detener dibujo si el toque se cancela
+        this.canvas.addEventListener('touchcancel', () => {
             if (this.isDrawing) this.endDrawing();
         });
     }

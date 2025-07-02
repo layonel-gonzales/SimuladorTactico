@@ -59,17 +59,6 @@ export default class UIManager {
                 playerToken.style.cursor = 'grab';
             }
         });
-
-        // Asegúrate de que el cursor del canvas se actualice al cambiar el modo
-        const toggleDrawingModeBtn = document.getElementById('toggle-drawing-mode');
-        if (toggleDrawingModeBtn) {
-            toggleDrawingModeBtn.addEventListener('click', () => {
-                this.state.isDrawingMode = !this.state.isDrawingMode;
-                this.updateModeIndicator();
-                updateCanvasCursor(); // Actualizar cursor inmediatamente al cambiar modo
-                console.log('UIManager: Modo de dibujo cambiado a', this.state.isDrawingMode);
-            });
-        }
     }
 
     setupEventListeners() {
