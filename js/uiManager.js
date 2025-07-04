@@ -66,44 +66,50 @@ export default class UIManager {
 
         // --- Eventos para el menú móvil ---
         const mobileControlsToggleBtn = document.getElementById('mobile-controls-toggle-btn');
+        const menuToggleIcon = document.getElementById('menu-toggle-icon');
         const controlsWrapper = document.getElementById('controls-wrapper');
         const overlay = document.getElementById('mobile-menu-overlay');
         const closeMobileMenuBtn = document.getElementById('close-mobile-menu-btn');
         const closeMobileMenuBtnBottom = document.getElementById('close-mobile-menu-btn-bottom');
 
-        // Función para cerrar el menú móvil
-        const closeMobileMenu = () => {
-            console.log('UIManager: Cerrando menú móvil.');
-            if (controlsWrapper) controlsWrapper.classList.remove('show-controls');
-            if (overlay) overlay.classList.remove('show-overlay');
+        // Alternar menú y cambiar icono
+        const toggleMenu = () => {
+            const isOpen = controlsWrapper.classList.contains('show-controls');
+            if (isOpen) {
+                controlsWrapper.classList.remove('show-controls');
+                overlay.classList.remove('show-overlay');
+                menuToggleIcon.classList.remove('fa-arrow-left');
+                menuToggleIcon.classList.add('fa-bars');
+            } else {
+                controlsWrapper.classList.add('show-controls');
+                overlay.classList.add('show-overlay');
+                menuToggleIcon.classList.remove('fa-bars');
+                menuToggleIcon.classList.add('fa-arrow-left');
+            }
         };
 
         // Abrir menú
         if (mobileControlsToggleBtn) {
-            mobileControlsToggleBtn.addEventListener('click', () => {
-                console.log('UIManager: Click en botón para abrir menú móvil.');
-                if (controlsWrapper) controlsWrapper.classList.add('show-controls');
-                if (overlay) overlay.classList.add('show-overlay');
-            });
+            mobileControlsToggleBtn.addEventListener('click', toggleMenu);
         } else {
              console.warn('UIManager: Botón #mobile-controls-toggle-btn no encontrado.');
         }
 
         // Cerrar menú desde el botón superior o inferior
         if (closeMobileMenuBtn) {
-            closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
+            closeMobileMenuBtn.addEventListener('click', toggleMenu);
         } else {
              console.warn('UIManager: Botón #close-mobile-menu-btn no encontrado.');
         }
         if (closeMobileMenuBtnBottom) {
-            closeMobileMenuBtnBottom.addEventListener('click', closeMobileMenu);
+            closeMobileMenuBtnBottom.addEventListener('click', toggleMenu);
         } else {
              console.warn('UIManager: Botón #close-mobile-menu-btn-bottom no encontrado.');
         }
 
         // Cerrar menú al hacer clic en el overlay
         if (overlay) {
-            overlay.addEventListener('click', closeMobileMenu);
+            overlay.addEventListener('click', toggleMenu);
         } else {
             console.warn('UIManager: Overlay #mobile-menu-overlay no encontrado.');
         }
@@ -272,7 +278,7 @@ export default class UIManager {
                 // Aquí podrías definir una lógica de posicionamiento por defecto,
                 // por ejemplo, dispersarlos un poco o colocarlos en una línea.
                 // Por simplicidad, usaremos un valor que los coloque en el centro superior al 20% del campo
-                // hasta que una táctica o un arrastre los mueva.
+                // hasta que una táctica o un arrastre los muevan.
                 const initialX = (pitchRect.width / 2) - (60 / 2) + (index * 5); // 60 es el ancho del token
                 const initialY = (pitchRect.height * 0.20); // 20% desde arriba
 

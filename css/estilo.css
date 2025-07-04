@@ -27,34 +27,155 @@ body {
     flex-direction: column; /* Apila el contenido verticalmente si es necesario */
 }
 
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 /* Contenedor principal para la aplicación */
 #app-container {
-    display: flex;
-    flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
-    position: relative; /* Necesario para posicionar elementos dentro */
-    width: 100vw; /* Asegurar que ocupa todo el ancho */
-    height: 100vh; /* Asegurar que ocupa toda la altura */
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: block;
+    flex-grow: unset;
 }
 
 /* Estilos para el campo de juego */
 #pitch-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    flex-grow: unset;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     background-color: var(--pitch-green); /* Usando variable */
     background-image:
         linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
         linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
     background-size: 100px 100px; /* Tamaño de las "líneas" de césped */
-    flex-grow: 1; /* Ocupa el espacio restante horizontalmente */
-    position: relative;
-    /* Aseguramos que el campo no tenga overflow, es para que los tokens no salgan */
-    overflow: hidden;
 }
 
+/* Estilos para el contenedor de controles (sidebar) */
+#controls-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 320px; /* Ancho del menú desplegable */
+    background-color: var(--dark-bg); /* Usando variable */
+    z-index: 2000; /* Refuerzo para estar por encima de los canvas */
+    transform: translateX(-100%); /* Oculto por defecto */
+    transition: transform 0.3s ease-out; /* Animación de deslizamiento */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+#controls-wrapper.show-controls {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* Estilo para el botón de toggle de controles en móviles */
+#mobile-controls-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2100; /* Refuerzo para estar por encima de todo */
+    background-color: var(--primary-color); /* Usando variable */
+    color: var(--dark-bg); /* Usando variable */
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    pointer-events: auto;
+}
+
+/* Botón de menú flotante, siempre visible y por encima de la cancha y el menú */
+.menu-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2101;
+    background: var(--primary-color);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: left 0.3s;
+}
+
+.menu-toggle-btn:active {
+    background: var(--medium-bg);
+}
+
+.menu-toggle-btn .fa-arrow-left {
+    font-size: 2rem;
+}
+
+#controls-wrapper.show-controls ~ .menu-toggle-btn {
+    left: 320px;
+}
+
+@media (max-width: 400px) {
+    #controls-wrapper {
+        width: 230px;
+    }
+    #controls-wrapper.show-controls ~ .menu-toggle-btn {
+        left: 230px;
+    }
+}
+@media (min-width: 916px) {
+    #controls-wrapper {
+        width: 350px;
+    }
+    #controls-wrapper.show-controls ~ .menu-toggle-btn {
+        left: 350px;
+    }
+}
+
+/* Overlay cuando el menú está abierto */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1999; /* Debajo del menú pero por encima del campo */
+    display: none;
+    pointer-events: none;
+}
+
+.overlay.show-overlay {
+    display: block;
+    pointer-events: auto;
+}
+
+/* Estilos para el canvas */
 canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    display: block;
+    max-width: 100vw;
+    max-height: 100vh;
 }
 
 #football-field {
@@ -367,67 +488,6 @@ canvas {
     overflow-y: auto;
 }
 
-/* Estilo para el botón de toggle de controles en móviles */
-#mobile-controls-toggle-btn {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 2001; /* Por encima de todo */
-    background-color: var(--primary-color); /* Usando variable */
-    color: var(--dark-bg); /* Usando variable */
-    border: none;
-    border-radius: 5px;
-    padding: 8px 12px;
-    cursor: pointer;
-    display: none; /* Oculto por defecto en escritorio */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    pointer-events: auto; /* Asegura que el botón sea clickeable */
-}
-
-/* Contenedor deslizante de los controles para móvil */
-#controls-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 280px; /* Ancho del menú desplegable */
-    background-color: var(--dark-bg); /* Usando variable */
-    z-index: 2000; /* Asegúrate de que esté por encima de todo cuando se muestra */
-    transform: translateX(-100%); /* Oculto por defecto */
-    transition: transform 0.3s ease-out; /* Animación de deslizamiento */
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    padding: 0;
-    color: var(--text-color); /* Usando variable */
-    overflow-y: auto;
-    box-sizing: border-box;
-    display: none; /* Oculto por defecto, se muestra con JS en móvil */
-    pointer-events: none; /* Por defecto, no intercepta eventos si está oculto */
-}
-
-#controls-wrapper.show-controls {
-    transform: translateX(0);
-    display: flex;
-    pointer-events: auto;
-}
-
-/* Overlay cuando el menú está abierto */
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1999; /* Debajo de controls-wrapper */
-    display: none;
-    pointer-events: none;
-}
-
-.overlay.show-overlay {
-    display: block;
-    pointer-events: auto;
-}
-
 /* Clases de Bootstrap adaptadas para usar variables (si no quieres !important) */
 .bg-dark { background-color: var(--dark-bg) !important; }
 .text-white { color: var(--text-color) !important; } /* Puede ser text-color si es blanco */
@@ -473,7 +533,7 @@ canvas {
 /* NUEVOS ESTILOS PARA MODAL */
 /* Aumentar el z-index de los modales para que estén por encima de los controles */
 .custom-z-index-modal.modal {
-    z-index: 2002; /* Mayor que controls-wrapper (2000) y mobile-controls-toggle-btn (2001) */
+    z-index: 2200; /* Mayor que controls-wrapper (2000) y mobile-controls-toggle-btn (2001) */
 }
 
 /* Asegurar que el backdrop del modal también tenga un z-index alto */
@@ -507,19 +567,13 @@ canvas {
 }
 
 /* Media Queries para Responsividad */
-@media (min-width: 768px) {
+@media (min-width: 916px) {
     #controls-wrapper {
-        position: static;
-        width: 350px;
-        transform: translateX(0);
-        box-shadow: none;
-        display: flex;
-        pointer-events: auto;
-        flex-shrink: 0;
+        width: 200px;
     }
 
-    #mobile-controls-toggle-btn {
-        display: none;
+    #mobile-controls-toggle-btn, .menu-toggle-btn {
+        display: flex !important;
     }
 
     .overlay {
@@ -536,7 +590,7 @@ canvas {
     }
 }
 
-@media (max-width: 767.98px) { /* Estilos para tablets y móviles en general */
+@media (max-width: 914px) { /* Estilos para tablets y móviles en general */
     #mobile-controls-toggle-btn {
         display: block;
     }
@@ -551,6 +605,7 @@ canvas {
     .player-token {
         width: 60px;
         height: 75px;
+        background-size: 100% 100%;
     }
 
     .player-token .minicard-overall {
@@ -713,4 +768,89 @@ canvas {
     #controls-wrapper {
         width: 230px; /* Aún más estrecho */
     }
+}
+
+@media (max-width: 600px) {
+  .player-token {
+    width: 54px;
+    height: 65px;
+    min-width: 48px;
+    min-height: 58px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  }
+  .player-token .minicard-overall {
+    top: 6px;
+    left: 4px;
+    font-size: 0.95em;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+  }
+  .player-token .minicard-position {
+    top: 6px;
+    right: 4px;
+    font-size: 0.65em;
+    padding: 0 2px;
+    border-radius: 10px;
+  }
+  .player-token .minicard-player-image {
+    top: 20px;
+    width: 28px;
+    height: 28px;
+    border-width: 1px;
+  }
+  .player-token .minicard-name {
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    font-size: 0.55em;
+    width: auto;
+    padding: 0 2px;
+    line-height: 1.1;
+  }
+  .player-token .minicard-jersey-number {
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85em;
+    padding: 0;
+  }
+}
+@media (max-width: 400px) {
+  .player-token {
+    width: 44px;
+    height: 54px;
+    min-width: 40px;
+    min-height: 48px;
+  }
+  .player-token .minicard-overall {
+    font-size: 0.8em;
+    width: 13px;
+    height: 13px;
+    top: 4px;
+    left: 3px;
+  }
+  .player-token .minicard-position {
+    font-size: 0.5em;
+    top: 4px;
+    right: 3px;
+    padding: 0 1px;
+  }
+  .player-token .minicard-player-image {
+    top: 14px;
+    width: 20px;
+    height: 20px;
+  }
+  .player-token .minicard-name {
+    font-size: 0.45em;
+    bottom: 4px;
+    left: 3px;
+    right: 3px;
+    padding: 0 1px;
+  }
+  .player-token .minicard-jersey-number {
+    font-size: 0.7em;
+    bottom: 12px;
+  }
 }
