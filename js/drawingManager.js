@@ -10,6 +10,10 @@ export default class DrawingManager {
         this.initialWidth = 0; // Ancho inicial del canvas cuando se dibuja una línea
         this.initialHeight = 0; // Alto inicial del canvas cuando se dibuja una línea
 
+        // Historial para deshacer/rehacer
+        this.undoStack = [];
+        this.redoStack = [];
+
         // Propiedades de la línea que deben persistir
         this.lineProperties = {
             width: 5,       // Grosor de la línea
@@ -128,6 +132,7 @@ export default class DrawingManager {
         this.isDrawing = false;
         this.ctx.closePath(); // Cierra el path actual de la línea en progreso
 
+        let lineAdded = false;
         if (this.currentLine.length > 1) { // Necesitamos al menos 2 puntos para una línea
             // Aplicar un suavizado o simplificación a la línea antes de guardarla
             // Reducir la tolerancia para líneas más precisas pero aún con suavizado ligero
@@ -142,6 +147,7 @@ export default class DrawingManager {
                         initialWidth: this.initialWidth,
                         initialHeight: this.initialHeight
                     });
+                    lineAdded = true;
                 }
             } else {
                 this.lines.push({
@@ -149,9 +155,29 @@ export default class DrawingManager {
                     initialWidth: this.initialWidth,
                     initialHeight: this.initialHeight
                 });
+                lineAdded = true;
             }
         }
+        // Si se agregó una línea, guardar el estado anterior en el undoStack y limpiar el redoStack
+        if (lineAdded) {
+            this.undoStack.push(this.lines.slice(0, -1)); // Estado antes de agregar la línea
+            this.redoStack = [];
+        }
         // Redibujar todas las líneas, incluyendo la nueva, con sus puntas de flecha
+        this.redrawLines();
+    }
+
+    undoLine() {
+        if (this.lines.length === 0) return;
+        this.redoStack.push([...this.lines]);
+        this.lines = this.undoStack.pop() || [];
+        this.redrawLines();
+    }
+
+    redoLine() {
+        if (this.redoStack.length === 0) return;
+        this.undoStack.push([...this.lines]);
+        this.lines = this.redoStack.pop() || [];
         this.redrawLines();
     }
 
@@ -224,7 +250,12 @@ export default class DrawingManager {
     clearCanvas() {
         if (!this.canvas || !this.ctx) return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.lines.length > 0) {
+            this.undoStack.push([...this.lines]);
+            this.redoStack = [];
+        }
         this.lines = []; // Borra todas las líneas almacenadas
+        this.redrawLines();
         console.log('DrawingManager: Canvas borrado.');
     }
 

@@ -133,8 +133,6 @@ export default class PlayerManager {
             <div class="minicard-overall">${this.calculateOverall(player)}</div>
             <img src="${player.image_url}" alt="${player.name}">
             <div class="player-name">${player.name}</div>
-            <div class="player-position">${player.position}</div>
-            <div class="minicard-jersey-number">#${player.jersey_number}</div>
         `;
         
         return playerItem;

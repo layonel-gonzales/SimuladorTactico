@@ -32,13 +32,13 @@ export const staticPlayers = [
         id: 3,
         jersey_number: 4,
         name: "Anibal Gonzales",
-        position: "RB",
+        position: "RW",
         pace: 80,
-        shooting: 55,
-        passing: 70,
-        dribbling: 65,
+        shooting: 80,
+        passing: 90,
+        dribbling: 86,
         defending: 82,
-        physical: 78,
+        physical: 89,
         image_url: "img/default_player.png"
     },
     {

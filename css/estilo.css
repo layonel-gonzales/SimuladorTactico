@@ -1,3 +1,26 @@
+/* Botones de deshacer/rehacer en móvil */
+#mobile-undo-redo {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050; /* Menor que el modal de selección, mayor que todo lo demás */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: none; /* Solo los botones deben ser interactivos */
+}
+#mobile-undo-redo button {
+    pointer-events: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0.95;
+}
+
+@media (min-width: 768px) {
+    #mobile-undo-redo {
+        display: none !important;
+    }
+}
 :root {
     --primary-color: #00ff80; /* Un verde vibrante, puedes probar #FFD700 (oro) o #00BFFF (azul cielo) */
     --dark-bg: #1a1a1a;       /* Fondo oscuro principal, puedes probar #2c3e50 (gris azulado) */
@@ -23,8 +46,8 @@ body {
     overflow: hidden; /* Esto es importante para evitar el scroll del body */
     height: 100vh;
     margin: 0; /* Asegúrate de que no haya margen por defecto en el body */
-    display: flex; /* Usamos flexbox para el layout principal */
-    flex-direction: column; /* Apila el contenido verticalmente si es necesario */
+    /* display: flex;  Usamos flexbox para el layout principal */
+    /* flex-direction: column;  Apila el contenido verticalmente si es necesario */
 }
 
 html, body {
@@ -40,24 +63,26 @@ html, body {
     width: 100vw;
     height: 100vh;
     position: relative;
-    display: block;
+    /* display: block; */
     flex-grow: unset;
 }
 
 /* Estilos para el campo de juego */
 #pitch-container {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    position: relative;
-    flex-grow: unset;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background-color: var(--pitch-green); /* Usando variable */
+    background-color: var(--pitch-green);
     background-image:
         linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
         linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
-    background-size: 100px 100px; /* Tamaño de las "líneas" de césped */
+    background-size: 100px 100px;
+    z-index: 1;
 }
 
 /* Estilos para el contenedor de controles (sidebar) */
@@ -66,11 +91,11 @@ html, body {
     top: 0;
     left: 0;
     height: 100vh;
-    width: 320px; /* Ancho del menú desplegable */
-    background-color: var(--dark-bg); /* Usando variable */
-    z-index: 2000; /* Refuerzo para estar por encima de los canvas */
-    transform: translateX(-100%); /* Oculto por defecto */
-    transition: transform 0.3s ease-out; /* Animación de deslizamiento */
+    width: 320px;
+    background-color: var(--dark-bg);
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
@@ -108,12 +133,9 @@ html, body {
     color: var(--dark-bg);
     border: none;
     border-radius: 0 8px 8px 0;
-    width: 48px;
-    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     cursor: pointer;
     transition: left 0.3s;
@@ -123,28 +145,17 @@ html, body {
     background: var(--medium-bg);
 }
 
-.menu-toggle-btn .fa-arrow-left {
-    font-size: 2rem;
-}
-
-#controls-wrapper.show-controls ~ .menu-toggle-btn {
-    left: 320px;
-}
+/* El botón de menú siempre fijo en la esquina, nunca se mueve */
+/* Ya está cubierto por .menu-toggle-btn { position: fixed; left: 20px; ... } */
 
 @media (max-width: 400px) {
     #controls-wrapper {
         width: 230px;
     }
-    #controls-wrapper.show-controls ~ .menu-toggle-btn {
-        left: 230px;
-    }
 }
 @media (min-width: 916px) {
     #controls-wrapper {
         width: 350px;
-    }
-    #controls-wrapper.show-controls ~ .menu-toggle-btn {
-        left: 350px;
     }
 }
 
@@ -603,8 +614,8 @@ canvas {
 
     /* Ajustes para los tokens de jugador en el campo */
     .player-token {
-        width: 60px;
-        height: 75px;
+        width: 65px;
+        height: 80px;
         background-size: 100% 100%;
     }
 
@@ -624,14 +635,14 @@ canvas {
     }
 
     .player-token .minicard-player-image {
-        top: 30px;
-        width: 40px;
-        height: 40px;
+        top: 25px;
+        width: 35px;
+        height: 35px;
     }
 
     .player-token .minicard-name {
-        bottom: 10px;
-        font-size: 0.6em;
+        bottom: 14px;
+        font-size: 0.5em;
         width: 80%;
         padding: 1px 2px;
         left: 50%;
@@ -651,15 +662,15 @@ canvas {
     }
 
     .squad-player-item img {
-        width: 50px;
-        height: 50px;
-        margin-top: 15px;
+        width: 55px;
+        height: 60px;
+        margin-bottom: 21px;
     }
 
     .squad-player-item .player-name {
         font-size: 0.65em;
         max-width: 70px;
-        bottom: 15px;
+        margin-top: -30px;
     }
 
     .squad-player-item .player-position {
@@ -668,8 +679,8 @@ canvas {
     }
 
     .squad-player-item .minicard-overall {
-        top: 10px;
-        left: 5px;
+        top: 16px;
+        left: 7px;
         font-size: 1em;
         width: 20px;
         height: 20px;

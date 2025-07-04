@@ -170,6 +170,34 @@ export default class UIManager {
             });
         }
 
+        // --- Botones de deshacer/rehacer (escritorio) ---
+        const undoBtn = document.getElementById('undo-line');
+        const redoBtn = document.getElementById('redo-line');
+        if (undoBtn) {
+            undoBtn.addEventListener('click', () => {
+                this.drawingManager.undoLine();
+            });
+        }
+        if (redoBtn) {
+            redoBtn.addEventListener('click', () => {
+                this.drawingManager.redoLine();
+            });
+        }
+
+        // --- Botones de deshacer/rehacer (móvil) ---
+        const mobileUndoBtn = document.getElementById('mobile-undo-line');
+        const mobileRedoBtn = document.getElementById('mobile-redo-line');
+        if (mobileUndoBtn) {
+            mobileUndoBtn.addEventListener('click', () => {
+                this.drawingManager.undoLine();
+            });
+        }
+        if (mobileRedoBtn) {
+            mobileRedoBtn.addEventListener('click', () => {
+                this.drawingManager.redoLine();
+            });
+        }
+
         const clearCanvasBtn = document.getElementById('clear-canvas');
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', () => {
@@ -299,7 +327,6 @@ export default class UIManager {
                 <div class="minicard-position">${player.position}</div>
                 <img src="${player.image_url}" class="minicard-player-image">
                 <div class="minicard-name">${player.name}</div>
-                <div class="minicard-jersey-number">#${player.jersey_number}</div>
             `;
 
             token.addEventListener('dblclick', () => {
