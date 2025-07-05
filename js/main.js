@@ -1,5 +1,33 @@
-    // --- Modo grabación ---
+
+
+import { drawFootballField } from './fieldDrawer.js';
+import { staticPlayers } from './players.js';
+import DrawingManager from './drawingManager.js';
+import PlayerManager from './playerManager.js';
+import TacticsManager from './tacticsManager.js';
+import UIManager from './uiManager.js';
+
+// --- Exportar animación como JSON y Generar link para compartir animación ---
+
+// ...existing code...
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    // Estado global (debe ir antes de cualquier uso)
+    const state = {
+        activePlayers: [],
+        currentTactic: 'Libre',
+        isDrawingMode: false
+    };
+
+    // Inicialización de módulos (antes de lógica de frames)
     let isRecordMode = false;
+    const playerManager = new PlayerManager(staticPlayers);
+    const tacticsManager = new TacticsManager();
+    // Pasar función para saber si está en modo grabación
+    const drawingManager = new DrawingManager('drawing-canvas', () => isRecordMode);
+    const uiManager = new UIManager();
+    // --- Modo grabación ---
     const recordBtn = document.getElementById('record-mode-toggle');
     if (recordBtn) {
         recordBtn.addEventListener('click', () => {
@@ -11,29 +39,6 @@
             recordBtn.innerHTML = isRecordMode ? '<i class="fas fa-dot-circle"></i> Grabando' : '<i class="fas fa-dot-circle"></i> Grabar';
         });
     }
-// main.js
-
-import { drawFootballField } from './fieldDrawer.js';
-import { staticPlayers } from './players.js';
-import DrawingManager from './drawingManager.js';
-import PlayerManager from './playerManager.js';
-import TacticsManager from './tacticsManager.js';
-import UIManager from './uiManager.js';
-
-document.addEventListener('DOMContentLoaded', async () => {
-    // Estado global (debe ir antes de cualquier uso)
-    const state = {
-        activePlayers: [],
-        currentTactic: 'Libre',
-        isDrawingMode: false
-    };
-
-    // Inicialización de módulos (antes de lógica de frames)
-    const playerManager = new PlayerManager(staticPlayers);
-    const tacticsManager = new TacticsManager();
-    // Pasar función para saber si está en modo grabación
-    const drawingManager = new DrawingManager('drawing-canvas', () => isRecordMode);
-    const uiManager = new UIManager();
 
     // --- NUEVO: Animación táctica (frames) ---
     let frames = [];
@@ -44,6 +49,141 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnNext = document.getElementById('frame-next');
     const btnAdd = document.getElementById('frame-add');
     const btnPlay = document.getElementById('frame-play');
+
+    // --- Exportar animación como JSON ---
+    const exportBtn = document.getElementById('export-animation-json');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const data = {
+                frames: frames.map(f => ({
+                    players: f.players ? f.players.map(p => ({...p})) : [],
+                    lines: f.lines ? f.lines.map(l => JSON.parse(JSON.stringify(l))) : []
+                })),
+                players: state.activePlayers.map(p => ({...p})),
+                tactic: state.currentTactic
+            };
+            const json = JSON.stringify(data);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animacion_tactica.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        });
+    }
+
+    // --- Generar link para compartir animación ---
+    const linkBtn = document.getElementById('generate-share-link');
+    const linkOutput = document.getElementById('share-link-output');
+    if (linkBtn && linkOutput) {
+        linkBtn.addEventListener('click', () => {
+            const data = {
+                frames: frames.map(f => ({
+                    players: f.players ? f.players.map(p => ({...p})) : [],
+                    lines: f.lines ? f.lines.map(l => JSON.parse(JSON.stringify(l))) : []
+                })),
+                players: state.activePlayers.map(p => ({...p})),
+                tactic: state.currentTactic
+            };
+            const json = JSON.stringify(data);
+            const base64 = btoa(unescape(encodeURIComponent(json)));
+            const url = `${window.location.origin}${window.location.pathname}?anim=${encodeURIComponent(base64)}`;
+            linkOutput.value = url;
+            linkOutput.style.display = 'block';
+            linkOutput.select();
+            try { document.execCommand('copy'); } catch(e) {}
+            linkBtn.innerHTML = '<i class="fas fa-link"></i> ¡Copiado!';
+            setTimeout(() => {
+                linkBtn.innerHTML = '<i class="fas fa-link"></i> Link';
+                linkOutput.style.display = 'none';
+            }, 1500);
+        });
+    }
+
+    // --- Importar animación desde JSON ---
+    // Vincular botón visible con input file oculto para importar (solo una vez)
+    let importInput = document.getElementById('import-animation-json');
+    let importBtn = document.getElementById('import-btn');
+    // Eliminar duplicados si existen
+    if (importBtn && importBtn.parentNode) importBtn.parentNode.removeChild(importBtn);
+    if (importInput && importInput.parentNode) importInput.parentNode.removeChild(importInput);
+    // Crear input file oculto
+    importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.id = 'import-animation-json';
+    importInput.accept = 'application/json';
+    importInput.style.display = 'none';
+    document.body.appendChild(importInput);
+    // Crear botón visible
+    importBtn = document.createElement('button');
+    importBtn.id = 'import-btn';
+    importBtn.className = 'btn btn-outline-primary btn-sm';
+    importBtn.innerHTML = '<i class="fas fa-file-import"></i> Importar';
+    // Insertar el botón al lado de exportar si existe
+    const exportBtnRef = document.getElementById('export-animation-json');
+    if (exportBtnRef && exportBtnRef.parentNode) {
+        exportBtnRef.parentNode.insertBefore(importBtn, exportBtnRef.nextSibling);
+    } else {
+        document.body.appendChild(importBtn);
+    }
+    // Al hacer click en el botón visible, abrir el input file
+    importBtn.addEventListener('click', () => importInput.click());
+    // Listener de importación real
+    importInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = JSON.parse(evt.target.result);
+                if (!data.frames || !Array.isArray(data.frames)) throw new Error('JSON inválido: falta frames');
+                frames = data.frames.map(f => ({
+                    players: f.players ? f.players.map(p => ({...p})) : [],
+                    lines: f.lines ? f.lines.map(l => JSON.parse(JSON.stringify(l))) : []
+                }));
+                state.activePlayers.forEach((p, i) => {
+                    if (data.players && data.players[i]) Object.assign(p, data.players[i]);
+                });
+                state.currentTactic = data.tactic || 'Libre';
+                currentFrame = 0;
+                setStateFromFrame(frames[0]);
+                updateFrameIndicator();
+                alert('Animación importada correctamente.');
+            } catch (err) {
+                alert('Error al importar animación: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // --- Importar animación desde link compartido (URL) ---
+    // Importar animación desde link compartido (URL) solo cuando todo está listo
+    setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        const anim = params.get('anim');
+        if (!anim) return;
+        try {
+            const json = decodeURIComponent(escape(atob(anim)));
+            const data = JSON.parse(json);
+            if (!data.frames || !Array.isArray(data.frames)) throw new Error('El link no contiene animación válida.');
+            frames = data.frames.map(f => ({
+                players: f.players ? f.players.map(p => ({...p})) : [],
+                lines: f.lines ? f.lines.map(l => JSON.parse(JSON.stringify(l))) : []
+            }));
+            state.activePlayers.forEach((p, i) => {
+                if (data.players && data.players[i]) Object.assign(p, data.players[i]);
+            });
+            state.currentTactic = data.tactic || 'Libre';
+            currentFrame = 0;
+            setStateFromFrame(frames[0]);
+            updateFrameIndicator();
+            setTimeout(() => alert('Animación cargada desde link.'), 300);
+        } catch (err) {
+            setTimeout(() => alert('Error al cargar animación desde link: ' + err.message), 300);
+        }
+    }, 200);
 
     function getCurrentState() {
         return {
@@ -282,4 +422,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     // que actualizan el contador están duplicados y la lógica está
     // mejor centralizada en uiManager.updateSelectedCount().
     // He eliminado el duplicado aquí. uiManager.updateSelectedCount() ya se encarga de esto.
+// Fin del bloque DOMContentLoaded
 });

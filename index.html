@@ -43,7 +43,8 @@
             <!-- Segmento: Dibujo de líneas -->
             <div class="mb-2 p-2 border rounded">
                 <div class="fw-bold text-primary mb-1" style="font-size:1em;">Dibujo de líneas</div>
-                <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="d-flex gap-2 align-items-center flex-wrap">                   
+                    <input id="share-link-output" type="text" readonly style="width:100%;max-width:320px;font-size:0.9em;display:none;margin-top:4px;" />
                     <button id="undo-line" class="btn btn-secondary" title="Atrás"><i class="fas fa-undo"></i></button>
                     <button id="redo-line" class="btn btn-secondary" title="Adelante"><i class="fas fa-redo"></i></button>
                     <button id="clear-canvas" class="btn btn-warning"><i class="fas fa-eraser"></i></button>
@@ -62,6 +63,9 @@
             <div class="mb-2 p-2 border rounded">
                 <div class="fw-bold text-primary mb-1" style="font-size:1em;">Animación táctica</div>
                 <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar animación como JSON"><i class="fas fa-share-square"></i> Exportar</button>
+                    <button id="import-animation-json" class="btn btn-outline-primary btn-sm" title="Importar animación desde JSON"><i class="fas fa-file-import"></i> Importar</button>
+                    <button id="generate-share-link" class="btn btn-outline-info btn-sm" title="Generar link para compartir animación"><i class="fas fa-link"></i> Link</button>
                     <button id="record-mode-toggle" class="btn btn-danger btn-sm" title="Modo grabación" style="font-weight:bold;"><i class="fas fa-dot-circle"></i> Grabar</button>
                     <button id="reset-animation" class="btn btn-warning btn-sm" title="Resetear animación" style="font-weight:bold;"><i class="fas fa-trash"></i> Reset</button>
                     <div id="animation-controls" style="display:flex;gap:4px;align-items:center;">
