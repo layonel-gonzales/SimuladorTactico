@@ -1,7 +1,10 @@
-// drawingManager.js
-
+import ballImg from './ballImage.js';
 export default class DrawingManager {
-    constructor(canvasId) {
+    /**
+     * @param {string} canvasId
+     * @param {function} isRecordModeFn - función que retorna true si está en modo grabación
+     */
+    constructor(canvasId, isRecordModeFn) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.isDrawing = false;
@@ -16,13 +19,60 @@ export default class DrawingManager {
 
         // Propiedades de la línea que deben persistir
         this.lineProperties = {
-            width: 5,       // Grosor de la línea
-            color: 'yellow' // Color de la línea
+            width: 5,
+            color: 'yellow'
         };
+
+        this.isRecordModeFn = isRecordModeFn || (() => false);
 
         this.setupCanvas();
         this.setupEventListeners();
     }
+    // --- NUEVO: Borrar línea individual ---
+    setDeleteLineMode(isActive) {
+        if (isActive) {
+            this.canvas.style.cursor = 'crosshair';
+            this._deleteLineHandler = this.handleDeleteLine.bind(this);
+            this.canvas.addEventListener('click', this._deleteLineHandler);
+        } else {
+            this.canvas.style.cursor = '';
+            if (this._deleteLineHandler) {
+                this.canvas.removeEventListener('click', this._deleteLineHandler);
+                this._deleteLineHandler = null;
+            }
+        }
+    }
+
+    handleDeleteLine(e) {
+        // Obtener coordenadas relativas al canvas
+        const coords = this.getCanvasCoordinates(e);
+        const x = coords.x;
+        const y = coords.y;
+        // Buscar la línea más cercana al punto clickeado
+        let minDist = Infinity;
+        let closestIdx = -1;
+        this.lines.forEach(function(lineData, idx) {
+            for (let i = 0; i < lineData.points.length; i++) {
+                const pt = lineData.points[i];
+                // Escalar punto a tamaño actual del canvas
+                const px = (pt.x / lineData.initialWidth) * this.canvas.width;
+                const py = (pt.y / lineData.initialHeight) * this.canvas.height;
+                const dist = Math.sqrt((px - x) * (px - x) + (py - y) * (py - y));
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestIdx = idx;
+                }
+            }
+        }, this);
+        // Si está suficientemente cerca (10px), borrar esa línea
+        if (closestIdx !== -1 && minDist < 15) {
+            this.undoStack.push(this.lines.slice());
+            this.redoStack = [];
+            this.lines.splice(closestIdx, 1);
+            this.redrawLines();
+        }
+    }
+    // (Eliminado: constructor duplicado)
 
     setupCanvas() {
         const pitchContainer = this.canvas.parentElement;
@@ -65,9 +115,32 @@ export default class DrawingManager {
 
     redrawLines() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.applyContextProperties(); // Asegurarse de que las propiedades estén configuradas antes de dibujar
+        this.applyContextProperties();
 
-        this.lines.forEach(lineData => {
+        // Si está en modo grabación y se está reproduciendo animación, NO dibujar líneas
+        if (this._hideLinesForAnimation) {
+            // Solo dibujar el balón de la última línea (si existe)
+            if (this.lines.length > 0) {
+                const lineData = this.lines[this.lines.length - 1];
+                const line = lineData.points;
+                const originalWidth = lineData.initialWidth;
+                const originalHeight = lineData.initialHeight;
+                if (line.length > 0) {
+                    const lastPoint = line[line.length - 1];
+                    const scaledLastX = (lastPoint.x / originalWidth) * this.canvas.width;
+                    const scaledLastY = (lastPoint.y / originalHeight) * this.canvas.height;
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 1.0;
+                    const ballSize = 32;
+                    this.ctx.drawImage(ballImg, scaledLastX - ballSize/2, scaledLastY - ballSize/2, ballSize, ballSize);
+                    this.ctx.restore();
+                }
+            }
+            return;
+        }
+
+        // Dibuja todas las líneas
+        this.lines.forEach((lineData, idx) => {
             const line = lineData.points;
             const originalWidth = lineData.initialWidth;
             const originalHeight = lineData.initialHeight;
@@ -85,21 +158,26 @@ export default class DrawingManager {
                     );
                 }
                 this.ctx.stroke();
+            }
+        });
 
-                // Dibuja la punta de flecha al final de la línea
+        // Dibuja los balones al final de cada línea
+        this.lines.forEach((lineData, idx) => {
+            const line = lineData.points;
+            const originalWidth = lineData.initialWidth;
+            const originalHeight = lineData.initialHeight;
+            if (line.length > 0) {
                 const lastPoint = line[line.length - 1];
-                const secondLastPoint = line[line.length - 2] || line[0]; // Usar el penúltimo o el primero si solo hay 1-2 puntos
-
-                // Escalar puntos para dibujar la flecha
                 const scaledLastX = (lastPoint.x / originalWidth) * this.canvas.width;
                 const scaledLastY = (lastPoint.y / originalHeight) * this.canvas.height;
-                const scaledSecondLastX = (secondLastPoint.x / originalWidth) * this.canvas.width;
-                const scaledSecondLastY = (secondLastPoint.y / originalHeight) * this.canvas.height;
-
-                this.drawArrowhead(
-                    scaledSecondLastX, scaledSecondLastY,
-                    scaledLastX, scaledLastY
-                );
+                // El último balón (línea más reciente) es el "activo"
+                let alpha = (idx === this.lines.length - 1) ? 1.0 : 0.4;
+                this.ctx.save();
+                this.ctx.globalAlpha = alpha;
+                // Centrar el balón en la punta
+                const ballSize = 32;
+                this.ctx.drawImage(ballImg, scaledLastX - ballSize/2, scaledLastY - ballSize/2, ballSize, ballSize);
+                this.ctx.restore();
             }
         });
     }
@@ -130,17 +208,20 @@ export default class DrawingManager {
     endDrawing() {
         if (!this.canvas || !this.ctx) return;
         this.isDrawing = false;
-        this.ctx.closePath(); // Cierra el path actual de la línea en progreso
+        this.ctx.closePath();
 
         let lineAdded = false;
-        if (this.currentLine.length > 1) { // Necesitamos al menos 2 puntos para una línea
-            // Aplicar un suavizado o simplificación a la línea antes de guardarla
-            // Reducir la tolerancia para líneas más precisas pero aún con suavizado ligero
+        if (this.currentLine.length > 1) {
             const simplifiedLine = this.simplifyLine(this.currentLine, 0.75);
-
-            // Asegurarse de que haya al menos 2 puntos para dibujar la flecha
+            // --- MODO GRABACIÓN: solo una línea ---
+            if (this.isRecordModeFn && this.isRecordModeFn()) {
+                // Elimina la línea anterior si existe
+                if (this.lines.length > 0) {
+                    this.lines = [];
+                }
+            }
+            // Guardar la línea (normal o grabación)
             if (simplifiedLine.length < 2) {
-                // Si la simplificación la reduce a menos de 2 puntos, usar los originales si son al menos 2
                 if (this.currentLine.length >= 2) {
                     this.lines.push({
                         points: this.currentLine,
@@ -151,19 +232,17 @@ export default class DrawingManager {
                 }
             } else {
                 this.lines.push({
-                    points: simplifiedLine, // Guardar la línea simplificada
+                    points: simplifiedLine,
                     initialWidth: this.initialWidth,
                     initialHeight: this.initialHeight
                 });
                 lineAdded = true;
             }
         }
-        // Si se agregó una línea, guardar el estado anterior en el undoStack y limpiar el redoStack
         if (lineAdded) {
-            this.undoStack.push(this.lines.slice(0, -1)); // Estado antes de agregar la línea
+            this.undoStack.push(this.lines.slice(0, -1));
             this.redoStack = [];
         }
-        // Redibujar todas las líneas, incluyendo la nueva, con sus puntas de flecha
         this.redrawLines();
     }
 

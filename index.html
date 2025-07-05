@@ -40,16 +40,43 @@
                     <i class="fas fa-users"></i>
                 </button>
             </div>
-            <div class="d-flex gap-2 mb-3">
-                <button id="undo-line" class="btn btn-secondary" title="Atrás">
-                    <i class="fas fa-undo"></i>
-                </button>
-                <button id="redo-line" class="btn btn-secondary" title="Adelante">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button id="clear-canvas" class="btn btn-warning">
-                    <i class="fas fa-eraser"></i>
-                </button>
+            <!-- Segmento: Dibujo de líneas -->
+            <div class="mb-2 p-2 border rounded">
+                <div class="fw-bold text-primary mb-1" style="font-size:1em;">Dibujo de líneas</div>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <button id="undo-line" class="btn btn-secondary" title="Atrás"><i class="fas fa-undo"></i></button>
+                    <button id="redo-line" class="btn btn-secondary" title="Adelante"><i class="fas fa-redo"></i></button>
+                    <button id="clear-canvas" class="btn btn-warning"><i class="fas fa-eraser"></i></button>
+                    <input type="color" id="line-color-picker" title="Color de línea" style="width:32px;height:32px;border:none;outline:none;cursor:pointer;" value="#ffff00">
+                    <select id="line-width-picker" title="Grosor de línea" style="width:40px;height:32px;">
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="6" selected>6</option>
+                        <option value="8">8</option>
+                        <option value="12">12</option>
+                    </select>
+                    <button id="delete-line-mode" class="btn btn-danger" title="Borrar línea individual"><i class="fas fa-cut"></i></button>
+                </div>
+            </div>
+            <!-- Segmento: Animación táctica -->
+            <div class="mb-2 p-2 border rounded">
+                <div class="fw-bold text-primary mb-1" style="font-size:1em;">Animación táctica</div>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <button id="record-mode-toggle" class="btn btn-danger btn-sm" title="Modo grabación" style="font-weight:bold;"><i class="fas fa-dot-circle"></i> Grabar</button>
+                    <button id="reset-animation" class="btn btn-warning btn-sm" title="Resetear animación" style="font-weight:bold;"><i class="fas fa-trash"></i> Reset</button>
+                    <div id="animation-controls" style="display:flex;gap:4px;align-items:center;">
+                        <button id="frame-prev" class="btn btn-outline-primary btn-sm" title="Frame anterior"><i class="fas fa-step-backward"></i></button>
+                        <span id="frame-indicator" style="min-width:32px;text-align:center;font-weight:bold;">1/1</span>
+                        <button id="frame-next" class="btn btn-outline-primary btn-sm" title="Frame siguiente"><i class="fas fa-step-forward"></i></button>
+                        <button id="frame-add" class="btn btn-success btn-sm" title="Nuevo frame"><i class="fas fa-plus"></i></button>
+                        <button id="frame-play" class="btn btn-info btn-sm" title="Reproducir animación"><i class="fas fa-play"></i></button>
+                        
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <label for="animation-speed" class="me-2 mb-0" style="font-size:0.9em;color:#fff;">Velocidad</label>
+                    <input type="range" id="animation-speed" min="0.2" max="2" step="0.05" value="1" style="width:80px;vertical-align:middle;">
+                </div>
             </div>
             <div class="d-grid mb-3">
                 <button id="fullscreenButton" class="btn btn-light">
