@@ -1,3 +1,35 @@
+/* Botón compartir alineación */
+.share-pitch-btn {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1100; /* Un nivel por encima de la cancha, pero debajo de modales */
+    background: var(--primary-color);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.share-pitch-btn:active {
+    background: var(--medium-bg);
+}
+@media (max-width: 767px) {
+    .share-pitch-btn {
+        bottom: 4px;
+        right: 7px;
+        width: 30px;
+        height: 30px;
+        font-size: 1.0rem;
+    }
+}
 /* Botones de deshacer/rehacer en móvil */
 #mobile-undo-redo {
     position: absolute;
@@ -110,14 +142,14 @@ html, body {
 /* Estilo para el botón de toggle de controles en móviles */
 #mobile-controls-toggle-btn {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 4px;
+    left: 4px;
     z-index: 2100; /* Refuerzo para estar por encima de todo */
     background-color: var(--primary-color); /* Usando variable */
     color: var(--dark-bg); /* Usando variable */
     border: none;
     border-radius: 5px;
-    padding: 8px 12px;
+    padding: 7px 10px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     pointer-events: auto;
