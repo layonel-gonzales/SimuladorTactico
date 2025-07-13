@@ -7,16 +7,20 @@ export default class ShareManager {
     }
 
     initShareButton() {
-        // Crear el botón si no existe
-        if (!document.getElementById('share-pitch-btn')) {
-            const btn = document.createElement('button');
+        // Buscar el botón en el DOM (si ya existe en el HTML)
+        let btn = document.getElementById('share-pitch-btn');
+        if (!btn) {
+            btn = document.createElement('button');
             btn.id = 'share-pitch-btn';
             btn.className = 'share-pitch-btn';
             btn.title = 'Compartir alineación';
             btn.innerHTML = '<i class="fas fa-share-alt"></i>';
             document.body.appendChild(btn);
-            btn.addEventListener('click', () => this.handleShare());
         }
+        // Siempre asignar el event listener (evitar duplicados)
+        btn.removeEventListener('click', this._shareHandler);
+        this._shareHandler = () => this.handleShare();
+        btn.addEventListener('click', this._shareHandler);
     }
 
     async handleShare() {

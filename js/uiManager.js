@@ -116,10 +116,23 @@ export default class UIManager {
 
         // --- Eventos principales de la aplicación ---
 
+        // Botón global de selección de plantilla (siempre visible)
+        const globalSelectSquadBtn = document.getElementById('global-select-squad-btn');
+        if (globalSelectSquadBtn) {
+            globalSelectSquadBtn.addEventListener('click', () => {
+                console.log('UIManager: Click en Seleccionar Plantilla (botón global).');
+                const modal = new bootstrap.Modal(document.getElementById('squad-selection-modal'));
+                modal.show();
+            });
+        } else {
+            console.warn('UIManager: Botón global de plantilla #global-select-squad-btn no encontrado.');
+        }
+
+        // Botón legacy para compatibilidad (si existe)
         const selectSquadBtn = document.getElementById('select-squad-btn');
         if (selectSquadBtn) {
             selectSquadBtn.addEventListener('click', () => {
-                console.log('UIManager: Click en Seleccionar Plantilla.');
+                console.log('UIManager: Click en Seleccionar Plantilla (botón legacy).');
                 const modal = new bootstrap.Modal(document.getElementById('squad-selection-modal'));
                 modal.show();
             });
@@ -137,16 +150,47 @@ export default class UIManager {
                 // Mapear los IDs seleccionados a objetos de jugador
                 this.state.activePlayers = playersToActivate.map(id =>
                     this.playerManager.getPlayerById(id)
-                );
+                ).filter(player => player !== null); // Filtrar nulls
 
-                // Aplicar la táctica, esto actualizará las posiciones x, y de los jugadores en this.state.activePlayers
-                this.tacticsManager.applyTactic(
-                    this.state.currentTactic,
-                    this.state.activePlayers
-                );
+                // Verificar si hay una animación pendiente de importar
+                if (window.pendingAnimationData) {
+                    console.log('UIManager: Importando animación pendiente...');
+                    const data = window.pendingAnimationData;
+                    
+                    // Primero cargar los jugadores seleccionados
+                    this.state.activePlayers = playersToActivate.map(id =>
+                        this.playerManager.getPlayerById(id)
+                    ).filter(player => player !== null); // Filtrar nulls
+                    
+                    // Asegurar que el balón esté presente
+                    if (window.ensureBallInPlayers) {
+                        window.ensureBallInPlayers(this.state.activePlayers);
+                    }
+                    
+                    // Luego importar la animación con los jugadores ya cargados
+                    if (window.importAnimationData) {
+                        window.importAnimationData(data);
+                    }
+                    
+                    // Limpiar datos pendientes
+                    delete window.pendingAnimationData;
+                } else {
+                    // Comportamiento normal: aplicar táctica y renderizar
+                    // Aplicar la táctica, esto actualizará las posiciones x, y de los jugadores
+                    this.tacticsManager.applyTactic(
+                        this.state.currentTactic,
+                        this.state.activePlayers
+                    );
 
-                // Renderizar los jugadores en el campo con sus nuevas posiciones
-                this.renderPlayersOnPitch();
+                    // Renderizar los jugadores en el campo con sus nuevas posiciones
+                    this.renderPlayersOnPitch();
+                    
+                    // Asegurar que el balón esté presente
+                    if (window.ensureBallInPlayers) {
+                        window.ensureBallInPlayers(this.state.activePlayers);
+                        this.renderPlayersOnPitch();
+                    }
+                }
 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('squad-selection-modal'));
                 if (modal) modal.hide();
@@ -292,24 +336,104 @@ export default class UIManager {
         pitch.querySelectorAll('.player-token').forEach(el => el.remove());
 
         const pitchRect = pitch.getBoundingClientRect();
-        // NOTA: Para el renderizado inicial, si no hay posiciones predefinidas,
-        // la lógica de applyTactic debería establecerlas.
-        // Si no hay táctica aplicada, podemos darles una posición inicial arbitraria.
 
-        // Asegurarse de que player.x y player.y estén definidos antes de intentar renderizar
-        // Esto es crucial para que repositionPlayersOnPitch funcione.
+        // --- DEBUG: Mostrar todos los jugadores a renderizar ---
+        console.log('[UIManager][DEBUG] Jugadores a renderizar:', this.state.activePlayers);
+
         this.state.activePlayers.forEach((player, index) => {
+            // Si el jugador es el balón, dibujar como imagen especial
+            if (player.isBall || player.type === 'ball' || player.role === 'ball' || player.id === 'ball') {
+                // Dibuja el balón como una imagen especial
+                const ball = document.createElement('img');
+                ball.className = 'player-token ball-token';
+                ball.dataset.playerId = player.id;
+                ball.src = 'img/ball.png';
+                
+                // Coordenadas del balón (esperamos porcentajes)
+                let x = player.x || 50; // default centro
+                let y = player.y || 50; // default centro
+                
+                // Convertir porcentaje a píxeles para posicionamiento
+                ball.style.left = `${(x / 100) * pitchRect.width - 16}px`; // -16 para centrar (32px/2)
+                ball.style.top = `${(y / 100) * pitchRect.height - 16}px`;   // -16 para centrar (32px/2)
+                ball.style.width = '32px';
+                ball.style.height = '32px';
+                ball.style.position = 'absolute';
+                ball.style.zIndex = 20;
+                ball.style.cursor = 'grab';
+                ball.title = 'Balón';
+                
+                // Agregar eventos de drag para el balón
+                const startDragBall = (e) => {
+                    if (this.state.isDrawingMode) return;
+                    console.log('UIManager: Iniciando arrastre del balón.', e.type);
+                    
+                    // Notificar que se está arrastrando para evitar conflicto con estela
+                    if (window.main && window.main.setBallDragStarted) {
+                        window.main.setBallDragStarted(true);
+                    }
+                    
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    ball.classList.add('dragging');
+                    ball.style.cursor = 'grabbing';
+                    const ballRect = ball.getBoundingClientRect();
+                    const pitchRect = pitch.getBoundingClientRect();
+                    const offsetX = clientX - ballRect.left;
+                    const offsetY = clientY - ballRect.top;
+                    const moveHandler = (moveEvent) => {
+                        moveEvent.preventDefault();
+                        const currentClientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
+                        const currentClientY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
+                        const xPx = currentClientX - pitchRect.left - offsetX;
+                        const yPx = currentClientY - pitchRect.top - offsetY;
+                        const maxX = pitchRect.width - ball.offsetWidth;
+                        const maxY = pitchRect.height - ball.offsetHeight;
+                        ball.style.left = `${Math.max(0, Math.min(xPx, maxX))}px`;
+                        ball.style.top = `${Math.max(0, Math.min(yPx, maxY))}px`;
+                    };
+                    const upHandler = () => {
+                        console.log('UIManager: Finalizando arrastre del balón.');
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', upHandler);
+                        document.removeEventListener('touchmove', moveHandler);
+                        document.removeEventListener('touchend', upHandler);
+                        ball.classList.remove('dragging');
+                        ball.style.cursor = 'grab';
+                        const ballPlayer = this.state.activePlayers.find(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
+                        if (ballPlayer) {
+                            const currentLeftPx = parseFloat(ball.style.left);
+                            const currentTopPx = parseFloat(ball.style.top);
+                            ballPlayer.x = ((currentLeftPx + 16) / pitchRect.width) * 100; // +16 para volver al centro
+                            ballPlayer.y = ((currentTopPx + 16) / pitchRect.height) * 100;  // +16 para volver al centro
+                            console.log(`Balón guardado en: x=${ballPlayer.x.toFixed(2)}%, y=${ballPlayer.y.toFixed(2)}%`);
+                        }
+                        
+                        // Restablecer estado de drag después de un tiempo
+                        setTimeout(() => {
+                            if (window.main && window.main.setBallDragStarted) {
+                                window.main.setBallDragStarted(false);
+                            }
+                        }, 200);
+                    };
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', upHandler);
+                    document.addEventListener('touchmove', moveHandler, { passive: false });
+                    document.addEventListener('touchend', upHandler);
+                };
+                ball.addEventListener('mousedown', startDragBall);
+                ball.addEventListener('touchstart', startDragBall, { passive: false });
+                
+                pitch.appendChild(ball);
+                console.log('[UIManager][DEBUG] Balón renderizado en', x, y, '% -> píxeles:', ball.style.left, ball.style.top);
+                return;
+            }
+
             // Si el jugador no tiene posiciones (x,y) definidas (por ejemplo, es la primera vez que se añade
             // o no hay una táctica que le asigne una), asignarle una posición por defecto
-            // que luego será actualizada por la táctica o por arrastre.
             if (typeof player.x !== 'number' || typeof player.y !== 'number') {
-                // Aquí podrías definir una lógica de posicionamiento por defecto,
-                // por ejemplo, dispersarlos un poco o colocarlos en una línea.
-                // Por simplicidad, usaremos un valor que los coloque en el centro superior al 20% del campo
-                // hasta que una táctica o un arrastre los muevan.
-                const initialX = (pitchRect.width / 2) - (60 / 2) + (index * 5); // 60 es el ancho del token
-                const initialY = (pitchRect.height * 0.20); // 20% desde arriba
-
+                const initialX = (pitchRect.width / 2) - (60 / 2) + (index * 5);
+                const initialY = (pitchRect.height * 0.20);
                 player.x = (initialX / pitchRect.width) * 100;
                 player.y = (initialY / pitchRect.height) * 100;
             }
@@ -317,11 +441,8 @@ export default class UIManager {
             const token = document.createElement('div');
             token.className = 'player-token';
             token.dataset.playerId = player.id;
-
-            // Usar las posiciones (x,y) que ya están guardadas como porcentajes en el objeto player
             token.style.left = `${(player.x / 100) * pitchRect.width}px`;
             token.style.top = `${(player.y / 100) * pitchRect.height}px`;
-
             token.innerHTML = `
                 <div class="minicard-overall">${this.playerManager.calculateOverall(player)}</div>
                 <div class="minicard-position">${player.position}</div>
@@ -338,74 +459,50 @@ export default class UIManager {
             const startDrag = (e) => {
                 if (this.state.isDrawingMode) return;
                 console.log('UIManager: Iniciando arrastre de jugador.', e.type);
-
-                // Si es un evento touch, usar el primer toque
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
                 token.classList.add('dragging');
                 token.style.cursor = 'grabbing';
-
                 const tokenRect = token.getBoundingClientRect();
-                const pitchRect = pitch.getBoundingClientRect(); // Obtener pitchRect actual en el momento del arrastre
-
+                const pitchRect = pitch.getBoundingClientRect();
                 const offsetX = clientX - tokenRect.left;
                 const offsetY = clientY - tokenRect.top;
-
                 const moveHandler = (moveEvent) => {
-                    // Prevenir comportamiento de touch por defecto (scroll) durante el movimiento
                     moveEvent.preventDefault();
-
                     const currentClientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
                     const currentClientY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
-
-                    // Cálculo de la posición absoluta en píxeles
                     const xPx = currentClientX - pitchRect.left - offsetX;
                     const yPx = currentClientY - pitchRect.top - offsetY;
-
-                    // Limitar al área del campo
                     const maxX = pitchRect.width - token.offsetWidth;
                     const maxY = pitchRect.height - token.offsetHeight;
-
                     token.style.left = `${Math.max(0, Math.min(xPx, maxX))}px`;
                     token.style.top = `${Math.max(0, Math.min(yPx, maxY))}px`;
                 };
-
                 const upHandler = () => {
                     console.log('UIManager: Finalizando arrastre de jugador.');
                     document.removeEventListener('mousemove', moveHandler);
                     document.removeEventListener('mouseup', upHandler);
                     document.removeEventListener('touchmove', moveHandler);
                     document.removeEventListener('touchend', upHandler);
-
                     token.classList.remove('dragging');
                     token.style.cursor = 'grab';
-
-                    // Actualizar posición en el estado como PORCENTAJES
                     const playerId = parseInt(token.dataset.playerId);
                     const player = this.state.activePlayers.find(p => p.id === playerId);
                     if (player) {
-                        // Obtener la posición actual en píxeles y convertirla a porcentaje
                         const currentLeftPx = parseFloat(token.style.left);
                         const currentTopPx = parseFloat(token.style.top);
-
                         player.x = (currentLeftPx / pitchRect.width) * 100;
                         player.y = (currentTopPx / pitchRect.height) * 100;
-
                         console.log(`Jugador ${player.id} guardado en: x=${player.x.toFixed(2)}%, y=${player.y.toFixed(2)}%`);
                     }
                 };
-
                 document.addEventListener('mousemove', moveHandler);
                 document.addEventListener('mouseup', upHandler);
                 document.addEventListener('touchmove', moveHandler, { passive: false });
                 document.addEventListener('touchend', upHandler);
             };
-
-            // Añadir event listeners para mouse y touch
             token.addEventListener('mousedown', startDrag);
             token.addEventListener('touchstart', startDrag, { passive: false });
-
             pitch.appendChild(token);
         });
     }

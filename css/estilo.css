@@ -1,3 +1,13 @@
+/* --- DEBUG: Forzar visibilidad del balón en el campo --- */
+.player-token.ball-token {
+  position: absolute !important;
+  z-index: 100 !important;
+  width: 32px !important;
+  height: 32px !important;
+  background: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
 /* --- NUEVO: Controles de animación táctica --- */
 #animation-controls button {
     padding: 2px 7px;
@@ -34,38 +44,257 @@
     color: #fff !important;
     border: 2px solid #fff;
 }
-/* Botón compartir alineación */
-.share-pitch-btn {
+
+/* Menú superior: solo dibujo de líneas (siempre visible) */
+/* Menú único inferior: TODO en una sola fila horizontal compacta */
+#unified-single-bottom-menu {
     position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 1100; /* Un nivel por encima de la cancha, pero debajo de modales */
-    background: var(--primary-color);
-    color: var(--dark-bg);
-    border: none;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 100; /* Por encima de cancha (1) y drawing-canvas (10), por debajo de modales (2200) */
+    background: rgba(40, 40, 40, 0.75); /* Transparencia para ver la cancha debajo */
+    backdrop-filter: blur(4px); /* Efecto de difuminado para mejor legibilidad */
+    border-top: 2px solid rgba(23, 162, 184, 0.8); /* Primary color con transparencia */
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
+    padding: 4px 8px; /* Padding mínimo */
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 44px; /* Altura fija y mínima */
+    display: flex;
+    align-items: center;
+}
+
+/* Separadores visuales */
+.vertical-separator {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.2);
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* Frame counter compacto */
+.frame-counter {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    min-width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Inputs compactos */
+.color-input-compact {
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.width-compact {
+    width: 50px !important;
+    font-size: 0.7rem !important;
+    flex-shrink: 0;
+}
+
+/* Fila de controles básicos eliminada */
+.basic-controls-row {
+    display: none;
+}
+
+/* Controles de cada modo - MÁXIMA ESPECIFICIDAD PARA FORZAR CAMBIOS */
+#unified-single-bottom-menu .mode-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Distribuir uniformemente en todo el ancho */
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: all 0.3s ease;
+}
+
+#unified-single-bottom-menu .mode-controls.visible {
+    display: flex !important; /* Mostrar y ocupar espacio completo */
+}
+
+#unified-single-bottom-menu .mode-controls.hidden {
+    display: none !important; /* Ocultar SIN ocupar espacio */
+}
+
+/* Estados específicos por ID con MÁXIMA especificidad */
+#unified-single-bottom-menu #drawing-mode-controls.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#unified-single-bottom-menu #animation-mode-controls.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#unified-single-bottom-menu #drawing-mode-controls.visible {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#unified-single-bottom-menu #animation-mode-controls.visible {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+.mobile-controls-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(40,40,40,0.85);
+    border-radius: 8px;
+    padding: 2px 3px;
+    flex: 1 1 0;
+    justify-content: center;
+    margin: 0 2px;
+    min-width: 0;
+}
+
+/* Estilos para controles del menú unificado - BOTONES FLEXIBLES */
+#unified-single-bottom-menu .btn,
+#unified-single-bottom-menu .form-select {
+    font-size: 0.75rem !important;
+    padding: 4px 6px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    border-radius: 4px !important;
+    margin: 0 !important;
+    flex: 1; /* Los botones se expanden para llenar el espacio disponible */
+    min-width: 28px; /* Ancho mínimo para iconos */
+    max-width: 80px; /* Ancho máximo para no crear botones gigantes */
+}
+
+/* Mejores contrastes para botones sobre fondo transparente */
+#unified-single-bottom-menu .btn {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    font-weight: 500 !important;
+    text-shadow: none !important;
+}
+
+#unified-single-bottom-menu .btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    color: #000 !important;
+    transform: scale(1.02) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* Botones específicos con colores preservados */
+#unified-single-bottom-menu .btn-primary {
+    background: rgba(13, 110, 253, 0.9) !important;
+    color: white !important;
+    border-color: rgba(13, 110, 253, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-primary:hover {
+    background: rgba(13, 110, 253, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-danger {
+    background: rgba(220, 53, 69, 0.9) !important;
+    color: white !important;
+    border-color: rgba(220, 53, 69, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-danger:hover {
+    background: rgba(220, 53, 69, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-warning {
+    background: rgba(255, 193, 7, 0.9) !important;
+    color: #000 !important;
+    border-color: rgba(255, 193, 7, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-warning:hover {
+    background: rgba(255, 193, 7, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-success {
+    background: rgba(25, 135, 84, 0.9) !important;
+    color: white !important;
+    border-color: rgba(25, 135, 84, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-success:hover {
+    background: rgba(25, 135, 84, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-info {
+    background: rgba(13, 202, 240, 0.9) !important;
+    color: #000 !important;
+    border-color: rgba(13, 202, 240, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-info:hover {
+    background: rgba(13, 202, 240, 1) !important;
+}
+
+/* Select elements con mejor contraste */
+#unified-single-bottom-menu .form-select {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+#unified-single-bottom-menu .form-select:focus {
+    background: rgba(255, 255, 255, 1) !important;
+    border-color: rgba(13, 110, 253, 0.8) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Frame counter con mejor contraste */
+#unified-single-bottom-menu .frame-counter {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #fff !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* El canvas debe ocupar todo el espacio */
+#football-field, #drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    aspect-ratio: unset !important;
+    object-fit: fill !important;
+}
+/* El watermark y overlays igual */
+.center-logo-watermark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: background 0.2s;
+    z-index: 2;
 }
-.share-pitch-btn:active {
-    background: var(--medium-bg);
-}
-@media (max-width: 767px) {
-    .share-pitch-btn {
-        bottom: 4px;
-        right: 7px;
-        width: 30px;
-        height: 30px;
-        font-size: 1.0rem;
-    }
-}
+
 /* Botones de deshacer/rehacer en móvil */
 #mobile-undo-redo {
     position: absolute;
@@ -173,6 +402,12 @@ html, body {
 #controls-wrapper.show-controls {
     transform: translateX(0);
     pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+    #controls-wrapper {
+        display: none !important;
+    }
 }
 
 /* Estilo para el botón de toggle de controles en móviles */
@@ -538,20 +773,22 @@ canvas {
 }
 
 /* Watermark */
-.center-logo-watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 20%; /* Tamaño relativo */
-    padding-bottom: 20%; /* Mantiene la proporción 1:1 */
+.center-logo-watermark::before {
+    content: "";
+    display: block;
+    width: 32vw;
+    height: 32vw;
+    max-width: 60vh;
+    max-height: 60vh;
+    min-width: 120px;
+    min-height: 120px;
     background-image: url('../img/logoStoiko.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    opacity: 0.1;
-    pointer-events: none; /* Crucial: no debe interceptar clics */
-    z-index: 2; /* Por encima del campo pero debajo del drawing-canvas */
+    opacity: 0.12;
+    pointer-events: none;
+    margin: auto;
 }
 
 /* --- Panel de Controles (Sidebar) --- */
@@ -565,6 +802,29 @@ canvas {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+}
+
+/* Colores específicos para botón de modo según estado */
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning {
+    background: rgba(255, 152, 0, 0.95) !important; /* Naranja para modo animación */
+    color: white !important;
+    border-color: rgba(255, 152, 0, 0.8) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning:hover {
+    background: rgba(255, 152, 0, 1) !important;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-info {
+    background: rgba(23, 162, 184, 0.95) !important; /* Azul para modo dibujo */
+    color: white !important;
+    border-color: rgba(23, 162, 184, 0.8) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-info:hover {
+    background: rgba(23, 162, 184, 1) !important;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4) !important;
 }
 
 /* Clases de Bootstrap adaptadas para usar variables (si no quieres !important) */
@@ -645,7 +905,67 @@ canvas {
     margin-bottom: 20px;
 }
 
-/* Media Queries para Responsividad */
+/* --- CONTROL DE MODOS: Dibujo vs Animación --- */
+#mode-toggle-btn {
+    font-weight: bold;
+    border: 2px solid #17a2b8;
+    background: linear-gradient(45deg, #17a2b8, #007bff);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+#mode-toggle-btn:hover {
+    background: linear-gradient(45deg, #138496, #0056b3);
+    transform: scale(1.05);
+}
+
+#mode-toggle-btn.active {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border-color: #28a745;
+}
+
+/* Controles que solo aparecen en modo dibujo */
+.mode-drawing #drawing-controls {
+    display: flex !important;
+}
+
+.mode-animation #drawing-controls {
+    display: none !important;
+}
+
+/* Controles que solo aparecen en modo animación */
+.mode-drawing .animation-controls {
+    display: none !important;
+}
+
+.mode-animation .animation-controls {
+    display: flex !important;
+}
+
+/* Transiciones suaves para cambios de modo */
+#drawing-controls,
+.animation-controls {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Indicador visual del modo activo */
+body.mode-drawing #mode-label::after {
+    content: " 🎨";
+}
+
+body.mode-animation #mode-label::after {
+    content: " 🎬";
+}
+
+/* Efectos visuales para el modo activo */
+body.mode-drawing #pitch-container {
+    box-shadow: 0 0 15px rgba(23, 162, 184, 0.5);
+}
+
+body.mode-animation #pitch-container {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+}
+
 @media (min-width: 916px) {
     #controls-wrapper {
         width: 326px;
@@ -765,9 +1085,11 @@ canvas {
     }
 
     /* Reducir el tamaño del watermark en móvil si es necesario */
-    .center-logo-watermark {
-        width: 40%;
-        padding-bottom: 40%;
+    .center-logo-watermark::before {
+        width: 28vw;
+        height: 28vw;
+        max-width: 45vh;
+        max-height: 45vh;
     }
 
     /* Estilos específicos para orientación vertical en móviles */
@@ -932,4 +1254,71 @@ canvas {
     font-size: 0.7em;
     bottom: 12px;
   }
+}
+
+/* Estilos específicos para controles de dibujo en menú unificado */
+#line-width-picker {
+    width: 80px;
+    height: 38px;
+    background: var(--dark-bg);
+    border: 1px solid var(--primary-color);
+    color: var(--light-text);
+    font-size: 0.8rem;
+}
+
+#line-color-picker {
+    width: 50px;
+    height: 38px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Asegurar que los controles estén bien distribuidos */
+#unified-single-bottom-menu .mobile-controls-group {
+    justify-content: space-around;
+    min-width: fit-content;
+}
+
+/* Botón de modo global - SIEMPRE VISIBLE */
+#unified-single-bottom-menu .mode-toggle-always-visible {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    order: -1 !important; /* Asegurar que aparezca primero */
+    flex: 0 0 auto !important; /* No expandir, tamaño fijo */
+    margin-right: 8px !important;
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.95), rgba(0, 123, 255, 0.95)) !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible:hover {
+    background: linear-gradient(135deg, rgba(19, 132, 150, 1), rgba(0, 86, 179, 1)) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+/* Botón de plantilla global - SIEMPRE VISIBLE */
+#unified-single-bottom-menu .squad-btn-always-visible {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    order: -1 !important; /* Asegurar que aparezca después del botón de modo */
+    flex: 0 0 auto !important; /* No expandir, tamaño fijo */
+    margin-right: 8px !important;
+    background: rgba(13, 110, 253, 0.95) !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.5) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+#unified-single-bottom-menu .squad-btn-always-visible:hover {
+    background: rgba(13, 110, 253, 1) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
 }
