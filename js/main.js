@@ -7,6 +7,8 @@ import UIManager from './uiManager.js';
 import BallDrawingManager from './ballDrawingManager.js';
 import AnimationManager from './animationManager.js';
 import ModeManager from './modeManager.js';
+import TutorialManager from './tutorialManager.js';
+import FullscreenManager from './fullscreenManager.js';
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
@@ -403,6 +405,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar jugadores iniciales en el modal de selección
     playerManager.renderPlayerSelectionList();
+
+    // --- TUTORIAL MANAGER ---
+    // Inicializar el gestor de tutorial al final para que todo esté cargado
+    const tutorialManager = new TutorialManager();
+    
+    // --- FULLSCREEN MANAGER ---
+    // Inicializar el gestor de pantalla completa
+    const fullscreenManager = new FullscreenManager();
+    
+    // Hacer disponible globalmente para debugging y acceso desde otros módulos
+    window.tutorialManager = tutorialManager;
+    window.fullscreenManager = fullscreenManager;
+    window.modeManager = modeManager; // También hacer disponible el modeManager
+    
+    console.log('[Main] 🎓 Tutorial Manager inicializado');
+    console.log('[Main] 🖥️ Fullscreen Manager inicializado');
 
     // NOTA: Los dos event listeners para 'click' en 'squad-player-list'
     // que actualizan el contador están duplicados y la lógica está

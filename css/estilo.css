@@ -827,498 +827,347 @@ canvas {
     box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4) !important;
 }
 
-/* Clases de Bootstrap adaptadas para usar variables (si no quieres !important) */
-.bg-dark { background-color: var(--dark-bg) !important; }
-.text-white { color: var(--text-color) !important; } /* Puede ser text-color si es blanco */
-.text-primary { color: var(--primary-color) !important; }
-.bg-secondary { background-color: var(--medium-bg) !important; } /* Usar medium-bg para secondary */
-.border-secondary { border-color: var(--border-color-secondary) !important; }
-.btn-primary {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: var(--dark-bg) !important; /* Texto oscuro para botón primario claro */
-}
-.btn-info {
-    background-color: var(--info-color) !important;
-    border-color: var(--info-color) !important;
-    color: var(--text-color) !important;
-}
-.btn-warning {
-    background-color: var(--warning-color) !important;
-    border-color: var(--warning-color) !important;
-    color: var(--dark-bg) !important; /* Texto oscuro para botón warning claro */
-}
-.btn-light {
-    background-color: var(--light-color) !important;
-    border-color: var(--light-color) !important;
-    color: var(--dark-bg) !important; /* Texto oscuro para botón light claro */
-}
-.btn-secondary {
-    background-color: var(--secondary-color) !important;
-    border-color: var(--secondary-color) !important;
-    color: var(--text-color) !important;
-}
-.btn-close-white {
-    filter: invert(1); /* Para que el icono de cierre blanco sea visible en fondos oscuros */
-}
-.badge.bg-success {
-    background-color: var(--success-color) !important;
-}
-.badge.bg-danger {
-    background-color: var(--danger-color) !important;
-}
+/* ===== TUTORIAL STYLES ===== */
 
-
-/* NUEVOS ESTILOS PARA MODAL */
-/* Aumentar el z-index de los modales para que estén por encima de los controles */
-.custom-z-index-modal.modal {
-    z-index: 2200; /* Mayor que controls-wrapper (2000) y mobile-controls-toggle-btn (2001) */
-}
-
-/* Asegurar que el backdrop del modal también tenga un z-index alto */
-.custom-z-index-modal.modal-backdrop {
-    z-index: 2001; /* Entre el menú y el modal */
-}
-
-/* MENSAJE DE ORIENTACIÓN EN MÓVILES (NUEVO) */
-#orientation-message {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--dark-bg); /* Fondo oscuro */
-    color: var(--text-color); /* Texto claro */
-    z-index: 3000; /* Por encima de todo */
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    box-sizing: border-box;
-    flex-direction: column;
-}
-
-#orientation-message img {
-    width: 100px;
-    height: auto;
-    margin-bottom: 20px;
-}
-
-/* --- CONTROL DE MODOS: Dibujo vs Animación --- */
-#mode-toggle-btn {
-    font-weight: bold;
-    border: 2px solid #17a2b8;
-    background: linear-gradient(45deg, #17a2b8, #007bff);
-    color: white;
-    transition: all 0.3s ease;
-}
-
-#mode-toggle-btn:hover {
-    background: linear-gradient(45deg, #138496, #0056b3);
-    transform: scale(1.05);
-}
-
-#mode-toggle-btn.active {
-    background: linear-gradient(45deg, #28a745, #20c997);
-    border-color: #28a745;
-}
-
-/* Controles que solo aparecen en modo dibujo */
-.mode-drawing #drawing-controls {
+/* Botón flotante del tutorial */
+.tutorial-btn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
     display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-.mode-animation #drawing-controls {
+/* Tutorial de Dibujo - Verde */
+.tutorial-drawing {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4) !important;
+}
+
+.tutorial-drawing:hover {
+    background: linear-gradient(135deg, #218838, #1ea080) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6) !important;
+    color: white !important;
+}
+
+/* Tutorial de Animación - Azul */
+.tutorial-animation {
+    background: linear-gradient(135deg, #007bff, #17a2b8) !important;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4) !important;
+}
+
+.tutorial-animation:hover {
+    background: linear-gradient(135deg, #0056b3, #138496) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6) !important;
+    color: white !important;
+}
+
+/* Controlar visibilidad según el modo */
+.tutorial-drawing.hidden,
+.tutorial-animation.hidden {
     display: none !important;
 }
 
-/* Controles que solo aparecen en modo animación */
-.mode-drawing .animation-controls {
-    display: none !important;
+/* Posicionamiento diferente para evitar superposición */
+.tutorial-animation {
+    right: 180px !important; /* Más a la izquierda cuando ambos están visibles */
 }
 
-.mode-animation .animation-controls {
-    display: flex !important;
+/* ===== RESPONSIVE TUTORIAL STYLES ===== */
+
+/* Personalización de Intro.js para móvil */
+.introjs-tooltip {
+    background: rgba(40, 40, 40, 0.95) !important;
+    border: 2px solid #17a2b8 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    max-width: 350px !important;
 }
 
-/* Transiciones suaves para cambios de modo */
-#drawing-controls,
-.animation-controls {
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-/* Indicador visual del modo activo */
-body.mode-drawing #mode-label::after {
-    content: " 🎨";
-}
-
-body.mode-animation #mode-label::after {
-    content: " 🎬";
-}
-
-/* Efectos visuales para el modo activo */
-body.mode-drawing #pitch-container {
-    box-shadow: 0 0 15px rgba(23, 162, 184, 0.5);
-}
-
-body.mode-animation #pitch-container {
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
-}
-
-@media (min-width: 916px) {
-    #controls-wrapper {
-        width: 326px;
-    }
-
-    #mobile-controls-toggle-btn, .menu-toggle-btn {
-        display: flex !important;
-    }
-
-    .overlay {
-        display: none !important;
-        pointer-events: none !important;
-    }
-
-    #info-panel {
-        flex-grow: 1;
-    }
-
-    #orientation-message {
-        display: none !important; /* Ocultar en escritorio */
-    }
-}
-
-@media (max-width: 914px) { /* Estilos para tablets y móviles en general */
-    #mobile-controls-toggle-btn {
-        display: block;
-    }
-
-    #controls-wrapper {
-        flex-direction: column;
-        width: 326px; /* Un poco más estrecho para móvil */
-        padding: 5px; /* Reducir padding general del wrapper */
-    }
-
-    /* Ajustes para los tokens de jugador en el campo */
-    .player-token {
-        width: 65px;
-        height: 80px;
-        background-size: 100% 100%;
-    }
-
-    .player-token .minicard-overall {
-        top: 10px;
-        left: 5px;
-        font-size: 1em;
-        width: 20px;
-        height: 20px;
-    }
-
-    .player-token .minicard-position {
-        top: 10px;
-        right: 5px;
-        font-size: 0.7em;
-        padding: 1px 3px;
-    }
-
-    .player-token .minicard-player-image {
-        top: 25px;
-        width: 35px;
-        height: 35px;
-    }
-
-    .player-token .minicard-name {
-        bottom: 14px;
-        font-size: 0.5em;
-        width: 80%;
-        padding: 1px 2px;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .player-token .minicard-jersey-number {
-        bottom: 25px;
-        font-size: 0.9em;
-    }
-
-    /* Ajustes para las tarjetas en el modal de selección */
-    .squad-player-item {
-        width: 90px;
-        height: 110px;
-        margin: 2px;
-    }
-
-    .squad-player-item img {
-        width: 55px;
-        height: 60px;
-        margin-bottom: 21px;
-    }
-
-    .squad-player-item .player-name {
-        font-size: 0.65em;
-        max-width: 70px;
-        margin-top: -30px;
-    }
-
-    .squad-player-item .player-position {
-        font-size: 0.6em;
-        margin-top: 0px;
-    }
-
-    .squad-player-item .minicard-overall {
-        top: 16px;
-        left: 7px;
-        font-size: 1em;
-        width: 20px;
-        height: 20px;
-    }
-
-    .squad-player-item .minicard-jersey-number {
-        bottom: 30px;
-        font-size: 0.9em;
-    }
-
-    #squad-player-list {
-        gap: 5px;
-        padding: 5px;
-    }
-
-    /* Reducir el tamaño del watermark en móvil si es necesario */
-    .center-logo-watermark::before {
-        width: 28vw;
-        height: 28vw;
-        max-width: 45vh;
-        max-height: 45vh;
-    }
-
-    /* Estilos específicos para orientación vertical en móviles */
-    @media (orientation: portrait) {
-        #app-container {
-            display: none; /* Ocultar la aplicación principal */
-        }
-
-        #orientation-message {
-            display: flex; /* Mostrar el mensaje de orientación */
-        }
-    }
-
-    /* Estilos específicos para orientación horizontal en móviles */
-    @media (orientation: landscape) {
-        #app-container {
-            display: flex; /* Mostrar la aplicación principal */
-        }
-
-        #orientation-message {
-            display: none; /* Ocultar el mensaje de orientación */
-        }
-    }
-}
-
-/* Media Query para pantallas muy pequeñas (ej. iPhone SE) - Afinamos aún más */
-@media (max-width: 400px) {
-    .player-token {
-        width: 55px; /* Ligeramente más pequeño */
-        height: 70px; /* Ligeramente más pequeño */
-    }
-    .player-token .minicard-overall,
-    .squad-player-item .minicard-overall {
-        font-size: 0.9em;
-        width: 18px;
-        height: 18px;
-        top: 8px;
-        left: 3px;
-    }
-    .player-token .minicard-position,
-    .squad-player-item .minicard-position {
-        font-size: 0.6em;
-        padding: 0px 2px;
-        top: 8px;
-        right: 3px;
-    }
-    .player-token .minicard-player-image,
-    .squad-player-item .minicard-player-image {
-        width: 38px; /* Ligeramente más pequeño */
-        height: 38px; /* Ligeramente más pequeño */
-        top: 25px;
-    }
-    .player-token .minicard-name,
-    .squad-player-item .minicard-name {
-        font-size: 0.55em;
-        bottom: 8px;
-    }
-    .player-token .minicard-jersey-number,
-    .squad-player-item .minicard-jersey-number {
-        font-size: 0.8em;
-        bottom: 20px;
-    }
-
-    .squad-player-item {
-        width: 85px; /* Ligeramente más pequeño */
-        height: 105px; /* Ligeramente más pequeño */
-    }
-    .squad-player-item img {
-        width: 45px;
-        height: 45px;
-        margin-top: 10px;
-    }
-    .squad-player-item .player-name {
-        max-width: 65px;
-    }
-
-    #controls-wrapper {
-        width: 230px; /* Aún más estrecho */
-    }
-}
-
-@media (max-width: 600px) {
-  .player-token {
-    width: 54px;
-    height: 65px;
-    min-width: 48px;
-    min-height: 58px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  }
-  .player-token .minicard-overall {
-    top: 6px;
-    left: 4px;
-    font-size: 0.95em;
-    width: 16px;
-    height: 16px;
-    padding: 0;
-  }
-  .player-token .minicard-position {
-    top: 6px;
-    right: 4px;
-    font-size: 0.65em;
-    padding: 0 2px;
-    border-radius: 10px;
-  }
-  .player-token .minicard-player-image {
-    top: 20px;
-    width: 28px;
-    height: 28px;
-    border-width: 1px;
-  }
-  .player-token .minicard-name {
-    bottom: 6px;
-    left: 6px;
-    right: 6px;
-    font-size: 0.55em;
-    width: auto;
-    padding: 0 2px;
-    line-height: 1.1;
-  }
-  .player-token .minicard-jersey-number {
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.85em;
-    padding: 0;
-  }
-}
-@media (max-width: 400px) {
-  .player-token {
-    width: 44px;
-    height: 54px;
-    min-width: 40px;
-    min-height: 48px;
-  }
-  .player-token .minicard-overall {
-    font-size: 0.8em;
-    width: 13px;
-    height: 13px;
-    top: 4px;
-    left: 3px;
-  }
-  .player-token .minicard-position {
-    font-size: 0.5em;
-    top: 4px;
-    right: 3px;
-    padding: 0 1px;
-  }
-  .player-token .minicard-player-image {
-    top: 14px;
-    width: 20px;
-    height: 20px;
-  }
-  .player-token .minicard-name {
-    font-size: 0.45em;
-    bottom: 4px;
-    left: 3px;
-    right: 3px;
-    padding: 0 1px;
-  }
-  .player-token .minicard-jersey-number {
-    font-size: 0.7em;
-    bottom: 12px;
-  }
-}
-
-/* Estilos específicos para controles de dibujo en menú unificado */
-#line-width-picker {
-    width: 80px;
-    height: 38px;
-    background: var(--dark-bg);
-    border: 1px solid var(--primary-color);
-    color: var(--light-text);
-    font-size: 0.8rem;
-}
-
-#line-color-picker {
-    width: 50px;
-    height: 38px;
-    border: 2px solid var(--primary-color);
-    border-radius: 4px;
-    background: transparent;
-    cursor: pointer;
-}
-
-/* Asegurar que los controles estén bien distribuidos */
-#unified-single-bottom-menu .mobile-controls-group {
-    justify-content: space-around;
-    min-width: fit-content;
-}
-
-/* Botón de modo global - SIEMPRE VISIBLE */
-#unified-single-bottom-menu .mode-toggle-always-visible {
-    position: sticky !important;
-    left: 0 !important;
-    z-index: 1000 !important;
-    order: -1 !important; /* Asegurar que aparezca primero */
-    flex: 0 0 auto !important; /* No expandir, tamaño fijo */
-    margin-right: 8px !important;
-    background: linear-gradient(135deg, rgba(23, 162, 184, 0.95), rgba(0, 123, 255, 0.95)) !important;
+.introjs-tooltip-header {
+    background: linear-gradient(135deg, #17a2b8, #007bff) !important;
     color: white !important;
-    border: 1px solid rgba(255,255,255,0.5) !important;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
-    backdrop-filter: blur(2px) !important;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 12px 16px !important;
+    margin: -10px -16px 10px -16px !important;
+    font-weight: 600 !important;
 }
 
-#unified-single-bottom-menu .mode-toggle-always-visible:hover {
-    background: linear-gradient(135deg, rgba(19, 132, 150, 1), rgba(0, 86, 179, 1)) !important;
-    transform: scale(1.05) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+.introjs-tooltiptext {
+    color: #fff !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    padding: 8px 0 !important;
 }
 
-/* Botón de plantilla global - SIEMPRE VISIBLE */
-#unified-single-bottom-menu .squad-btn-always-visible {
-    position: sticky !important;
-    left: 0 !important;
-    z-index: 1000 !important;
-    order: -1 !important; /* Asegurar que aparezca después del botón de modo */
-    flex: 0 0 auto !important; /* No expandir, tamaño fijo */
-    margin-right: 8px !important;
-    background: rgba(13, 110, 253, 0.95) !important;
+.introjs-button {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    border: none !important;
+    border-radius: 6px !important;
     color: white !important;
-    border: 1px solid rgba(255,255,255,0.5) !important;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
-    backdrop-filter: blur(2px) !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin: 0 4px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
 }
 
-#unified-single-bottom-menu .squad-btn-always-visible:hover {
-    background: rgba(13, 110, 253, 1) !important;
+.introjs-button:hover {
+    background: linear-gradient(135deg, #0056b3, #004085) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;
+}
+
+.introjs-skipbutton {
+    background: linear-gradient(135deg, #6c757d, #495057) !important;
+}
+
+.introjs-skipbutton:hover {
+    background: linear-gradient(135deg, #495057, #343a40) !important;
+}
+
+/* Estilos responsive para móvil */
+@media (max-width: 768px) {
+    /* Botones de tutorial más pequeños en móvil */
+    .tutorial-btn {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+        top: 10px !important;
+        right: 10px !important;
+    }
+    
+    .tutorial-animation {
+        right: 120px !important; /* Menos espacio en móvil */
+    }
+    
+    .tutorial-btn i {
+        font-size: 14px !important;
+    }
+    
+    .tutorial-text {
+        font-size: 11px !important;
+        display: none; /* Ocultar texto en móvil, solo mostrar iconos */
+    }
+    
+    /* Tooltips de Intro.js más pequeños */
+    .introjs-tooltip {
+        max-width: 280px !important;
+        font-size: 12px !important;
+    }
+    
+    .introjs-tooltip-header {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
+    
+    .introjs-tooltiptext {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        padding: 6px 0 !important;
+    }
+    
+    .introjs-button {
+        padding: 6px 12px !important;
+        font-size: 11px !important;
+        margin: 0 2px !important;
+    }
+    
+    /* Overlay del tutorial más transparente en móvil */
+    .introjs-overlay {
+        opacity: 0.6 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Pantallas muy pequeñas */
+    .tutorial-btn {
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        border-radius: 20px !important;
+    }
+    
+    .tutorial-animation {
+        right: 80px !important;
+    }
+    
+    .introjs-tooltip {
+        max-width: 250px !important;
+        margin: 10px !important;
+    }
+    
+    .introjs-tooltip-header {
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+    }
+    
+    .introjs-tooltiptext {
+        font-size: 11px !important;
+        padding: 4px 0 !important;
+    }
+    
+    .introjs-button {
+        padding: 5px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* ===== MODAL DE BIENVENIDA TUTORIAL ===== */
+
+/* Estilos para sobrescribir el modal inline del tutorial */
+#welcome-tutorial-modal {
+    backdrop-filter: blur(8px) !important;
+}
+
+#welcome-tutorial-modal > div {
+    /* El contenedor principal del modal */
+    background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 50%, #1a1a1a 100%) !important;
+    border: 3px solid transparent !important;
+    border-radius: 20px !important;
+    padding: 40px !important;
+    max-width: 550px !important;
+    width: 90% !important;
+    margin: 20px !important;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    text-align: center !important;
+    color: white !important;
+}
+
+/* Responsive para el modal de bienvenida */
+@media (max-width: 768px) {
+    #welcome-tutorial-modal > div {
+        padding: 25px !important;
+        max-width: 90% !important;
+        margin: 10px !important;
+        border-radius: 15px !important;
+    }
+    
+    /* Título más pequeño */
+    #welcome-tutorial-modal h2 {
+        font-size: 22px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    /* Texto más pequeño */
+    #welcome-tutorial-modal p {
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+        margin-bottom: 20px !important;
+    }
+    
+    /* Panel de características más compacto */
+    #welcome-tutorial-modal > div > div:nth-of-type(4) {
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    /* Grid de características más pequeño */
+    #welcome-tutorial-modal > div > div:nth-of-type(4) > div:nth-of-type(2) {
+        grid-template-columns: 1fr !important;
+        gap: 5px !important;
+        font-size: 12px !important;
+    }
+    
+    /* Botones más pequeños */
+    #welcome-tutorial-modal button {
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Icono principal más pequeño */
+    #welcome-tutorial-modal > div > div:nth-of-type(1) {
+        font-size: 48px !important;
+        margin-bottom: 15px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #welcome-tutorial-modal > div {
+        padding: 20px !important;
+        margin: 5px !important;
+        border-radius: 12px !important;
+    }
+    
+    #welcome-tutorial-modal h2 {
+        font-size: 18px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    #welcome-tutorial-modal p {
+        font-size: 12px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #welcome-tutorial-modal > div > div:nth-of-type(4) {
+        padding: 10px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #welcome-tutorial-modal > div > div:nth-of-type(4) > div:nth-of-type(2) {
+        font-size: 10px !important;
+        gap: 3px !important;
+    }
+    
+    #welcome-tutorial-modal button {
+        padding: 10px 16px !important;
+        font-size: 12px !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Contenedor de botones vertical en pantallas muy pequeñas */
+    #welcome-tutorial-modal > div > div:last-child {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    #welcome-tutorial-modal > div > div:nth-of-type(1) {
+        font-size: 36px !important;
+        margin-bottom: 10px !important;
+    }
+}
+
+/* Estilos para el botón de pantalla completa */
+#unified-single-bottom-menu .fullscreen-btn-always-visible {
+    background: rgba(108, 117, 125, 0.9) !important;
+    color: white !important;
+    border-color: rgba(108, 117, 125, 0.8) !important;
+    transition: all 0.3s ease !important;
+}
+
+#unified-single-bottom-menu .fullscreen-btn-always-visible:hover {
+    background: rgba(108, 117, 125, 1) !important;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4) !important;
     transform: scale(1.05) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+#unified-single-bottom-menu .fullscreen-btn-always-visible:active {
+    transform: scale(0.95) !important;
+}
+
+/* Estilo para cuando está en pantalla completa */
+#unified-single-bottom-menu .fullscreen-btn-always-visible.active {
+    background: rgba(40, 167, 69, 0.9) !important;
+    border-color: rgba(40, 167, 69, 0.8) !important;
+}
+
+#unified-single-bottom-menu .fullscreen-btn-always-visible.active:hover {
+    background: rgba(40, 167, 69, 1) !important;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4) !important;
 }

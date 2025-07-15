@@ -94,6 +94,14 @@ export default class ModeManager {
         this.updateModeToggleUI();
         this.updateControlsVisibility();
         
+        // Emitir evento de cambio de modo para otros componentes
+        document.dispatchEvent(new CustomEvent('modeChanged', {
+            detail: { 
+                newMode: mode,
+                oldMode: this.currentMode 
+            }
+        }));
+        
         console.log(`ModeManager: Modo activo: ${this.currentMode}`);
     }
     
