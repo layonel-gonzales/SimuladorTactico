@@ -450,21 +450,9 @@ export default class TutorialManager {
                 }
                 break;
 
-            case '4': // Cambio de formación
+            case '12': // Dibujar línea
                 setNextEnabled(false);
-                const tacticSelect = document.getElementById('tactic-selector');
-                if (tacticSelect) {
-                    const handler = () => {
-                        setNextEnabled(true);
-                        tacticSelect.removeEventListener('change', handler);
-                    };
-                    tacticSelect.addEventListener('change', handler);
-                }
-                break;
-
-            case '13': // Dibujar línea
-                setNextEnabled(false);
-                const drawingCanvas = document.getElementById('canvas-drawing');
+                const drawingCanvas = document.getElementById('drawing-canvas');
                 if (drawingCanvas) {
                     const handler = () => {
                         setNextEnabled(true);
@@ -494,19 +482,7 @@ export default class TutorialManager {
                 }
                 break;
 
-            case '4': // Cambio de formación
-                setNextEnabled(false);
-                const tacticSelect = document.getElementById('tactic-selector-anim');
-                if (tacticSelect) {
-                    const handler = () => {
-                        setNextEnabled(true);
-                        tacticSelect.removeEventListener('change', handler);
-                    };
-                    tacticSelect.addEventListener('change', handler);
-                }
-                break;
-
-            case '9': // Agregar frame
+            case '8': // Agregar frame
                 setNextEnabled(false);
                 const addFrameBtn = document.getElementById('frame-add');
                 if (addFrameBtn && isElementVisible(addFrameBtn)) {
@@ -520,7 +496,7 @@ export default class TutorialManager {
                 }
                 break;
 
-            case '10': // Reproducir animación
+            case '9': // Reproducir animación
                 setNextEnabled(false);
                 const playBtn = document.getElementById('frame-play');
                 if (playBtn && isElementVisible(playBtn)) {
@@ -534,7 +510,7 @@ export default class TutorialManager {
                 }
                 break;
 
-            case '11': // Activar grabación
+            case '10': // Activar grabación
                 setNextEnabled(false);
                 const recordBtn = document.getElementById('record-mode-toggle');
                 if (recordBtn && isElementVisible(recordBtn)) {
@@ -548,7 +524,7 @@ export default class TutorialManager {
                 }
                 break;
 
-            case '12': // Exportar animación
+            case '11': // Exportar animación
                 setNextEnabled(false);
                 const exportBtn = document.getElementById('export-animation-json');
                 if (exportBtn && isElementVisible(exportBtn)) {

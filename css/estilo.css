@@ -295,29 +295,6 @@
     z-index: 2;
 }
 
-/* Botones de deshacer/rehacer en móvil */
-#mobile-undo-redo {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1050; /* Menor que el modal de selección, mayor que todo lo demás */
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    pointer-events: none; /* Solo los botones deben ser interactivos */
-}
-#mobile-undo-redo button {
-    pointer-events: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    opacity: 0.95;
-}
-
-@media (min-width: 768px) {
-    #mobile-undo-redo {
-        display: none !important;
-    }
-}
 :root {
     --primary-color: #00ff80; /* Un verde vibrante, puedes probar #FFD700 (oro) o #00BFFF (azul cielo) */
     --dark-bg: #1a1a1a;       /* Fondo oscuro principal, puedes probar #2c3e50 (gris azulado) */
@@ -1170,4 +1147,97 @@ canvas {
 #unified-single-bottom-menu .fullscreen-btn-always-visible.active:hover {
     background: rgba(40, 167, 69, 1) !important;
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4) !important;
+}
+
+/* === MENSAJE DE ORIENTACIÓN PARA MÓVILES === */
+#orientation-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Por encima de todo */
+    color: white;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#orientation-message img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
+    opacity: 0.9;
+    animation: rotateAnimation 2s ease-in-out infinite;
+}
+
+#orientation-message h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #fff;
+    font-weight: 600;
+}
+
+#orientation-message p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+/* Animación para la imagen de rotar */
+@keyframes rotateAnimation {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(15deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Media query para mostrar solo en móvil y en orientación vertical */
+@media (max-width: 768px) and (orientation: portrait) {
+    #orientation-message {
+        display: flex;
+    }
+    
+    /* Ocultar el contenido principal cuando se muestra el mensaje */
+    #app-container,
+    #unified-single-bottom-menu,
+    .tutorial-btn {
+        display: none !important;
+    }
+}
+
+/* Para pantallas muy pequeñas (móviles compactos) */
+@media (max-width: 480px) and (orientation: portrait) {
+    #orientation-message img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    #orientation-message h2 {
+        font-size: 1.5rem;
+    }
+    
+    #orientation-message p {
+        font-size: 1rem;
+    }
+}
+
+/* En landscape mobile, ocultar el mensaje */
+@media (max-width: 768px) and (orientation: landscape) {
+    #orientation-message {
+        display: none;
+    }
+}
+
+/* En desktop, siempre ocultar el mensaje */
+@media (min-width: 769px) {
+    #orientation-message {
+        display: none !important;
+    }
 }

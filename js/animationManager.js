@@ -345,7 +345,7 @@ export default class AnimationManager {
     }
     
     // Métodos para import/export
-    exportAnimationData(currentTactic) {
+    exportAnimationData() {
         const activePlayers = this.getActivePlayers();
         
         // Obtener IDs de jugadores activos (excluyendo el balón)
@@ -368,7 +368,7 @@ export default class AnimationManager {
             })),
             players: activePlayers.map(p => ({ ...p })),
             selectedPlayerIds: selectedPlayerIds,
-            tactic: currentTactic || 'Libre',
+            tactic: 'Libre',
             initialState: {
                 players: activePlayers.map(p => ({ ...p })),
                 currentFrame: this.currentFrame

@@ -19,41 +19,37 @@ const drawingTutorialSteps = {
         'data-intro': 'Esta es la barra de herramientas del MODO DIBUJO. Aquí puedes seleccionar formaciones, dibujar líneas, cambiar colores y más.',
         'data-step': '4'
     },
-    '#tactic-selector': {
-        'data-intro': '🎯 ¡ELIGE UNA FORMACIÓN! Selecciona una táctica como 4-3-3 o 4-4-2. Esto posicionará automáticamente a los jugadores en el campo.',
-        'data-step': '5'
-    },
     '#undo-line': {
         'data-intro': 'Deshace la última línea dibujada. Útil para corregir errores.',
-        'data-step': '6'
+        'data-step': '5'
     },
     '#redo-line': {
         'data-intro': 'Rehace una línea que hayas deshecho anteriormente.',
-        'data-step': '7'
+        'data-step': '6'
     },
     '#clear-canvas': {
         'data-intro': 'Borra TODAS las líneas del campo. ¡Cuidado! Esta acción no se puede deshacer.',
-        'data-step': '8'
+        'data-step': '7'
     },
     '#line-color-picker': {
         'data-intro': 'Cambia el color de las líneas que dibujes. El amarillo es ideal para jugadas ofensivas.',
-        'data-step': '9'
+        'data-step': '8'
     },
     '#line-width-picker': {
         'data-intro': 'Ajusta el grosor de las líneas. Líneas más gruesas son más visibles para jugadas importantes.',
-        'data-step': '10'
+        'data-step': '9'
     },
     '#delete-line-mode': {
         'data-intro': 'Activa el modo borrador. Después haz clic en cualquier línea para eliminarla específicamente.',
-        'data-step': '11'
+        'data-step': '10'
     },
     '#share-pitch-btn': {
         'data-intro': 'Exporta y comparte tu táctica como imagen. Perfecto para enviar a tu equipo o entrenador.',
-        'data-step': '12'
+        'data-step': '11'
     },
-    '#canvas-drawing': {
+    '#drawing-canvas': {
         'data-intro': '🎯 ¡DIBUJA AHORA! Haz CLIC y ARRASTRA sobre el campo para crear tu primera línea táctica. Puedes dibujar flechas, líneas de pase, movimientos de jugadores, etc.',
-        'data-step': '13'
+        'data-step': '12'
     }
 };
 
@@ -75,41 +71,37 @@ const animationTutorialSteps = {
         'data-intro': 'Esta es la barra del MODO ANIMACIÓN. Aquí puedes crear secuencias de movimiento y reproducir animaciones tácticas.',
         'data-step': '4'
     },
-    '#tactic-selector-anim': {
-        'data-intro': '🎯 ¡ELIGE UNA FORMACIÓN! Selecciona la táctica inicial para posicionar a los jugadores antes de animar.',
-        'data-step': '5'
-    },
     '#frame-prev': {
         'data-intro': 'Navega al frame anterior de tu animación. Útil para revisar secuencias.',
-        'data-step': '6'
+        'data-step': '5'
     },
     '#frame-indicator': {
         'data-intro': 'Muestra el frame actual y el total de frames en tu animación (ej: 3/5).',
-        'data-step': '7'
+        'data-step': '6'
     },
     '#frame-next': {
         'data-intro': 'Navega al siguiente frame de tu animación.',
-        'data-step': '8'
+        'data-step': '7'
     },
     '#frame-add': {
         'data-intro': '🎯 ¡CREA UN FRAME! Haz clic aquí para capturar las posiciones actuales de los jugadores como un nuevo frame.',
-        'data-step': '9'
+        'data-step': '8'
     },
     '#frame-play': {
         'data-intro': '🎯 ¡REPRODUCE! Haz clic para ver toda la secuencia de animación que has creado. ¡Verás tu táctica en movimiento!',
-        'data-step': '10'
+        'data-step': '9'
     },
     '#record-mode-toggle': {
         'data-intro': '🎯 ¡ACTIVA GRABACIÓN! Haz clic aquí y mueve los jugadores. Se registrarán automáticamente sus posiciones.',
-        'data-step': '11'
+        'data-step': '10'
     },
     '#export-animation-json': {
         'data-intro': '🎯 ¡EXPORTA! Haz clic para guardar tu animación como archivo JSON y compartirla.',
-        'data-step': '12'
+        'data-step': '11'
     },
     '#reset-animation': {
         'data-intro': 'Borra toda la animación y vuelve al frame inicial. ¡Cuidado! Se perderán todos los frames.',
-        'data-step': '13'
+        'data-step': '12'
     }
 };
 

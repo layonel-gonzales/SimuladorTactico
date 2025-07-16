@@ -24,6 +24,11 @@ export default class DrawingManager {
         // Modo para borrar líneas individuales
         this.deleteLineMode = false;
         
+        // Imagen del balón para mostrar al final de las líneas
+        this.ballImg = new Image();
+        this.ballImg.src = 'img/ball.png';
+        this.ballSize = 20; // Tamaño del balón en píxeles
+        
         this.init();
     }
     
@@ -120,8 +125,14 @@ export default class DrawingManager {
         this.isDrawing = false;
         this.ctx.closePath();
         
-        // Opcional: simplificar la línea para optimizar
+        // Agregar el balón al final de la línea recién dibujada
         const currentLine = this.lines[this.lines.length - 1];
+        if (currentLine && currentLine.points.length > 1) {
+            const lastPoint = currentLine.points[currentLine.points.length - 1];
+            currentLine.ballPosition = { x: lastPoint.x, y: lastPoint.y };
+        }
+        
+        // Opcional: simplificar la línea para optimizar
         if (currentLine && currentLine.points.length > 10) {
             // Aquí se podría implementar un algoritmo de simplificación de línea
         }
@@ -141,7 +152,9 @@ export default class DrawingManager {
     // Redibuja todas las líneas almacenadas
     redrawLines() {
         this.clearCanvas();
-        this.lines.forEach(line => {
+        
+        // Dibujar todas las líneas
+        this.lines.forEach((line, index) => {
             if (line.points.length < 2) return;
             
             this.ctx.save();
@@ -157,7 +170,39 @@ export default class DrawingManager {
             this.ctx.stroke();
             this.ctx.restore();
         });
+        
+        // Dibujar todos los balones al final de las líneas
+        this.drawBalls();
+        
         this.applyContextProperties(); // Restaurar contexto para el próximo dibujo
+    }
+    
+    // Dibuja los balones al final de cada línea con opacidad según su edad
+    drawBalls() {
+        if (!this.ballImg.complete) {
+            // Si la imagen no está cargada, intentar de nuevo en un momento
+            setTimeout(() => this.drawBalls(), 50);
+            return;
+        }
+        
+        this.lines.forEach((line, index) => {
+            if (!line.ballPosition) return;
+            
+            this.ctx.save();
+            
+            // Hacer que los balones anteriores sean más opacos
+            const isLastLine = index === this.lines.length - 1;
+            const opacity = isLastLine ? 1.0 : 0.4; // Último balón opaco, anteriores semi-transparentes
+            this.ctx.globalAlpha = opacity;
+            
+            // Dibujar el balón centrado en la posición
+            const x = line.ballPosition.x - this.ballSize / 2;
+            const y = line.ballPosition.y - this.ballSize / 2;
+            
+            this.ctx.drawImage(this.ballImg, x, y, this.ballSize, this.ballSize);
+            
+            this.ctx.restore();
+        });
     }
     
     // Limpia completamente el canvas
@@ -171,7 +216,7 @@ export default class DrawingManager {
             const undoneLine = this.lines.pop();
             this.undoStack.push(undoneLine);
             this.redrawLines();
-            console.log('DrawingManager: Línea deshecha');
+            console.log('DrawingManager: Línea deshecha (con balón)');
         }
     }
     
@@ -181,7 +226,7 @@ export default class DrawingManager {
             const redoneLine = this.undoStack.pop();
             this.lines.push(redoneLine);
             this.redrawLines();
-            console.log('DrawingManager: Línea rehecha');
+            console.log('DrawingManager: Línea rehecha (con balón)');
         }
     }
     
@@ -190,7 +235,7 @@ export default class DrawingManager {
         this.lines = [];
         this.undoStack = [];
         this.clearCanvas();
-        console.log('DrawingManager: Todas las líneas borradas');
+        console.log('DrawingManager: Todas las líneas y balones borrados');
     }
     
     // Activa/desactiva el modo de borrar línea
@@ -207,23 +252,38 @@ export default class DrawingManager {
         const pos = this.getMousePos(e);
         let lineDeleted = false;
         
-        // Buscar la línea más cercana al punto de click
+        // Buscar la línea más cercana al punto de click (incluyendo el balón)
         for (let i = this.lines.length - 1; i >= 0; i--) {
             const line = this.lines[i];
-            for (const point of line.points) {
-                const distance = Math.hypot(point.x - pos.x, point.y - pos.y);
-                if (distance < line.properties.width + 5) { // +5 de margen
+            
+            // Verificar si se hizo click en el balón
+            if (line.ballPosition) {
+                const ballDistance = Math.hypot(line.ballPosition.x - pos.x, line.ballPosition.y - pos.y);
+                if (ballDistance < this.ballSize) {
                     this.lines.splice(i, 1);
                     lineDeleted = true;
                     break;
                 }
             }
+            
+            // Verificar si se hizo click en la línea
+            if (!lineDeleted) {
+                for (const point of line.points) {
+                    const distance = Math.hypot(point.x - pos.x, point.y - pos.y);
+                    if (distance < line.properties.width + 5) { // +5 de margen
+                        this.lines.splice(i, 1);
+                        lineDeleted = true;
+                        break;
+                    }
+                }
+            }
+            
             if (lineDeleted) break;
         }
         
         if (lineDeleted) {
             this.redrawLines();
-            console.log('DrawingManager: Línea borrada');
+            console.log('DrawingManager: Línea y balón borrados');
         }
     }
     

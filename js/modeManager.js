@@ -142,12 +142,9 @@ export default class ModeManager {
                 this.ballDrawingManager.setEnabled(true);
             }
             
-            // Limpiar cualquier frame de animación visual
-            if (this.animationManager) {
-                // Solo limpiar visualización, no los datos
-                if (this.uiManager) {
-                    this.uiManager.renderPlayersOnPitch();
-                }
+            // Re-renderizar para ocultar el balón en modo dibujo
+            if (this.uiManager) {
+                this.uiManager.renderPlayersOnPitch();
             }
             
         } else if (this.currentMode === 'animation') {
@@ -155,9 +152,14 @@ export default class ModeManager {
             if (this.drawingManager) {
                 this.drawingManager.setEnabled(false);
             }
-            
+
             if (this.ballDrawingManager) {
                 this.ballDrawingManager.setEnabled(false);
+            }
+            
+            // Re-renderizar para mostrar el balón en modo animación
+            if (this.uiManager) {
+                this.uiManager.renderPlayersOnPitch();
             }
             
             // NO limpiar líneas automáticamente - el usuario puede querer conservarlas

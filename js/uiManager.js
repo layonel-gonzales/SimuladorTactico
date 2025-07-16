@@ -3,17 +3,17 @@
 export default class UIManager {
     constructor() {
         this.playerManager = null;
-        this.tacticsManager = null;
         this.drawingManager = null;
-        this.state = null; // Se inicializará en init()
+        this.state = null;
+        this.modeManager = null; // Referencia al modeManager para verificar modo actual
     }
 
-    init({ playerManager, tacticsManager, drawingManager, state }) {
+    init({ playerManager, drawingManager, state, modeManager }) {
         this.playerManager = playerManager;
-        this.tacticsManager = tacticsManager;
         this.drawingManager = drawingManager;
         this.state = state;
-
+        this.modeManager = modeManager; // Guardar referencia
+        this.drawingManager = null;
         this.setupEventListeners();
         this.setupCursors();
         this.updateModeIndicator();
@@ -63,56 +63,6 @@ export default class UIManager {
 
     setupEventListeners() {
         console.log('UIManager: Configurando Event Listeners...');
-
-        // --- Eventos para el menú móvil ---
-        const mobileControlsToggleBtn = document.getElementById('mobile-controls-toggle-btn');
-        const menuToggleIcon = document.getElementById('menu-toggle-icon');
-        const controlsWrapper = document.getElementById('controls-wrapper');
-        const overlay = document.getElementById('mobile-menu-overlay');
-        const closeMobileMenuBtn = document.getElementById('close-mobile-menu-btn');
-        const closeMobileMenuBtnBottom = document.getElementById('close-mobile-menu-btn-bottom');
-
-        // Alternar menú y cambiar icono
-        const toggleMenu = () => {
-            const isOpen = controlsWrapper.classList.contains('show-controls');
-            if (isOpen) {
-                controlsWrapper.classList.remove('show-controls');
-                overlay.classList.remove('show-overlay');
-                menuToggleIcon.classList.remove('fa-arrow-left');
-                menuToggleIcon.classList.add('fa-bars');
-            } else {
-                controlsWrapper.classList.add('show-controls');
-                overlay.classList.add('show-overlay');
-                menuToggleIcon.classList.remove('fa-bars');
-                menuToggleIcon.classList.add('fa-arrow-left');
-            }
-        };
-
-        // Abrir menú
-        if (mobileControlsToggleBtn) {
-            mobileControlsToggleBtn.addEventListener('click', toggleMenu);
-        } else {
-             console.warn('UIManager: Botón #mobile-controls-toggle-btn no encontrado.');
-        }
-
-        // Cerrar menú desde el botón superior o inferior
-        if (closeMobileMenuBtn) {
-            closeMobileMenuBtn.addEventListener('click', toggleMenu);
-        } else {
-             console.warn('UIManager: Botón #close-mobile-menu-btn no encontrado.');
-        }
-        if (closeMobileMenuBtnBottom) {
-            closeMobileMenuBtnBottom.addEventListener('click', toggleMenu);
-        } else {
-             console.warn('UIManager: Botón #close-mobile-menu-btn-bottom no encontrado.');
-        }
-
-        // Cerrar menú al hacer clic en el overlay
-        if (overlay) {
-            overlay.addEventListener('click', toggleMenu);
-        } else {
-            console.warn('UIManager: Overlay #mobile-menu-overlay no encontrado.');
-        }
 
         // --- Eventos principales de la aplicación ---
 
@@ -175,14 +125,7 @@ export default class UIManager {
                     // Limpiar datos pendientes
                     delete window.pendingAnimationData;
                 } else {
-                    // Comportamiento normal: aplicar táctica y renderizar
-                    // Aplicar la táctica, esto actualizará las posiciones x, y de los jugadores
-                    this.tacticsManager.applyTactic(
-                        this.state.currentTactic,
-                        this.state.activePlayers
-                    );
-
-                    // Renderizar los jugadores en el campo con sus nuevas posiciones
+                    // Comportamiento normal: renderizar jugadores
                     this.renderPlayersOnPitch();
                     
                     // Asegurar que el balón esté presente
@@ -194,23 +137,6 @@ export default class UIManager {
 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('squad-selection-modal'));
                 if (modal) modal.hide();
-            });
-        }
-
-
-        const tacticSelector = document.getElementById('tactic-selector');
-        if (tacticSelector) {
-            tacticSelector.addEventListener('change', (e) => {
-                console.log('UIManager: Táctica cambiada a', e.target.value);
-                this.state.currentTactic = e.target.value;
-
-                if (this.state.activePlayers.length > 0) {
-                    this.tacticsManager.applyTactic(
-                        this.state.currentTactic,
-                        this.state.activePlayers
-                    );
-                    this.renderPlayersOnPitch();
-                }
             });
         }
 
@@ -228,20 +154,6 @@ export default class UIManager {
             });
         }
 
-        // --- Botones de deshacer/rehacer (móvil) ---
-        const mobileUndoBtn = document.getElementById('mobile-undo-line');
-        const mobileRedoBtn = document.getElementById('mobile-redo-line');
-        if (mobileUndoBtn) {
-            mobileUndoBtn.addEventListener('click', () => {
-                this.drawingManager.undoLine();
-            });
-        }
-        if (mobileRedoBtn) {
-            mobileRedoBtn.addEventListener('click', () => {
-                this.drawingManager.redoLine();
-            });
-        }
-
         const clearCanvasBtn = document.getElementById('clear-canvas');
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', () => {
@@ -250,13 +162,7 @@ export default class UIManager {
             });
         }
 
-        const fullscreenButton = document.getElementById('fullscreenButton');
-        if (fullscreenButton) {
-            fullscreenButton.addEventListener('click', () => {
-                console.log('UIManager: Click en Pantalla Completa.');
-                this.toggleFullscreen();
-            });
-        }
+
 
         const squadPlayerList = document.getElementById('squad-player-list');
         if (squadPlayerList) {
@@ -341,9 +247,16 @@ export default class UIManager {
         console.log('[UIManager][DEBUG] Jugadores a renderizar:', this.state.activePlayers);
 
         this.state.activePlayers.forEach((player, index) => {
-            // Si el jugador es el balón, dibujar como imagen especial
+            // Si el jugador es el balón, solo dibujarlo en modo animación
             if (player.isBall || player.type === 'ball' || player.role === 'ball' || player.id === 'ball') {
-                // Dibuja el balón como una imagen especial
+                // Solo mostrar el balón en modo animación
+                const currentMode = this.modeManager ? this.modeManager.currentMode : 'drawing';
+                if (currentMode !== 'animation') {
+                    console.log('[UIManager] Balón omitido - solo se muestra en modo animación');
+                    return; // Saltar renderizado del balón en modo dibujo
+                }
+                
+                // Dibuja el balón como una imagen especial (solo en modo animación)
                 const ball = document.createElement('img');
                 ball.className = 'player-token ball-token';
                 ball.dataset.playerId = player.id;
@@ -556,18 +469,5 @@ export default class UIManager {
         } else {
             console.warn('UIManager: Elemento #selected-count no encontrado.');
         }
-    }
-
-    toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`UIManager: Error al intentar pantalla completa: ${err.message}`);
-            });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        }
-        console.log('UIManager: Toggle Fullscreen.');
     }
 }

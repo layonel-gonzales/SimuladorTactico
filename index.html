@@ -14,17 +14,7 @@
     <div id="orientation-message">
         <img src="img/rotate-device.png" alt="Girar dispositivo">
         <h2>Por favor, gira tu dispositivo</h2>
-        <p>Esta aplicación funciona mejor en orientación horizontal.</p>
-    </div>
-
-    <!-- Canvas de juego -->
-    <div id="game-container" 
-         data-intro="¡Bienvenido al Simulador Táctico de Fútbol! Este es el campo donde puedes dibujar jugadas y crear animaciones tácticas." 
-         data-step="1">
-        <canvas id="canvas-field" width="800" height="600"></canvas>
-        <canvas id="canvas-drawing" width="800" height="600" 
-                data-intro="🎯 ¡DIBUJA AHORA! Haz CLIC y ARRASTRA sobre el campo para crear tu primera línea táctica. Puedes dibujar flechas, líneas de pase, movimientos de jugadores, etc." 
-                data-step="23"></canvas>
+        <p>Esta aplicación funciona mejor en orientación horizontal para una experiencia completa.</p>
     </div>
 
     <!-- Menú único inferior: TODO unificado en una sola barra -->
@@ -54,20 +44,8 @@
         
         <!-- MODO DIBUJO: Una sola fila horizontal -->
         <div id="drawing-mode-controls" class="mode-controls visible"
-             data-intro="Esta es la barra de herramientas del MODO DIBUJO. Aquí puedes seleccionar formaciones, dibujar líneas, cambiar colores y más." 
+             data-intro="Esta es la barra de herramientas del MODO DIBUJO. Aquí puedes dibujar líneas, cambiar colores y más." 
              data-step="5">
-            <select id="tactic-selector" class="form-select form-select-sm"
-                    data-intro="🎯 ¡ELIGE UNA FORMACIÓN! Selecciona una táctica como 4-3-3 o 4-4-2. Esto posicionará automáticamente a los jugadores en el campo." 
-                    data-step="6">
-                <option value="Libre">Libre</option>
-                <option value="4-3-3">4-3-3</option>
-                <option value="4-4-2">4-4-2</option>
-                <option value="3-5-2">3-5-2</option>
-            </select>
-        
-            <!-- Separador visual -->
-            <div class="vertical-separator"></div>
-            
             <button id="undo-line" class="btn btn-secondary btn-sm" title="Atrás"
                     data-intro="Deshace la última línea dibujada. Útil para corregir errores." 
                     data-step="6">
@@ -116,44 +94,32 @@
         <div id="animation-mode-controls" class="mode-controls hidden"
              data-intro="Esta es la barra del MODO ANIMACIÓN. Aquí puedes crear secuencias de movimiento y reproducir animaciones tácticas." 
              data-step="13">
-            <select id="tactic-selector-anim" class="form-select form-select-sm"
-                    data-intro="Formación táctica para el modo animación. Cambia la posición inicial de los jugadores." 
-                    data-step="14">
-                <option value="Libre">Libre</option>
-                <option value="4-3-3">4-3-3</option>
-                <option value="4-4-2">4-4-2</option>
-                <option value="3-5-2">3-5-2</option>
-            </select>
-            
-            <!-- Separador visual -->
-            <div class="vertical-separator"></div>
-            
             <button id="frame-prev" class="btn btn-outline-primary btn-sm" title="Frame anterior"
                     data-intro="Navega al frame anterior de tu animación. Útil para revisar secuencias." 
-                    data-step="15">
+                    data-step="14">
                 <i class="fas fa-step-backward"></i>
             </button>
             <span id="frame-indicator" class="frame-counter"
                   data-intro="Muestra el frame actual y el total de frames en tu animación (ej: 3/5)." 
-                  data-step="16">1/1</span>
+                  data-step="15">1/1</span>
             <button id="frame-next" class="btn btn-outline-primary btn-sm" title="Frame siguiente"
                     data-intro="Navega al siguiente frame de tu animación." 
-                    data-step="17">
+                    data-step="16">
                 <i class="fas fa-step-forward"></i>
             </button>
             <button id="frame-add" class="btn btn-success btn-sm" title="Nuevo frame"
                     data-intro="Crea un nuevo frame en tu animación. Cada frame captura las posiciones actuales de los jugadores." 
-                    data-step="18">
+                    data-step="17">
                 <i class="fas fa-plus"></i>
             </button>
             <button id="frame-play" class="btn btn-info btn-sm" title="Reproducir"
                     data-intro="Reproduce toda la secuencia de animación que has creado. ¡Verás tu táctica en movimiento!" 
-                    data-step="19">
+                    data-step="18">
                 <i class="fas fa-play"></i>
             </button>
             <button id="record-mode-toggle" class="btn btn-danger btn-sm" title="Grabar"
                     data-intro="Activa el modo grabación. Mueve los jugadores y se registrarán automáticamente sus posiciones." 
-                    data-step="20">
+                    data-step="19">
                 <i class="fas fa-dot-circle"></i>
             </button>
             
@@ -162,12 +128,12 @@
             
             <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar"
                     data-intro="Exporta tu animación como archivo JSON para guardarla o compartirla." 
-                    data-step="21">
+                    data-step="20">
                 <i class="fas fa-share-square"></i>
             </button>
             <button id="reset-animation" class="btn btn-warning btn-sm" title="Reset"
                     data-intro="Borra toda la animación y vuelve al frame inicial. ¡Cuidado! Se perderán todos los frames." 
-                    data-step="22">
+                    data-step="21">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -185,20 +151,15 @@
     </button>
 
     <div id="mobile-menu-overlay" class="overlay"></div>
-    <div id="app-container">
+    <div id="app-container" 
+         data-intro="¡Bienvenido al Simulador Táctico de Fútbol! Este es el campo donde puedes dibujar jugadas y crear animaciones tácticas." 
+         data-step="1">
         <div id="pitch-container">
             <canvas id="football-field"></canvas>
             <div class="center-logo-watermark"></div>
-            <canvas id="drawing-canvas"></canvas>
-            <!-- Botones de deshacer/rehacer para móvil -->
-            <div id="mobile-undo-redo" class="d-md-none">
-                <button id="mobile-undo-line" class="btn btn-secondary mx-2" title="Atrás">
-                    <i class="fas fa-undo"></i>
-                </button>
-                <button id="mobile-redo-line" class="btn btn-secondary mx-2" title="Adelante">
-                    <i class="fas fa-redo"></i>
-                </button>
-            </div>
+            <canvas id="drawing-canvas" 
+                    data-intro="🎯 ¡DIBUJA AHORA! Haz CLIC y ARRASTRA sobre el campo para crear tu primera línea táctica. Puedes dibujar flechas, líneas de pase, movimientos de jugadores, etc." 
+                    data-step="22"></canvas>
         </div>
     </div>
 

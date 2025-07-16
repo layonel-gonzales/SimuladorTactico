@@ -2,19 +2,22 @@ import { drawFootballField } from './fieldDrawer.js';
 import { staticPlayers } from './players.js';
 import DrawingManager from './drawingManager.js';
 import PlayerManager from './playerManager.js';
-import TacticsManager from './tacticsManager.js';
 import UIManager from './uiManager.js';
 import BallDrawingManager from './ballDrawingManager.js';
 import AnimationManager from './animationManager.js';
 import ModeManager from './modeManager.js';
 import TutorialManager from './tutorialManager.js';
 import FullscreenManager from './fullscreenManager.js';
+import OrientationManager from './orientationManager.js';
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
 // Modo 2: Crear animaciones tácticas con frames
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // Inicializar el gestor de orientación PRIMERO (antes que cualquier otra cosa)
+    const orientationManager = new OrientationManager();
 
     // Función global para comunicación con UIManager y BallDrawingManager
     window.main = {
@@ -79,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Estado global (debe ir antes de cualquier uso)
     const state = {
         activePlayers: [], // Iniciar vacío, solo agregar jugadores seleccionados
-        currentTactic: 'Libre',
         isDrawingMode: false
     };
     
@@ -96,7 +98,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Inicialización de módulos especializados
     const playerManager = new PlayerManager(staticPlayers);
-    const tacticsManager = new TacticsManager();
     const drawingManager = new DrawingManager('drawing-canvas');
     
     // NUEVO: Gestores especializados para las dos funcionalidades principales
@@ -140,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const exportBtn = document.getElementById('export-animation-json');
     if (exportBtn) {
         exportBtn.addEventListener('click', () => {
-            const data = animationManager.exportAnimationData(state.currentTactic);
+            const data = animationManager.exportAnimationData();
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -161,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const linkOutput = document.getElementById('share-link-output');
     if (linkBtn && linkOutput) {
         linkBtn.addEventListener('click', () => {
-            const data = animationManager.exportAnimationData(state.currentTactic);
+            const data = animationManager.exportAnimationData();
             const json = JSON.stringify(data);
             const base64 = btoa(unescape(encodeURIComponent(json)));
             const url = `${window.location.origin}${window.location.pathname}?anim=${encodeURIComponent(base64)}`;
@@ -184,51 +185,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             console.log('[Main] Link generado exitosamente');
         });
-    }
-
-    // Función para cargar jugadores específicos por sus IDs
-    function loadPlayersByIds(playerIds) {
-        // Limpiar jugadores actuales (mantener solo el balón)
-        state.activePlayers = state.activePlayers.filter(p => 
-            p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'
-        );
-        
-        // Agregar jugadores seleccionados
-        playerIds.forEach(playerId => {
-            const player = staticPlayers.find(p => p.id === playerId);
-            if (player) {
-                state.activePlayers.push({ ...player });
-            }
-        });
-        
-        // Asegurar que el balón esté presente
-        ensureBallInPlayers(state.activePlayers);
-        
-        // Renderizar jugadores en la cancha
-        uiManager.renderPlayersOnPitch();
-        
-        console.log('[Main] Jugadores cargados por IDs:', playerIds, state.activePlayers);
-    }
-
-    // Función para mostrar modal de selección con IDs predefinidos
-    function showPlayerSelectionModal(preselectedIds = []) {
-        const modal = new bootstrap.Modal(document.getElementById('squad-selection-modal'));
-        modal.show();
-        
-        if (preselectedIds.length > 0) {
-            setTimeout(() => {
-                const checkboxes = document.querySelectorAll('#squad-player-list input[type="checkbox"]');
-                checkboxes.forEach(checkbox => {
-                    const playerId = parseInt(checkbox.value);
-                    if (preselectedIds.includes(playerId)) {
-                        checkbox.checked = true;
-                    }
-                });
-                if (uiManager && uiManager.updateSelectedCount) {
-                    uiManager.updateSelectedCount();
-                }
-            }, 100);
-        }
     }
 
     // --- Importar animación desde JSON ---
@@ -276,8 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 // Usar AnimationManager para importar
-                const tactic = animationManager.importAnimationData(data);
-                state.currentTactic = tactic;
+                animationManager.importAnimationData(data);
                 
                 alert('Animación importada correctamente.');
                 console.log('[Main] Animación importada desde archivo JSON');
@@ -293,8 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Función auxiliar para importar datos de animación (expuesta globalmente para compatibilidad)
     function importAnimationData(data) {
         try {
-            const tactic = animationManager.importAnimationData(data);
-            state.currentTactic = tactic;
+            animationManager.importAnimationData(data);
             return true;
         } catch (err) {
             console.error('[Main] Error en importAnimationData:', err);
@@ -319,8 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             // Usar AnimationManager para importar
-            const tactic = animationManager.importAnimationData(data);
-            state.currentTactic = tactic;
+            animationManager.importAnimationData(data);
             
             setTimeout(() => alert('Animación cargada desde link compartido.'), 300);
             console.log('[Main] Animación importada desde URL');
@@ -365,9 +318,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar UI
     uiManager.init({
         playerManager,
-        tacticsManager,
         drawingManager, // Pasamos el drawingManager
-        state
+        state,
+        modeManager // Pasar referencia del modeManager
     });
 
     // Renderizar jugadores iniciales (incluyendo el balón)
