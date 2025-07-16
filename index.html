@@ -17,6 +17,11 @@
         <p>Esta aplicación funciona mejor en orientación horizontal para una experiencia completa.</p>
     </div>
 
+    <!-- Indicador de grabación de audio -->
+    <div id="audio-indicator">
+        Grabando audio...
+    </div>
+
     <!-- Menú único inferior: TODO unificado en una sola barra -->
     <!-- Menú único inferior: TODO en una sola fila horizontal compacta -->
     <nav id="unified-single-bottom-menu">
@@ -123,17 +128,29 @@
                 <i class="fas fa-dot-circle"></i>
             </button>
             
+            <!-- Controles de Audio -->
+            <button id="audio-record-btn" class="btn btn-secondary btn-sm" title="Grabar audio"
+                    data-intro="Graba una narración de audio para tu animación táctica. Perfecto para explicar la jugada." 
+                    data-step="20">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button id="audio-play-btn" class="btn btn-outline-secondary btn-sm" title="Reproducir audio" disabled
+                    data-intro="Reproduce el audio grabado para escuchar tu narración." 
+                    data-step="21">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            
             <!-- Separador visual -->
             <div class="vertical-separator"></div>
             
             <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar"
-                    data-intro="Exporta tu animación como archivo JSON para guardarla o compartirla." 
-                    data-step="20">
+                    data-intro="Exporta tu animación como archivo JSON para guardarla o compartirla (incluye audio si fue grabado)." 
+                    data-step="22">
                 <i class="fas fa-share-square"></i>
             </button>
             <button id="reset-animation" class="btn btn-warning btn-sm" title="Reset"
-                    data-intro="Borra toda la animación y vuelve al frame inicial. ¡Cuidado! Se perderán todos los frames." 
-                    data-step="21">
+                    data-intro="Borra toda la animación y vuelve al frame inicial. ¡Cuidado! Se perderán todos los frames y el audio." 
+                    data-step="23">
                 <i class="fas fa-trash"></i>
             </button>
         </div>

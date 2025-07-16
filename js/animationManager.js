@@ -2,11 +2,12 @@
 // Maneja todo lo relacionado con crear y reproducir animaciones tácticas
 
 export default class AnimationManager {
-    constructor(getActivePlayers, setActivePlayers, ensureBallInPlayers, uiManager) {
+    constructor(getActivePlayers, setActivePlayers, ensureBallInPlayers, uiManager, audioManager = null) {
         this.getActivePlayers = getActivePlayers;
         this.setActivePlayers = setActivePlayers;
         this.ensureBallInPlayers = ensureBallInPlayers;
         this.uiManager = uiManager;
+        this.audioManager = audioManager; // Referencia al AudioManager
         
         // Estado de la animación
         this.frames = [];
@@ -360,7 +361,10 @@ export default class AnimationManager {
             this.frames[this.currentFrame] = this.getCurrentState();
         }
         
-        return {
+        // Obtener datos de audio si están disponibles
+        const audioData = this.audioManager ? this.audioManager.getAudioDataForExport() : null;
+        
+        const exportData = {
             frames: this.frames.map(f => ({
                 players: f.players ? f.players.map(p => ({ ...p })) : [],
                 ball: f.ball ? { ...f.ball } : null,
@@ -374,6 +378,14 @@ export default class AnimationManager {
                 currentFrame: this.currentFrame
             }
         };
+        
+        // Incluir audio solo si existe (para evitar archivos JSON innecesariamente grandes)
+        if (audioData) {
+            exportData.audio = audioData;
+            console.log('[AnimationManager] Audio incluido en la exportación');
+        }
+        
+        return exportData;
     }
     
     importAnimationData(data, clearLines = true) {
@@ -410,6 +422,15 @@ export default class AnimationManager {
         this.setActivePlayers(activePlayers);
         this.ensureBallInPlayers(activePlayers);
         
+        // Cargar audio si está disponible
+        if (data.audio && this.audioManager) {
+            this.audioManager.loadAudioFromData(data.audio);
+            console.log('[AnimationManager] Audio cargado desde datos importados');
+        } else if (this.audioManager) {
+            // Limpiar audio si no hay datos de audio
+            this.audioManager.clearAudio();
+        }
+        
         // Establecer frame inicial
         this.currentFrame = data.initialState && typeof data.initialState.currentFrame === 'number' 
             ? Math.min(data.initialState.currentFrame, this.frames.length - 1) 
@@ -434,6 +455,11 @@ export default class AnimationManager {
         this.currentFrame = 0;
         this.isPlaying = false;
         this.isRecordMode = false;
+        
+        // Limpiar audio también
+        if (this.audioManager) {
+            this.audioManager.clearAudio();
+        }
         
         if (this.recordBtn) {
             this.recordBtn.classList.remove('active');

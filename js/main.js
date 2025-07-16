@@ -9,6 +9,7 @@ import ModeManager from './modeManager.js';
 import TutorialManager from './tutorialManager.js';
 import FullscreenManager from './fullscreenManager.js';
 import OrientationManager from './orientationManager.js';
+import AudioManager from './audioManager.js';
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
@@ -18,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Inicializar el gestor de orientación PRIMERO (antes que cualquier otra cosa)
     const orientationManager = new OrientationManager();
+    
+    // Inicializar el gestor de audio
+    const audioManager = new AudioManager();
 
     // Función global para comunicación con UIManager y BallDrawingManager
     window.main = {
@@ -106,7 +110,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         () => state.activePlayers,
         (players) => { state.activePlayers = players; },
         ensureBallInPlayers,
-        null // Se asignará después de crear UIManager
+        null, // Se asignará después de crear UIManager
+        audioManager // Pasar referencia del audioManager
     );
 
     // NUEVO: Coordinador de modos para evitar conflictos
@@ -163,13 +168,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (linkBtn && linkOutput) {
         linkBtn.addEventListener('click', () => {
             const data = animationManager.exportAnimationData();
-            const json = JSON.stringify(data);
+            
+            // ESTRATEGIA INTELIGENTE: Crear versión sin audio para compartir por URL
+            const dataForURL = { ...data };
+            delete dataForURL.audio; // Eliminar audio para mantener URL manejable
+            
+            const json = JSON.stringify(dataForURL);
             const base64 = btoa(unescape(encodeURIComponent(json)));
             const url = `${window.location.origin}${window.location.pathname}?anim=${encodeURIComponent(base64)}`;
+            
+            // Verificar tamaño del URL
+            if (url.length > 6000) {
+                alert('❌ La animación es muy compleja para compartir por URL.\n\n✅ Usa "Exportar JSON" para descargar el archivo completo (incluye audio).');
+                return;
+            }
             
             linkOutput.value = url;
             linkOutput.style.display = 'block';
             linkOutput.select();
+            
+            // Mostrar advertencia si había audio
+            if (data.audio) {
+                setTimeout(() => {
+                    alert('📢 NOTA: El audio se guarda solo en el archivo JSON descargable.\n\nLa URL compartida contiene la animación pero sin audio.');
+                }, 500);
+            }
             
             try { 
                 document.execCommand('copy'); 
@@ -359,25 +382,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Cargar jugadores iniciales en el modal de selección
     playerManager.renderPlayerSelectionList();
 
+    // --- AUDIO RECORDING CONTROLS ---
+    const audioRecordBtn = document.getElementById('audio-record-btn');
+    const audioPlayBtn = document.getElementById('audio-play-btn');
+    
+    if (audioRecordBtn) {
+        audioRecordBtn.addEventListener('click', async () => {
+            if (!audioManager.isRecording) {
+                // Verificar si hay audio previo y advertir al usuario
+                if (audioManager.hasAudio()) {
+                    if (!confirm('Ya existe una grabación de audio. ¿Deseas reemplazarla con una nueva grabación?')) {
+                        return;
+                    }
+                }
+                
+                try {
+                    await audioManager.startRecording();
+                    audioRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    audioRecordBtn.title = 'Detener grabación';
+                    audioRecordBtn.classList.add('recording');
+                } catch (error) {
+                    console.error('[Main] Error al iniciar grabación:', error);
+                    alert('Error al iniciar la grabación. Asegúrate de permitir el acceso al micrófono.');
+                }
+            } else {
+                audioManager.stopRecording();
+                audioRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                audioRecordBtn.title = 'Grabar audio';
+                audioRecordBtn.classList.remove('recording');
+                
+                // Habilitar botón de reproducción si hay audio
+                if (audioPlayBtn && audioManager.hasAudio()) {
+                    audioPlayBtn.disabled = false;
+                }
+            }
+        });
+    }
+    
+    if (audioPlayBtn) {
+        audioPlayBtn.addEventListener('click', () => {
+            if (audioManager.hasAudio()) {
+                if (!audioManager.isPlaying) {
+                    audioManager.playAudio();
+                    audioPlayBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    audioPlayBtn.title = 'Detener reproducción';
+                    
+                    // Volver al estado normal cuando termine la reproducción
+                    audioManager.onAudioEnd = () => {
+                        audioPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        audioPlayBtn.title = 'Reproducir audio';
+                    };
+                } else {
+                    audioManager.stopAudio();
+                    audioPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    audioPlayBtn.title = 'Reproducir audio';
+                }
+            }
+        });
+        
+        // Deshabilitar inicialmente si no hay audio
+        audioPlayBtn.disabled = !audioManager.hasRecordedAudio();
+    }
+
     // --- TUTORIAL MANAGER ---
     // Inicializar el gestor de tutorial al final para que todo esté cargado
-    const tutorialManager = new TutorialManager();
-    
+    // Usar setTimeout para asegurar que todo esté inicializado
+    setTimeout(() => {
+        const tutorialManager = new TutorialManager();
+        
+        // Hacer disponible globalmente para debugging y acceso desde otros módulos
+        window.tutorialManager = tutorialManager;
+        console.log('[Main] 🎓 Tutorial Manager inicializado');
+    }, 100);
+
     // --- FULLSCREEN MANAGER ---
     // Inicializar el gestor de pantalla completa
     const fullscreenManager = new FullscreenManager();
     
     // Hacer disponible globalmente para debugging y acceso desde otros módulos
-    window.tutorialManager = tutorialManager;
     window.fullscreenManager = fullscreenManager;
     window.modeManager = modeManager; // También hacer disponible el modeManager
     
-    console.log('[Main] 🎓 Tutorial Manager inicializado');
     console.log('[Main] 🖥️ Fullscreen Manager inicializado');
-
-    // NOTA: Los dos event listeners para 'click' en 'squad-player-list'
-    // que actualizan el contador están duplicados y la lógica está
-    // mejor centralizada en uiManager.updateSelectedCount().
-    // He eliminado el duplicado aquí. uiManager.updateSelectedCount() ya se encarga de esto.
 // Fin del bloque DOMContentLoaded
 });

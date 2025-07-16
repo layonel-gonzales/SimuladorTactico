@@ -69,6 +69,9 @@ export default class ModeManager {
         
         // Configurar modo inicial
         this.switchToMode(this.currentMode);
+        
+        // Asegurar que los botones de tutorial estén configurados correctamente
+        this.updateTutorialButtonsVisibility();
     }
     
     toggleMode() {
@@ -201,6 +204,9 @@ export default class ModeManager {
         console.log('[ModeManager] DEBUG - drawingModeControls:', this.drawingModeControls);
         console.log('[ModeManager] DEBUG - animationModeControls:', this.animationModeControls);
         
+        // Controlar visibilidad de botones de tutorial
+        this.updateTutorialButtonsVisibility();
+        
         // Usar JavaScript directo para forzar el cambio visual
         if (this.drawingModeControls && this.animationModeControls) {
             if (this.currentMode === 'drawing') {
@@ -257,6 +263,31 @@ export default class ModeManager {
         
         // Ya no necesitamos actualizar label del modo (no hay label visible)
         console.log(`[ModeManager] ✅ Controles actualizados para modo: ${this.currentMode}`);
+    }
+    
+    updateTutorialButtonsVisibility() {
+        const drawingTutorialBtn = document.getElementById('start-tutorial-drawing-btn');
+        const animationTutorialBtn = document.getElementById('start-tutorial-animation-btn');
+        
+        if (drawingTutorialBtn && animationTutorialBtn) {
+            if (this.currentMode === 'drawing') {
+                // Mostrar solo el botón de tutorial de dibujo
+                drawingTutorialBtn.classList.remove('hidden');
+                drawingTutorialBtn.style.display = 'flex';
+                animationTutorialBtn.classList.add('hidden');
+                animationTutorialBtn.style.display = 'none';
+                console.log('[ModeManager] 📚 Mostrando tutorial de DIBUJO, ocultando tutorial de ANIMACIÓN');
+            } else {
+                // Mostrar solo el botón de tutorial de animación
+                animationTutorialBtn.classList.remove('hidden');
+                animationTutorialBtn.style.display = 'flex';
+                drawingTutorialBtn.classList.add('hidden');
+                drawingTutorialBtn.style.display = 'none';
+                console.log('[ModeManager] 📚 Mostrando tutorial de ANIMACIÓN, ocultando tutorial de DIBUJO');
+            }
+        } else {
+            console.warn('[ModeManager] ❌ No se encontraron los botones de tutorial');
+        }
     }
     
     // Método para verificar si un evento debe ser procesado

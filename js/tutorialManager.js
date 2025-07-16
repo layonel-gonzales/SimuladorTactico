@@ -34,8 +34,15 @@ export default class TutorialManager {
         const tutorialDrawingBtn = document.getElementById('start-tutorial-drawing-btn');
         const tutorialAnimationBtn = document.getElementById('start-tutorial-animation-btn');
         
+        console.log('[TutorialManager] Configurando botones de tutorial...');
+        console.log('[TutorialManager] tutorialDrawingBtn:', tutorialDrawingBtn);
+        console.log('[TutorialManager] tutorialAnimationBtn:', tutorialAnimationBtn);
+        
         if (tutorialDrawingBtn) {
-            tutorialDrawingBtn.addEventListener('click', () => {
+            tutorialDrawingBtn.addEventListener('click', (e) => {
+                console.log('[TutorialManager] Click en botón de tutorial de dibujo detectado');
+                e.preventDefault();
+                e.stopPropagation();
                 this.startTutorial('drawing');
             });
             console.log('[TutorialManager] Botón de tutorial de dibujo configurado');
@@ -44,7 +51,10 @@ export default class TutorialManager {
         }
         
         if (tutorialAnimationBtn) {
-            tutorialAnimationBtn.addEventListener('click', () => {
+            tutorialAnimationBtn.addEventListener('click', (e) => {
+                console.log('[TutorialManager] Click en botón de tutorial de animación detectado');
+                e.preventDefault();
+                e.stopPropagation();
                 this.startTutorial('animation');
             });
             console.log('[TutorialManager] Botón de tutorial de animación configurado');
@@ -104,271 +114,157 @@ export default class TutorialManager {
     }
     
     showWelcomeDialog() {
-        // Crear modal personalizado con diseño mejorado
+        // Crear modal moderno con CSS avanzado y responsive design
         const modalHTML = `
-            <div id="welcome-tutorial-modal" style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.85);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(8px);
-                animation: fadeIn 0.3s ease-out;
-            ">
-                <div style="
-                    background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 50%, #1a1a1a 100%);
-                    border: 3px solid transparent;
-                    background-clip: padding-box;
-                    position: relative;
-                    border-radius: 20px;
-                    padding: 40px;
-                    max-width: 550px;
-                    width: 90%;
-                    margin: 20px;
-                    box-shadow: 
-                        0 25px 50px rgba(0, 0, 0, 0.6),
-                        0 0 0 1px rgba(255, 255, 255, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-                    text-align: center;
-                    color: white;
-                    transform: scale(0.9);
-                    animation: modalAppear 0.4s ease-out forwards;
-                ">
-                    <!-- Borde animado -->
-                    <div style="
-                        position: absolute;
-                        top: -3px;
-                        left: -3px;
-                        right: -3px;
-                        bottom: -3px;
-                        background: linear-gradient(45deg, #17a2b8, #28a745, #ffc107, #dc3545, #6f42c1, #17a2b8);
-                        background-size: 300% 300%;
-                        border-radius: 20px;
-                        z-index: -1;
-                        animation: borderGlow 3s ease-in-out infinite;
-                    "></div>
-                    
-                    <!-- Icono principal -->
-                    <div style="
-                        font-size: 64px;
-                        margin-bottom: 25px;
-                        background: linear-gradient(135deg, #17a2b8, #28a745, #ffc107);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-                        animation: iconBounce 2s ease-in-out infinite;
-                    ">⚽</div>
-                    
-                    <!-- Título -->
-                    <h2 style="
-                        background: linear-gradient(135deg, #17a2b8, #20c997);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                        margin-bottom: 20px;
-                        font-weight: 700;
-                        font-size: 28px;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                    ">¡Bienvenido al Simulador Táctico!</h2>
-                    
-                    <!-- Subtítulo -->
-                    <p style="
-                        font-size: 18px;
-                        line-height: 1.6;
-                        margin-bottom: 30px;
-                        color: #e8e8e8;
-                        font-weight: 300;
-                    ">
-                        ¿Te gustaría hacer un <strong style="
-                            color: #28a745;
-                            font-weight: 600;
-                            background: rgba(40, 167, 69, 0.1);
-                            padding: 2px 6px;
-                            border-radius: 4px;
-                        ">tutorial interactivo</strong> 
-                        para dominar todas las funciones?
-                    </p>
-                    
-                    <!-- Panel de características -->
-                    <div style="
-                        background: linear-gradient(135deg, rgba(23, 162, 184, 0.15), rgba(40, 167, 69, 0.15));
-                        border: 2px solid rgba(23, 162, 184, 0.3);
-                        border-radius: 12px;
-                        padding: 25px;
-                        margin-bottom: 30px;
-                        text-align: left;
-                        backdrop-filter: blur(5px);
-                    ">
-                        <div style="
-                            color: #17a2b8;
-                            font-weight: 700;
-                            margin-bottom: 15px;
-                            font-size: 16px;
-                            text-align: center;
-                        ">
-                            🎯 Aprenderás paso a paso:
+            <div id="modern-tutorial-modal" class="tutorial-modal-overlay">
+                <div class="tutorial-modal-container">
+                    <div class="tutorial-modal-header">
+                        <div class="tutorial-modal-icon">
+                            <i class="fas fa-graduation-cap"></i>
                         </div>
-                        <div style="
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 10px;
-                            font-size: 14px;
-                            line-height: 1.8;
-                            color: #b8b8b8;
-                        ">
-                            <div>⚽ Seleccionar jugadores</div>
-                            <div>🎨 Dibujar tácticas</div>
-                            <div>🎬 Crear animaciones</div>
-                            <div>📤 Exportar jugadas</div>
-                            <div>🔄 Cambiar modos</div>
-                            <div>🏆 Tips profesionales</div>
+                        <h2 class="tutorial-modal-title">¡Bienvenido al Simulador Táctico!</h2>
+                        <button class="tutorial-modal-close" id="modal-close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tutorial-modal-body">
+                        <div class="tutorial-modal-content">
+                            <div class="tutorial-feature-grid">
+                                <div class="tutorial-feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-palette"></i>
+                                    </div>
+                                    <h3>Modo Dibujo</h3>
+                                    <p>Dibuja líneas, flechas y tácticas directamente en el campo</p>
+                                </div>
+                                
+                                <div class="tutorial-feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                    <h3>Modo Animación</h3>
+                                    <p>Crea secuencias animadas moviendo jugadores frame por frame</p>
+                                </div>
+                                
+                                <div class="tutorial-feature-card">
+                                    <div class="feature-icon">
+                                        <i class="fas fa-microphone"></i>
+                                    </div>
+                                    <h3>Audio Narración</h3>
+                                    <p>Graba explicaciones de voz para tus jugadas tácticas</p>
+                                </div>
+                            </div>
+                            
+                            <div class="tutorial-mode-selector">
+                                <h3>¿Qué te gustaría aprender primero?</h3>
+                                <div class="tutorial-button-group">
+                                    <button class="tutorial-start-btn tutorial-drawing-btn" data-mode="drawing">
+                                        <i class="fas fa-palette"></i>
+                                        <span>Tutorial de Dibujo</span>
+                                        <small>Aprende a dibujar tácticas</small>
+                                    </button>
+                                    
+                                    <button class="tutorial-start-btn tutorial-animation-btn" data-mode="animation">
+                                        <i class="fas fa-play-circle"></i>
+                                        <span>Tutorial de Animación</span>
+                                        <small>Crea secuencias animadas</small>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Botones de acción -->
-                    <div style="display: flex; gap: 20px; justify-content: center;">
-                        <button id="start-tutorial-welcome" style="
-                            background: linear-gradient(135deg, #28a745, #20c997);
-                            color: white;
-                            border: none;
-                            padding: 16px 32px;
-                            border-radius: 12px;
-                            font-weight: 700;
-                            cursor: pointer;
-                            font-size: 16px;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
-                            position: relative;
-                            overflow: hidden;
-                            margin-right: 10px;
-                        ">
-                            <span style="position: relative; z-index: 2;">🎨 Tutorial Dibujo</span>
-                        </button>
-                        <button id="start-tutorial-animation-welcome" style="
-                            background: linear-gradient(135deg, #007bff, #17a2b8);
-                            color: white;
-                            border: none;
-                            padding: 16px 32px;
-                            border-radius: 12px;
-                            font-weight: 700;
-                            cursor: pointer;
-                            font-size: 16px;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
-                            position: relative;
-                            overflow: hidden;
-                        ">
-                            <span style="position: relative; z-index: 2;">🎬 Tutorial Animación</span>
-                        </button>
-                        <button id="skip-tutorial-welcome" style="
-                            background: linear-gradient(135deg, #6c757d, #495057);
-                            color: white;
-                            border: none;
-                            padding: 16px 32px;
-                            border-radius: 12px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            font-size: 16px;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-                        ">Ahora no</button>
+                    <div class="tutorial-modal-footer">
+                        <div class="tutorial-skip-section">
+                            <button class="tutorial-skip-btn" id="skip-tutorial-btn">
+                                Saltar y explorar por mi cuenta
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <style>
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                
-                @keyframes fadeOut {
-                    from { opacity: 1; transform: scale(1); }
-                    to { opacity: 0; transform: scale(0.9); }
-                }
-                
-                @keyframes modalAppear {
-                    from { 
-                        transform: scale(0.8) translateY(-20px);
-                        opacity: 0;
-                    }
-                    to { 
-                        transform: scale(1) translateY(0);
-                        opacity: 1;
-                    }
-                }
-                
-                @keyframes borderGlow {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                }
-                
-                @keyframes iconBounce {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
-                }
-            </style>
         `;
-
+        
+        // Agregar el modal al DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
+        // Configurar event listeners
+        this.setupModalEventListeners();
+        
+        // Animar entrada del modal
+        requestAnimationFrame(() => {
+            const modal = document.getElementById('modern-tutorial-modal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        });
+    }
+    
+    setupModalEventListeners() {
+        const modal = document.getElementById('modern-tutorial-modal');
+        if (!modal) return;
+        
+        const closeBtn = document.getElementById('modal-close-btn');
+        const skipBtn = document.getElementById('skip-tutorial-btn');
+        const drawingBtn = modal.querySelector('.tutorial-drawing-btn');
+        const animationBtn = modal.querySelector('.tutorial-animation-btn');
+        
+        // Cerrar modal
+        const closeModal = () => {
+            modal.classList.remove('show');
+            modal.classList.add('hide');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 300);
+        };
+        
         // Event listeners
-        document.getElementById('start-tutorial-welcome').addEventListener('click', () => {
-            document.getElementById('welcome-tutorial-modal').remove();
-            this.startTutorial('drawing');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+        
+        if (skipBtn) {
+            skipBtn.addEventListener('click', closeModal);
+        }
+        
+        // Click fuera del modal para cerrar
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
         });
         
-        document.getElementById('start-tutorial-animation-welcome').addEventListener('click', () => {
-            document.getElementById('welcome-tutorial-modal').remove();
-            this.startTutorial('animation');
-        });
+        // Botones de inicio de tutorial
+        if (drawingBtn) {
+            drawingBtn.addEventListener('click', () => {
+                closeModal();
+                setTimeout(() => {
+                    this.startTutorial('drawing');
+                }, 350);
+            });
+        }
         
-        document.getElementById('skip-tutorial-welcome').addEventListener('click', () => {
-            const modal = document.getElementById('welcome-tutorial-modal');
-            modal.style.animation = 'fadeOut 0.3s ease-out forwards';
-            setTimeout(() => modal.remove(), 300);
-        });
-
-        // Efectos hover mejorados
-        const startBtn = document.getElementById('start-tutorial-welcome');
-        const animationBtn = document.getElementById('start-tutorial-animation-welcome');
-        const skipBtn = document.getElementById('skip-tutorial-welcome');
+        if (animationBtn) {
+            animationBtn.addEventListener('click', () => {
+                closeModal();
+                setTimeout(() => {
+                    this.startTutorial('animation');
+                }, 350);
+            });
+        }
         
-        startBtn.addEventListener('mouseenter', () => {
-            startBtn.style.transform = 'translateY(-3px) scale(1.05)';
-            startBtn.style.boxShadow = '0 12px 25px rgba(40, 167, 69, 0.6)';
-        });
+        // Atajos de teclado
+        const handleKeydown = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleKeydown);
+            }
+        };
         
-        startBtn.addEventListener('mouseleave', () => {
-            startBtn.style.transform = 'translateY(0) scale(1)';
-            startBtn.style.boxShadow = '0 8px 20px rgba(40, 167, 69, 0.4)';
-        });
-        
-        animationBtn.addEventListener('mouseenter', () => {
-            animationBtn.style.transform = 'translateY(-3px) scale(1.05)';
-            animationBtn.style.boxShadow = '0 12px 25px rgba(0, 123, 255, 0.6)';
-        });
-        
-        animationBtn.addEventListener('mouseleave', () => {
-            animationBtn.style.transform = 'translateY(0) scale(1)';
-            animationBtn.style.boxShadow = '0 8px 20px rgba(0, 123, 255, 0.4)';
-        });
-        
-        skipBtn.addEventListener('mouseenter', () => {
-            skipBtn.style.transform = 'translateY(-2px)';
-            skipBtn.style.boxShadow = '0 8px 16px rgba(108, 117, 125, 0.5)';
-        });
-        
-        skipBtn.addEventListener('mouseleave', () => {
-            skipBtn.style.transform = 'translateY(0)';
-            skipBtn.style.boxShadow = '0 4px 12px rgba(108, 117, 125, 0.3)';
-        });
+        document.addEventListener('keydown', handleKeydown);
     }
     
     startTutorial(mode = 'drawing') {
