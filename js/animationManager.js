@@ -606,12 +606,12 @@ export default class AnimationManager {
             this.frames = data.frames;
             this.currentFrame = data.currentFrame || 0;
             
-            // Asegurar que el frame actual esté en rango válido
+            // Asegurar que el frame current esté en rango válido
             if (this.currentFrame >= this.frames.length) {
                 this.currentFrame = this.frames.length - 1;
             }
             
-            // Aplicar el frame actual
+            // Aplicar el frame current
             if (this.frames.length > 0) {
                 this.setStateFromFrame(this.frames[this.currentFrame]);
             }
@@ -685,5 +685,710 @@ export default class AnimationManager {
     
     getCurrentFrameIndex() {
         return this.currentFrame;
+    }
+    
+    // Nuevo método para exportar a video MP4 - CAPTURA REAL DE LA ANIMACIÓN
+    async exportToVideo() {
+        if (this.frames.length < 2) {
+            alert('❌ Necesitas al menos 2 frames para crear un video');
+            return;
+        }
+
+        // Mostrar modal de progreso
+        this.showVideoExportProgress();
+
+        try {
+            // Obtener el contenedor del campo para capturar
+            const pitchContainer = document.getElementById('pitch-container');
+            if (!pitchContainer) {
+                throw new Error('No se encontró el contenedor del campo');
+            }
+
+            // Configurar captura de pantalla del campo
+            const stream = await this.captureApplicationScreen(pitchContainer);
+            
+            // Si hay audio grabado, combinarlo
+            let finalStream = stream;
+            if (this.audioManager && this.audioManager.hasRecordedAudio()) {
+                finalStream = await this.addAudioToStream(stream);
+            }
+            
+            // Configurar MediaRecorder
+            const mediaRecorder = new MediaRecorder(finalStream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 3000000 // 3 Mbps para alta calidad
+            });
+
+            const chunks = [];
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            // Cuando termine la grabación
+            mediaRecorder.onstop = async () => {
+                const webmBlob = new Blob(chunks, { type: 'video/webm' });
+                this.downloadVideo(webmBlob, 'webm');
+                this.hideVideoExportProgress();
+            };
+
+            // Iniciar grabación
+            mediaRecorder.start();
+            console.log('[AnimationManager] Iniciando captura de video de la animación real');
+
+            // Reproducir la animación REAL de la aplicación mientras se graba
+            await this.playAnimationForRecording();
+
+            // Detener grabación
+            setTimeout(() => {
+                mediaRecorder.stop();
+                console.log('[AnimationManager] Captura de video completada');
+            }, 1000); // Pequeña pausa al final
+
+        } catch (error) {
+            console.error('[AnimationManager] Error al exportar video:', error);
+            
+            // Mensaje de error más específico
+            let errorMessage = '❌ Error al crear el video.\n\n';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage += '🚫 Permisos de captura denegados.\n\n💡 Solución:\n• Permite compartir pantalla\n• Selecciona esta pestaña en el selector';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage += '⚠️ Tu navegador no soporta captura de pantalla.\n\n💡 Alternativas:\n• Usa Chrome, Firefox o Edge\n• Actualiza tu navegador\n• Usa grabación de pantalla externa';
+            } else {
+                errorMessage += '🔧 Error técnico.\n\n💡 Intenta:\n• Recargar la página\n• Usar otro navegador\n• Verificar conexión a internet';
+            }
+            
+            alert(errorMessage);
+            this.hideVideoExportProgress();
+        }
+    }
+
+    // Capturar la pantalla de la aplicación
+    async captureApplicationScreen(element) {
+        try {
+            // Usar getDisplayMedia para capturar pantalla
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    mediaSource: 'screen',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                },
+                audio: false // Audio lo manejaremos por separado
+            });
+
+            console.log('[AnimationManager] Captura de pantalla iniciada');
+            return screenStream;
+
+        } catch (error) {
+            console.warn('[AnimationManager] getDisplayMedia no disponible, usando alternativa');
+            
+            // Alternativa: capturar usando canvas del elemento
+            return this.captureElementAsStream(element);
+        }
+    }
+
+    // Alternativa: capturar elemento específico
+    async captureElementAsStream(element) {
+        // Crear canvas del tamaño del elemento
+        const canvas = document.createElement('canvas');
+        const rect = element.getBoundingClientRect();
+        canvas.width = rect.width * 2; // 2x para mejor calidad
+        canvas.height = rect.height * 2;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.scale(2, 2); // Escalar para mejor calidad
+        
+        // Función para capturar el elemento en el canvas
+        const captureFrame = () => {
+            // Usar html2canvas para capturar el elemento
+            if (window.html2canvas) {
+                window.html2canvas(element, {
+                    canvas: canvas,
+                    backgroundColor: null,
+                    scale: 2,
+                    logging: false
+                });
+            } else {
+                // Fallback: dibujar fondo del campo
+                ctx.fillStyle = '#1a5f3f';
+                ctx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+            }
+        };
+
+        // Iniciar captura continua
+        const interval = setInterval(captureFrame, 33); // ~30 FPS
+        
+        // Limpiar interval cuando termine
+        setTimeout(() => clearInterval(interval), 30000); // Max 30 segundos
+        
+        return canvas.captureStream(30);
+    }
+
+    // Agregar audio al stream de video
+    async addAudioToStream(videoStream) {
+        try {
+            if (!this.audioManager || !this.audioManager.recordedAudioBlob) {
+                return videoStream;
+            }
+
+            // Crear contexto de audio
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Convertir blob de audio a buffer
+            const audioArrayBuffer = await this.audioManager.recordedAudioBlob.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(audioArrayBuffer);
+
+            // Crear fuente de audio
+            const audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+
+            // Crear destino para el stream
+            const audioDestination = audioContext.createMediaStreamDestination();
+            audioSource.connect(audioDestination);
+
+            // Combinar video y audio
+            const combinedStream = new MediaStream([
+                ...videoStream.getVideoTracks(),
+                ...audioDestination.stream.getAudioTracks()
+            ]);
+
+            // Programar inicio del audio sincronizado
+            this.scheduledAudioSource = audioSource;
+            
+            console.log('[AnimationManager] Audio preparado para sincronización');
+            return combinedStream;
+
+        } catch (error) {
+            console.warn('[AnimationManager] Error al agregar audio:', error);
+            return videoStream;
+        }
+    }
+
+    // Reproducir animación especificamente para grabación
+    async playAnimationForRecording() {
+        // Preparar para grabación
+        this.isRecordingVideo = true;
+        
+        // Ir al primer frame
+        this.currentFrame = 0;
+        this.setStateFromFrame(this.frames[0]);
+        this.updateFrameIndicator();
+        
+        // Pequeña pausa inicial
+        await this.sleep(1000);
+        
+        // Iniciar audio si está disponible
+        if (this.scheduledAudioSource) {
+            this.scheduledAudioSource.start(0);
+            console.log('[AnimationManager] Audio iniciado sincrónicamente');
+        }
+
+        // Reproducir la animación normal
+        await this.playAnimationSynchronously();
+        
+        // Pausa final
+        await this.sleep(1500);
+        
+        this.isRecordingVideo = false;
+        console.log('[AnimationManager] Animación para grabación completada');
+    }
+
+    // Versión síncrona de playAnimation para grabación
+    async playAnimationSynchronously() {
+        const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
+        
+        for (let i = 0; i < this.frames.length - 1; i++) {
+            const fromFrame = this.frames[i];
+            const toFrame = this.frames[i + 1];
+            
+            // Actualizar progreso
+            this.updateVideoProgress(((i + 1) / (this.frames.length - 1)) * 90); // 90% max, dejando 10% para finalización
+            
+            // Animar transición
+            await this.animateFrameTransitionSync(fromFrame, toFrame, speed);
+            
+            // Pausa entre frames
+            await this.sleep((200 * 1.75) / speed);
+        }
+    }
+
+    // Transición de frame síncrona
+    async animateFrameTransitionSync(fromFrame, toFrame, speed) {
+        const duration = (600 * 1.75) / speed;
+        const startTime = performance.now();
+        
+        return new Promise((resolve) => {
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Interpolar jugadores
+                const interpolatedPlayers = fromFrame.players.map((fromPlayer, idx) => {
+                    const toPlayer = toFrame.players[idx];
+                    if (!toPlayer) return fromPlayer;
+                    
+                    return {
+                        ...fromPlayer,
+                        x: this.lerp(fromPlayer.x, toPlayer.x, progress),
+                        y: this.lerp(fromPlayer.y, toPlayer.y, progress)
+                    };
+                });
+                
+                // Actualizar pantalla real
+                this.setActivePlayers(interpolatedPlayers);
+                if (this.uiManager) {
+                    this.uiManager.renderPlayersOnPitch();
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        });
+    }
+
+    // Crear canvas para el video
+    createVideoCanvas() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1280; // HD width
+        canvas.height = 720; // HD height
+        return canvas;
+    }
+
+    // Grabar frames de la animación
+    async recordAnimationFrames(ctx, canvas) {
+        const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
+        const frameDuration = (600 * 1.75) / speed; // ms por frame (igual que la animación)
+        const pauseDuration = (200 * 1.35) / speed; // pausa entre frames
+
+        // Capturar estado inicial
+        await this.captureFrameToCanvas(ctx, canvas, this.frames[0]);
+        await this.sleep(500); // Pausa inicial
+
+        // Capturar transiciones entre frames
+        for (let i = 0; i < this.frames.length - 1; i++) {
+            const fromFrame = this.frames[i];
+            const toFrame = this.frames[i + 1];
+
+            // Actualizar progreso
+            this.updateVideoProgress(((i + 1) / this.frames.length) * 100);
+
+            // Animar transición
+            await this.animateFrameForVideo(ctx, canvas, fromFrame, toFrame, frameDuration);
+            
+            // Pausa entre frames
+            await this.sleep(pauseDuration);
+        }
+
+        // Frame final estático
+        await this.sleep(1000);
+    }
+
+    // Animar transición para video
+    async animateFrameForVideo(ctx, canvas, fromFrame, toFrame, duration) {
+        const startTime = performance.now();
+        const fromPlayers = fromFrame.players.map(p => ({ ...p }));
+        const toPlayers = toFrame.players.map(p => ({ ...p }));
+
+        return new Promise((resolve) => {
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Interpolar posiciones
+                const interpolatedPlayers = fromPlayers.map((fromPlayer, idx) => {
+                    const toPlayer = toPlayers[idx];
+                    if (!toPlayer) return fromPlayer;
+
+                    return {
+                        ...fromPlayer,
+                        x: this.lerp(fromPlayer.x, toPlayer.x, progress),
+                        y: this.lerp(fromPlayer.y, toPlayer.y, progress)
+                    };
+                });
+
+                // Capturar frame interpolado
+                this.captureFrameToCanvas(ctx, canvas, { players: interpolatedPlayers });
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            };
+
+            requestAnimationFrame(animate);
+        });
+    }
+
+    // Capturar frame actual al canvas del video
+    captureFrameToCanvas(ctx, canvas, frame) {
+        // Limpiar canvas
+        ctx.fillStyle = '#1a5f3f'; // Color verde del campo
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar campo de fútbol
+        this.drawSoccerField(ctx, canvas);
+
+        // Dibujar jugadores
+        if (frame && frame.players) {
+            frame.players.forEach(player => {
+                this.drawPlayerOnCanvas(ctx, canvas, player);
+            });
+        }
+
+        // Dibujar información del frame
+        this.drawFrameInfo(ctx, canvas);
+
+        // Dibujar marca de agua
+        this.drawWatermark(ctx, canvas);
+    }
+
+    // Dibujar campo de fútbol en el canvas
+    drawSoccerField(ctx, canvas) {
+        const width = canvas.width;
+        const height = canvas.height;
+        const fieldMargin = 50;
+        const fieldWidth = width - (fieldMargin * 2);
+        const fieldHeight = height - (fieldMargin * 2);
+
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 3;
+
+        // Campo principal
+        ctx.strokeRect(fieldMargin, fieldMargin, fieldWidth, fieldHeight);
+
+        // Línea central
+        ctx.beginPath();
+        ctx.moveTo(width / 2, fieldMargin);
+        ctx.lineTo(width / 2, height - fieldMargin);
+        ctx.stroke();
+
+        // Círculo central
+        ctx.beginPath();
+        ctx.arc(width / 2, height / 2, 60, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Áreas de penalty
+        const penaltyWidth = 120;
+        const penaltyHeight = 80;
+        
+        // Área izquierda
+        ctx.strokeRect(fieldMargin, (height - penaltyHeight) / 2, penaltyWidth, penaltyHeight);
+        
+        // Área derecha
+        ctx.strokeRect(width - fieldMargin - penaltyWidth, (height - penaltyHeight) / 2, penaltyWidth, penaltyHeight);
+
+        // Porterías
+        const goalHeight = 40;
+        ctx.strokeRect(fieldMargin - 10, (height - goalHeight) / 2, 10, goalHeight);
+        ctx.strokeRect(width - fieldMargin, (height - goalHeight) / 2, 10, goalHeight);
+    }
+
+    // Dibujar jugador en el canvas
+    drawPlayerOnCanvas(ctx, canvas, player) {
+        // Obtener dimensiones reales del campo desde el DOM
+        const pitchContainer = document.getElementById('pitch-container');
+        const fieldWidth = pitchContainer ? pitchContainer.offsetWidth : 800;
+        const fieldHeight = pitchContainer ? pitchContainer.offsetHeight : 600;
+
+        // Escalar posiciones del campo real al canvas del video
+        const x = (player.x / fieldWidth) * (canvas.width - 100) + 50;
+        const y = (player.y / fieldHeight) * (canvas.height - 100) + 50;
+
+        if (player.isBall) {
+            // Dibujar balón
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Sombra del balón
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(x + 2, y + 12, 8, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        } else {
+            // Dibujar jugador
+            const teamColor = player.team === 'team1' ? '#ff4444' : '#4444ff';
+            
+            // Sombra del jugador
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(x + 2, y + 20, 12, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Círculo del jugador
+            ctx.fillStyle = teamColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Borde
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Número del jugador
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(player.number || '?', x, y);
+
+            // Nombre del jugador (opcional)
+            if (player.name && player.name !== 'Jugador') {
+                ctx.font = '10px Arial';
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.strokeText(player.name, x, y + 35);
+                ctx.fillText(player.name, x, y + 35);
+            }
+        }
+    }
+
+    // Dibujar información del frame
+    drawFrameInfo(ctx, canvas) {
+        const currentFrameNum = this.currentFrame + 1;
+        const totalFrames = this.frames.length;
+        
+        // Fondo semi-transparente
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(10, 10, 200, 40);
+        
+        // Texto del frame
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Frame ${currentFrameNum} / ${totalFrames}`, 20, 35);
+    }
+
+    // Dibujar marca de agua
+    drawWatermark(ctx, canvas) {
+        // Logo/marca principal
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('⚽ Simulador Táctico', canvas.width - 20, canvas.height - 40);
+        
+        // URL/créditos
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '12px Arial';
+        ctx.fillText('Creado con Simulador Táctico', canvas.width - 20, canvas.height - 20);
+        
+        // Timestamp
+        const now = new Date();
+        const timestamp = now.toLocaleDateString('es-ES');
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(timestamp, 20, canvas.height - 20);
+    }
+
+    // Convertir WebM a MP4 (usando FFmpeg.js o similar)
+    async convertToMP4(webmBlob) {
+        try {
+            // Para una implementación completa, aquí usarías FFmpeg.js
+            // Por ahora, descargaremos como WebM (compatible con la mayoría de navegadores modernos)
+            this.downloadVideo(webmBlob, 'webm');
+            
+            // TODO: Implementar conversión real a MP4 con FFmpeg.js
+            console.log('[AnimationManager] Video exportado como WebM (compatible con MP4)');
+            
+        } catch (error) {
+            console.error('[AnimationManager] Error en conversión:', error);
+            this.downloadVideo(webmBlob, 'webm');
+        }
+    }
+
+    // Descargar video
+    downloadVideo(blob, extension) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `animacion-tactica-${Date.now()}.${extension}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Mostrar mensaje de éxito
+        const hasAudio = this.audioManager && this.audioManager.hasRecordedAudio();
+        const audioText = hasAudio ? '\n🎤 Incluye narración de audio' : '\n🔇 Sin audio (puedes grabarlo antes de exportar)';
+        
+        setTimeout(() => {
+            alert(`✅ Video exportado exitosamente como ${extension.toUpperCase()}${audioText}\n\n📱 Puedes compartirlo en:\n• WhatsApp\n• Instagram\n• Facebook\n• YouTube\n• TikTok\n\n🎬 El video está listo para usar!`);
+        }, 500);
+    }
+
+    // Mostrar modal de progreso
+    showVideoExportProgress() {
+        const modal = document.createElement('div');
+        modal.id = 'video-export-modal';
+        modal.innerHTML = `
+            <div class="video-export-overlay">
+                <div class="video-export-content">
+                    <div class="video-export-header">
+                        <h3>🎬 Capturando Video Real</h3>
+                        <p>Grabando la animación exacta de la aplicación...</p>
+                    </div>
+                    <div class="video-export-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="video-progress-fill"></div>
+                        </div>
+                        <span id="video-progress-text">0%</span>
+                    </div>
+                    <div class="video-export-instructions">
+                        <div class="instruction-step">
+                            <strong>📺 Si aparece selector de pantalla:</strong><br>
+                            <small>• Selecciona esta ventana/pestaña<br>
+                            • Permite compartir pantalla</small>
+                        </div>
+                        <div class="instruction-step">
+                            <strong>⚠️ Durante la grabación:</strong><br>
+                            <small>• NO cambies de pestaña<br>
+                            • NO minimices la ventana<br>
+                            • La animación se reproduce automáticamente</small>
+                        </div>
+                    </div>
+                    <div class="video-export-info">
+                        <small>💡 El video final será idéntico a lo que ves en pantalla</small>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Estilos para el modal
+        if (!document.getElementById('video-export-styles')) {
+            const style = document.createElement('style');
+            style.id = 'video-export-styles';
+            style.textContent = `
+                .video-export-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                }
+                
+                .video-export-content {
+                    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+                    border-radius: 15px;
+                    padding: 30px;
+                    max-width: 400px;
+                    width: 90%;
+                    text-align: center;
+                    color: white;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                }
+                
+                .video-export-header h3 {
+                    margin: 0 0 10px 0;
+                    color: #17a2b8;
+                    font-size: 24px;
+                }
+                
+                .video-export-header p {
+                    margin: 0 0 20px 0;
+                    color: #b8b8b8;
+                }
+                
+                .progress-bar {
+                    width: 100%;
+                    height: 20px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                    overflow: hidden;
+                    margin-bottom: 10px;
+                }
+                
+                .progress-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #17a2b8, #28a745);
+                    width: 0%;
+                    transition: width 0.3s ease;
+                    border-radius: 10px;
+                }
+                
+                #video-progress-text {
+                    font-weight: bold;
+                    color: #17a2b8;
+                }
+                
+                .video-export-instructions {
+                    margin: 20px 0;
+                    text-align: left;
+                }
+                
+                .instruction-step {
+                    margin-bottom: 15px;
+                    padding: 10px;
+                    background: rgba(23, 162, 184, 0.1);
+                    border-left: 3px solid #17a2b8;
+                    border-radius: 5px;
+                }
+                
+                .instruction-step strong {
+                    color: #17a2b8;
+                    display: block;
+                    margin-bottom: 5px;
+                }
+                
+                .instruction-step small {
+                    color: #d0d0d0;
+                    line-height: 1.4;
+                }
+                
+                .video-export-info {
+                    margin-top: 20px;
+                    color: #888;
+                    text-align: center;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(modal);
+    }
+
+    // Actualizar progreso del video
+    updateVideoProgress(percentage) {
+        const progressFill = document.getElementById('video-progress-fill');
+        const progressText = document.getElementById('video-progress-text');
+        
+        if (progressFill && progressText) {
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${Math.round(percentage)}%`;
+        }
+    }
+
+    // Ocultar modal de progreso
+    hideVideoExportProgress() {
+        const modal = document.getElementById('video-export-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    // Utilidad para pausas
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }

@@ -162,6 +162,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- Exportar animación como Video MP4 ---
+    const exportVideoBtn = document.getElementById('export-animation-video');
+    if (exportVideoBtn) {
+        exportVideoBtn.addEventListener('click', async () => {
+            // Verificar que hay frames suficientes
+            if (animationManager.getFrameCount() < 2) {
+                alert('❌ Necesitas al menos 2 frames para crear un video.\n\n💡 Tip: Agrega más frames moviendo jugadores y presionando "Agregar Frame"');
+                return;
+            }
+
+            // Confirmar exportación con instrucciones claras
+            const hasAudio = audioManager && audioManager.hasRecordedAudio();
+            const audioText = hasAudio ? '\n🎤 SE INCLUIRÁ el audio grabado' : '\n🔇 Sin audio (graba antes si quieres narrarlo)';
+            
+            const confirmed = confirm(`🎬 ¿Exportar animación como video?\n\n📹 Se capturará la animación REAL de la pantalla${audioText}\n\n⚠️ IMPORTANTE:\n• Se abrirá selector de pantalla\n• Selecciona esta ventana/pestaña\n• La animación se reproducirá automáticamente\n• El video se descargará al finalizar\n\n¿Continuar?`);
+            
+            if (confirmed) {
+                try {
+                    await animationManager.exportToVideo();
+                    console.log('[Main] Video exportado exitosamente');
+                } catch (error) {
+                    console.error('[Main] Error al exportar video:', error);
+                    alert('❌ Error al crear el video.\n\n💡 Asegúrate de:\n• Permitir captura de pantalla\n• Seleccionar esta pestaña\n• No minimizar la ventana durante la grabación');
+                }
+            }
+        });
+    }
+
     // --- Generar link para compartir animación ---
     const linkBtn = document.getElementById('generate-share-link');
     const linkOutput = document.getElementById('share-link-output');
