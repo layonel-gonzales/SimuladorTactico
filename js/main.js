@@ -106,6 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // NUEVO: Gestores especializados para las dos funcionalidades principales
     const ballDrawingManager = new BallDrawingManager('drawing-canvas', () => state.activePlayers);
+    
+    // CRÍTICO: Conectar ambos managers para coordinación mutua
+    ballDrawingManager.drawingManager = drawingManager;
+    drawingManager.ballDrawingManager = ballDrawingManager;
+    
     const animationManager = new AnimationManager(
         () => state.activePlayers,
         (players) => { state.activePlayers = players; },
@@ -357,10 +362,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- NUEVO: Borrar línea individual ---
     let deleteLineMode = false;
     const deleteLineBtn = document.getElementById('delete-line-mode');
+    const drawingCanvas = document.getElementById('drawing-canvas');
+    
     if (deleteLineBtn) {
         deleteLineBtn.addEventListener('click', () => {
             deleteLineMode = !deleteLineMode;
+            
+            // Toggle clases CSS
             deleteLineBtn.classList.toggle('active', deleteLineMode);
+            
+            // Toggle animación del ícono
+            const icon = deleteLineBtn.querySelector('i');
+            if (deleteLineMode) {
+                icon.classList.add('fa-beat');
+                // Cambiar cursor del canvas
+                if (drawingCanvas) {
+                    drawingCanvas.classList.add('scissors-cursor-simple');
+                }
+                // Actualizar título del botón
+                deleteLineBtn.title = 'Salir del modo borrar líneas';
+                console.log('[Main] 🔄 Modo eliminar líneas ACTIVADO');
+            } else {
+                icon.classList.remove('fa-beat');
+                // Restaurar cursor normal
+                if (drawingCanvas) {
+                    drawingCanvas.classList.remove('scissors-cursor-simple');
+                }
+                // Restaurar título del botón
+                deleteLineBtn.title = 'Borrar línea específica';
+                console.log('[Main] ✅ Modo eliminar líneas DESACTIVADO');
+            }
+            
+            // Notificar al DrawingManager
             drawingManager.setDeleteLineMode(deleteLineMode);
         });
     }

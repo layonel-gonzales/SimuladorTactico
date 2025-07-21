@@ -79,10 +79,10 @@
                 <option value="8">8</option>
                 <option value="12">12</option>
             </select>
-            <button id="delete-line-mode" class="btn btn-danger btn-sm" title="Borrar línea"
-                    data-intro="Activa el modo borrador. Después haz clic en cualquier línea para eliminarla específicamente." 
+            <button id="delete-line-mode" class="btn btn-danger btn-sm" title="Borrar línea específica"
+                    data-intro="Activa el modo borrador. Después haz clic en cualquier línea para eliminarla específicamente. Haz clic de nuevo para salir del modo." 
                     data-step="11">
-                <i class="fas fa-cut"></i>
+                <i class="fas fa-scissors"></i>
             </button>
             
             <!-- Separador visual -->
@@ -228,6 +228,12 @@
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
     <!-- HTML Updater para tutoriales -->
     <script src="js/htmlUpdater.js"></script>
+    <!-- Script de validación de funcionalidades -->
+    <script src="js/validation-script.js"></script>
+    <!-- Script de prueba específico para bug de borrado -->
+    <script src="js/test-drawing-bug.js"></script>
+    <!-- Script de prueba para bug de líneas que desaparecen -->
+    <script src="js/test-line-disappearing-bug.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module">
         import ShareManager from './js/shareManager.js';

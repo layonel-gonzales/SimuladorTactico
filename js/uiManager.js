@@ -13,7 +13,6 @@ export default class UIManager {
         this.drawingManager = drawingManager;
         this.state = state;
         this.modeManager = modeManager; // Guardar referencia
-        this.drawingManager = null;
         this.setupEventListeners();
         this.setupCursors();
         this.updateModeIndicator();
@@ -158,7 +157,7 @@ export default class UIManager {
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', () => {
                 console.log('UIManager: Click en Borrar Dibujo.');
-                this.drawingManager.clearCanvas();
+                this.drawingManager.clearAllLines();
             });
         }
 

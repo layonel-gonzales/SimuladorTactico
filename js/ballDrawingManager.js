@@ -7,12 +7,16 @@ export default class BallDrawingManager {
         this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
         this.getActivePlayers = getActivePlayers; // Función para obtener jugadores activos
         
+        // Referencia al DrawingManager para coordinar limpieza
+        this.drawingManager = null; // Se asignará desde main.js
+        
         // Estado del dibujo de estela
         this.isDrawingBallPath = false;
         this.ballPath = [];
         this.ballDragStarted = false;
         this.mouseDownPos = null;
         this.mouseDownTime = 0;
+        this.clickedOnBall = false; // Track si el click inicial fue sobre el balón
         
         // Imagen del balón para la estela
         this.ballImg = new window.Image();
@@ -84,15 +88,19 @@ export default class BallDrawingManager {
         this.mouseDownTime = Date.now();
         this.ballDragStarted = false;
         
-        // Detectar si el click fue sobre el balón
+        // CRÍTICO: Solo proceder si el click fue sobre el balón
         const ballPlayer = this.getBallPlayer();
-        if (ballPlayer && this.isClickOnBall(x, y, ballPlayer, rect)) {
+        this.clickedOnBall = ballPlayer && this.isClickOnBall(x, y, ballPlayer, rect);
+        
+        if (this.clickedOnBall) {
             console.log('[BallDrawingManager] Balón detectado, esperando para determinar acción');
+        } else {
+            console.log('[BallDrawingManager] Click fuera del balón, ignorando');
         }
     }
     
     handleMouseMove(e) {
-        if (!this.isEnabled() || !this.mouseDownPos) return;
+        if (!this.isEnabled() || !this.mouseDownPos || !this.clickedOnBall) return;
         
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -121,6 +129,7 @@ export default class BallDrawingManager {
         if (!this.isEnabled()) return;
         
         this.mouseDownPos = null;
+        this.clickedOnBall = false; // Limpiar el estado del click
         
         if (!this.isDrawingBallPath) return;
         
@@ -128,10 +137,9 @@ export default class BallDrawingManager {
         this.isDrawingBallPath = false;
         this.drawFinalTrail();
         
-        // Limpiar estela después de un tiempo
-        setTimeout(() => {
-            this.clearTrail();
-        }, this.TRAIL_CLEAR_DELAY);
+        // CAMBIO CRÍTICO: No limpiar automáticamente las estelas
+        // Las estelas se mantendrán hasta que se dibuje una línea permanente o se limpie manualmente
+        console.log('[BallDrawingManager] Estela del balón completada (se mantiene visible)');
     }
     
     getBallPlayer() {
@@ -218,14 +226,20 @@ export default class BallDrawingManager {
     }
     
     clearTrail() {
+        // Limpiar estela y preservar líneas permanentes automáticamente
         this.clearCanvas();
         this.ballPath = [];
-        console.log('[BallDrawingManager] Estela limpiada');
+        console.log('[BallDrawingManager] Estela limpiada (líneas permanentes preservadas automáticamente)');
     }
     
     clearCanvas() {
         if (this.ctx) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            // CRÍTICO: Redibujar líneas permanentes del DrawingManager si existen
+            if (this.drawingManager && this.drawingManager.lines && this.drawingManager.lines.length > 0) {
+                this.drawingManager.drawStoredLines();
+            }
         }
     }
     
