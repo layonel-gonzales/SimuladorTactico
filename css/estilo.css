@@ -69,18 +69,20 @@
     backdrop-filter: blur(4px); /* Efecto de difuminado para mejor legibilidad */
     border-top: 2px solid rgba(23, 162, 184, 0.8); /* Primary color con transparencia */
     box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
-    padding: 4px 8px; /* Padding mínimo */
+    padding: 6px 8px; /* Aumentar padding */
     overflow-x: auto;
     overflow-y: hidden;
-    height: 44px; /* Altura fija y mínima */
+    height: 48px; /* Aumentar altura para acomodar botones más grandes */
     display: flex;
     align-items: center;
+    flex-wrap: nowrap; /* No permitir que los elementos se envuelvan */
+    gap: 2px; /* Espacio uniforme entre elementos */
 }
 
 /* Separadores visuales */
 .vertical-separator {
     width: 1px;
-    height: 28px;
+    height: 32px; /* Aumentar altura para coincidir con botones */
     background: rgba(255,255,255,0.2);
     margin: 0 4px;
     flex-shrink: 0;
@@ -98,8 +100,8 @@
 
 /* Inputs compactos */
 .color-input-compact {
-    width: 28px !important;
-    height: 28px !important;
+    width: 32px !important; /* Aumentar para uniformidad */
+    height: 32px !important; /* Coincidir con altura de botones */
     padding: 0 !important;
     border: 1px solid var(--primary-color);
     border-radius: 4px;
@@ -107,8 +109,9 @@
 }
 
 .width-compact {
-    width: 50px !important;
-    font-size: 0.7rem !important;
+    width: 60px !important; /* Aumentar ancho */
+    height: 32px !important; /* Coincidir con altura de botones */
+    font-size: 0.75rem !important; /* Coincidir con tamaño de fuente de botones */
     flex-shrink: 0;
 }
 
@@ -122,9 +125,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between; /* Distribuir uniformemente en todo el ancho */
-    gap: 4px;
-    width: 100%;
+    flex: 1; /* Ocupa todo el espacio disponible después de los botones siempre visibles */
+    gap: 2px; /* Espacio uniforme entre elementos */
     height: 100%;
     overflow-x: auto;
     overflow-y: hidden;
@@ -174,18 +176,50 @@
     min-width: 0;
 }
 
-/* Estilos para controles del menú unificado - BOTONES FLEXIBLES */
+/* Estilos para controles del menú unificado - BOTONES FLEXIBLES Y UNIFORMES */
 #unified-single-bottom-menu .btn,
 #unified-single-bottom-menu .form-select {
     font-size: 0.75rem !important;
     padding: 4px 6px !important;
-    height: 28px !important;
-    min-height: 28px !important;
+    height: 32px !important; /* Aumentar altura para mejor uniformidad */
+    min-height: 32px !important;
     border-radius: 4px !important;
+    margin: 0 !important; /* Sin margen para maximizar espacio */
+    flex: 1 1 auto !important; /* Los botones se expanden igualmente para llenar el espacio */
+    min-width: 32px !important; /* Ancho mínimo para iconos */
+    width: auto !important; /* Ancho automático basado en flex */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+/* Botones siempre visibles - SOLO el espacio que necesitan */
+#unified-single-bottom-menu .mode-toggle-always-visible,
+#unified-single-bottom-menu .squad-btn-always-visible,
+#unified-single-bottom-menu .fullscreen-btn-always-visible {
+    flex: 0 0 auto !important; /* NO se expanden, solo ocupan el espacio necesario */
+    min-width: 32px !important;
+    width: auto !important; /* Ancho automático según contenido */
+    height: 32px !important;
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important; /* Padding un poco mayor para mejor apariencia */
+    margin: 0 2px !important; /* Pequeño margen para separación */
+}
+
+/* Los botones DENTRO de los mode-controls sí se expanden para llenar el espacio restante */
+#unified-single-bottom-menu .mode-controls .btn,
+#unified-single-bottom-menu .mode-controls .form-select {
+    flex: 1 1 auto !important; /* Estos SÍ se expanden */
     margin: 0 !important;
-    flex: 1; /* Los botones se expanden para llenar el espacio disponible */
-    min-width: 28px; /* Ancho mínimo para iconos */
-    max-width: 80px; /* Ancho máximo para no crear botones gigantes */
+}
+
+/* Asegurar que los inputs también participen en la distribución flex */
+#unified-single-bottom-menu .color-input-compact,
+#unified-single-bottom-menu .width-compact {
+    flex: 0 0 auto !important; /* No se expanden, mantienen su tamaño fijo */
+    margin: 0 !important;
 }
 
 /* Mejores contrastes para botones sobre fondo transparente */
@@ -1615,5 +1649,162 @@ canvas {
     
     .tutorial-start-btn {
         padding: 16px 12px;
+    }
+}
+
+/* ===== RESPONSIVE PARA MENÚ UNIFICADO ===== */
+/* Pantallas muy pequeñas - botones más pequeños pero mismo ancho relativo */
+@media (max-width: 480px) {
+    #unified-single-bottom-menu .btn,
+    #unified-single-bottom-menu .form-select {
+        font-size: 0.65rem !important;
+        padding: 2px 4px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        min-width: 28px !important;
+        margin: 0 !important;
+    }
+    
+    /* Botones siempre visibles más compactos en móviles */
+    #unified-single-bottom-menu .mode-toggle-always-visible,
+    #unified-single-bottom-menu .squad-btn-always-visible,
+    #unified-single-bottom-menu .fullscreen-btn-always-visible {
+        padding: 2px 6px !important;
+        height: 28px !important;
+        font-size: 0.65rem !important;
+        margin: 0 1px !important;
+    }
+    
+    #unified-single-bottom-menu {
+        height: 40px !important;
+        padding: 4px 6px !important;
+        gap: 1px !important;
+    }
+    
+    .vertical-separator {
+        height: 28px !important;
+        margin: 0 !important;
+    }
+    
+    .color-input-compact {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    .width-compact {
+        width: 45px !important;
+        height: 28px !important;
+        font-size: 0.65rem !important;
+    }
+}
+
+/* Pantallas pequeñas (móviles horizontales, tablets pequeñas) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #unified-single-bottom-menu .btn,
+    #unified-single-bottom-menu .form-select {
+        font-size: 0.7rem !important;
+        padding: 3px 5px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        min-width: 30px !important;
+        margin: 0 !important;
+    }
+    
+    /* Botones siempre visibles */
+    #unified-single-bottom-menu .mode-toggle-always-visible,
+    #unified-single-bottom-menu .squad-btn-always-visible,
+    #unified-single-bottom-menu .fullscreen-btn-always-visible {
+        padding: 3px 7px !important;
+        height: 30px !important;
+        font-size: 0.7rem !important;
+        margin: 0 1px !important;
+    }
+    
+    #unified-single-bottom-menu {
+        height: 44px !important;
+        padding: 5px 7px !important;
+    }
+    
+    .vertical-separator {
+        height: 30px !important;
+        margin: 0 !important;
+    }
+    
+    .color-input-compact {
+        width: 30px !important;
+        height: 30px !important;
+    }
+    
+    .width-compact {
+        width: 55px !important;
+        height: 30px !important;
+        font-size: 0.7rem !important;
+    }
+}
+
+/* Pantallas medianas (tablets grandes, laptops pequeñas) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #unified-single-bottom-menu .btn,
+    #unified-single-bottom-menu .form-select {
+        font-size: 0.75rem !important;
+        padding: 4px 6px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        min-width: 32px !important;
+        margin: 0 !important;
+    }
+    
+    /* Botones siempre visibles */
+    #unified-single-bottom-menu .mode-toggle-always-visible,
+    #unified-single-bottom-menu .squad-btn-always-visible,
+    #unified-single-bottom-menu .fullscreen-btn-always-visible {
+        padding: 4px 8px !important;
+        height: 32px !important;
+        font-size: 0.75rem !important;
+        margin: 0 2px !important;
+    }
+}
+
+/* Pantallas grandes - botones más grandes */
+@media (min-width: 1025px) {
+    #unified-single-bottom-menu .btn,
+    #unified-single-bottom-menu .form-select {
+        font-size: 0.8rem !important;
+        padding: 5px 8px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        min-width: 36px !important;
+        margin: 0 !important;
+    }
+    
+    /* Botones siempre visibles */
+    #unified-single-bottom-menu .mode-toggle-always-visible,
+    #unified-single-bottom-menu .squad-btn-always-visible,
+    #unified-single-bottom-menu .fullscreen-btn-always-visible {
+        padding: 5px 10px !important;
+        height: 36px !important;
+        font-size: 0.8rem !important;
+        margin: 0 2px !important;
+    }
+    
+    #unified-single-bottom-menu {
+        height: 52px !important;
+        padding: 8px 10px !important;
+    }
+    
+    .vertical-separator {
+        height: 36px !important;
+        margin: 0 !important;
+    }
+    
+    .color-input-compact {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    .width-compact {
+        width: 70px !important;
+        height: 36px !important;
+        font-size: 0.8rem !important;
     }
 }

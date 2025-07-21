@@ -40,18 +40,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Estado global (debe ir antes de cualquier uso)
     // Inicializar activePlayers con los jugadores y balón desde staticPlayers
     // Asegura que siempre haya un balón en la cancha
-    function ensureBallInPlayers(players) {
+    function ensureBallInPlayers() {
         console.log('[DEBUG] Llamada a ensureBallInPlayers');
+        
+        // Si no hay activePlayers, inicializar como array vacío
+        if (!state.activePlayers || !Array.isArray(state.activePlayers)) {
+            console.log('[DEBUG] Inicializando activePlayers como array vacío');
+            state.activePlayers = [];
+        }
+        
         // Elimina cualquier balón duplicado
-        let balls = players.filter(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
+        let balls = state.activePlayers.filter(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
         if (balls.length > 1) {
             console.log('[DEBUG] Se encontraron balones duplicados, eliminando extras');
             // Deja solo uno
             const first = balls[0];
-            players = players.filter(p => !(p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'));
-            players.push(first);
+            state.activePlayers = state.activePlayers.filter(p => !(p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'));
+            state.activePlayers.push(first);
         }
-        let ballPlayer = players.find(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
+        let ballPlayer = state.activePlayers.find(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
         if (!ballPlayer) {
             // Agregar balón en el centro del campo (coordenadas más realistas)
             ballPlayer = {
@@ -62,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 x: 50, // centro horizontal
                 y: 50  // centro vertical
             };
-            players.push(ballPlayer);
+            state.activePlayers.push(ballPlayer);
             console.log('[DEBUG] Balón agregado al centro de la cancha', ballPlayer);
         }
         // Asegura que tenga todas las propiedades y posición válida
@@ -81,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ballPlayer.type = 'ball';
         ballPlayer.role = 'ball';
         // Mensaje de depuración para ver el estado de los jugadores
-        console.log('[DEBUG] Estado de activePlayers tras asegurar balón:', players);
+        console.log('[DEBUG] Estado de activePlayers tras asegurar balón:', state.activePlayers);
     }
     // Estado global (debe ir antes de cualquier uso)
     const state = {
@@ -90,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     // Solo asegurar el balón, no cargar jugadores por defecto
-    ensureBallInPlayers(state.activePlayers);
+    ensureBallInPlayers();
     
     // Forzar balón al centro al cargar
     const ballPlayerInit = state.activePlayers.find(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');

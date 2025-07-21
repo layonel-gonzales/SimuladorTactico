@@ -99,6 +99,16 @@
         <div id="animation-mode-controls" class="mode-controls hidden"
              data-intro="Esta es la barra del MODO ANIMACIÓN. Aquí puedes crear secuencias de movimiento y reproducir animaciones tácticas." 
              data-step="13">
+             <button id="record-mode-toggle" class="btn btn-danger btn-sm" title="Grabar"
+                    data-intro="Activa el modo grabación. Mueve los jugadores y se registrarán automáticamente sus posiciones." 
+                    data-step="19">
+                <i class="fas fa-dot-circle"></i>
+            </button>
+            <button id="frame-add" class="btn btn-success btn-sm" title="Nuevo frame"
+                    data-intro="Crea un nuevo frame en tu animación. Cada frame captura las posiciones actuales de los jugadores." 
+                    data-step="17">
+                <i class="fas fa-plus"></i>
+            </button>
             <button id="frame-prev" class="btn btn-outline-primary btn-sm" title="Frame anterior"
                     data-intro="Navega al frame anterior de tu animación. Útil para revisar secuencias." 
                     data-step="14">
@@ -112,22 +122,16 @@
                     data-step="16">
                 <i class="fas fa-step-forward"></i>
             </button>
-            <button id="frame-add" class="btn btn-success btn-sm" title="Nuevo frame"
-                    data-intro="Crea un nuevo frame en tu animación. Cada frame captura las posiciones actuales de los jugadores." 
-                    data-step="17">
-                <i class="fas fa-plus"></i>
-            </button>
+            <button id="frame-delete" class="btn btn-outline-danger btn-sm" title="Eliminar frame actual"
+                    data-intro="Elimina el frame actual de la animación. Ten cuidado, esta acción no se puede deshacer." 
+                    data-step="16-delete">
+                <i class="fas fa-trash"></i>
+            </button>            
             <button id="frame-play" class="btn btn-info btn-sm" title="Reproducir"
                     data-intro="Reproduce toda la secuencia de animación que has creado. ¡Verás tu táctica en movimiento!" 
                     data-step="18">
                 <i class="fas fa-play"></i>
-            </button>
-            <button id="record-mode-toggle" class="btn btn-danger btn-sm" title="Grabar"
-                    data-intro="Activa el modo grabación. Mueve los jugadores y se registrarán automáticamente sus posiciones." 
-                    data-step="19">
-                <i class="fas fa-dot-circle"></i>
-            </button>
-            
+            </button>        
             <!-- Controles de Audio -->
             <button id="audio-record-btn" class="btn btn-secondary btn-sm" title="Grabar audio"
                     data-intro="Graba una narración de audio para tu animación táctica. Perfecto para explicar la jugada." 

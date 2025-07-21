@@ -36,6 +36,7 @@ export default class AnimationManager {
         // Inicializar con un frame vacío
         this.frames.push(this.getCurrentState());
         this.updateFrameIndicator();
+        this.updateButtonsAvailability(); // ✨ Configurar estado inicial de botones
         
         console.log('AnimationManager: Inicializado correctamente');
     }
@@ -50,6 +51,7 @@ export default class AnimationManager {
         this.btnPrev = document.getElementById('frame-prev');
         this.btnNext = document.getElementById('frame-next');
         this.btnAdd = document.getElementById('frame-add');
+        this.btnDelete = document.getElementById('frame-delete');
         this.btnReset = document.getElementById('reset-animation');
     }
     
@@ -61,13 +63,32 @@ export default class AnimationManager {
         
         // Controles de frames
         if (this.btnPrev) {
-            this.btnPrev.addEventListener('click', () => this.gotoFrame(this.currentFrame - 1));
+            this.btnPrev.addEventListener('click', () => {
+                console.log('[AnimationManager] 🔴 Click en botón Previous');
+                console.log('[AnimationManager] Estado actual:', {
+                    currentFrame: this.currentFrame,
+                    totalFrames: this.frames.length,
+                    btnDisabled: this.btnPrev.disabled
+                });
+                this.gotoFrame(this.currentFrame - 1);
+            });
         }
         if (this.btnNext) {
-            this.btnNext.addEventListener('click', () => this.gotoFrame(this.currentFrame + 1));
+            this.btnNext.addEventListener('click', () => {
+                console.log('[AnimationManager] 🔴 Click en botón Next');
+                console.log('[AnimationManager] Estado actual:', {
+                    currentFrame: this.currentFrame,
+                    totalFrames: this.frames.length,
+                    btnDisabled: this.btnNext.disabled
+                });
+                this.gotoFrame(this.currentFrame + 1);
+            });
         }
         if (this.btnAdd) {
             this.btnAdd.addEventListener('click', () => this.addFrame());
+        }
+        if (this.btnDelete) {
+            this.btnDelete.addEventListener('click', () => this.deleteCurrentFrame());
         }
         if (this.btnReset) {
             this.btnReset.addEventListener('click', () => this.resetAnimation());
@@ -112,12 +133,67 @@ export default class AnimationManager {
                 '<i class="fas fa-dot-circle"></i> Grabar';
         }
         
+        // ✨ NUEVA FUNCIONALIDAD: Habilitar botones progresivamente
+        this.updateButtonsAvailability();
+        
         // Si se desactiva el modo grabación y se tienen frames, sugerir audio
         if (!this.isRecordMode && this.frames.length >= 3) {
             this.checkForAudioRecordingSuggestion();
         }
         
         console.log(`[AnimationManager] Modo grabación: ${this.isRecordMode ? 'ACTIVADO' : 'DESACTIVADO'}`);
+    }
+    
+    // ✨ NUEVA FUNCIÓN: Actualizar disponibilidad de botones según el estado
+    updateButtonsAvailability() {
+        // Lógica progresiva de habilitación:
+        // 1. Solo "Grabar" está disponible inicialmente
+        // 2. Al grabar, se habilita "Nuevo frame" 
+        // 3. Con múltiples frames, se habilitan navegación y reproducción
+        
+        const hasFrames = this.frames.length > 0;
+        const hasMultipleFrames = this.frames.length > 1;
+        const isRecording = this.isRecordMode;
+        
+        // Botón "Nuevo frame" - disponible cuando hay grabación activa o frames existentes
+        if (this.btnAdd) {
+            this.btnAdd.disabled = !isRecording && !hasFrames;
+            this.btnAdd.style.opacity = (isRecording || hasFrames) ? '1' : '0.5';
+            this.btnAdd.title = !isRecording && !hasFrames ? 
+                'Primero activa el modo grabar para crear frames' : 
+                'Nuevo frame';
+        }
+        
+        // Navegación - disponible solo con múltiples frames
+        if (this.btnPrev) {
+            this.btnPrev.disabled = !hasMultipleFrames;
+            this.btnPrev.style.opacity = hasMultipleFrames ? '1' : '0.5';
+        }
+        
+        if (this.btnNext) {
+            this.btnNext.disabled = !hasMultipleFrames;
+            this.btnNext.style.opacity = hasMultipleFrames ? '1' : '0.5';
+        }
+        
+        // Reproducción - disponible con múltiples frames y no grabando
+        if (this.btnPlay) {
+            this.btnPlay.disabled = !hasMultipleFrames || isRecording;
+            this.btnPlay.style.opacity = (hasMultipleFrames && !isRecording) ? '1' : '0.5';
+            this.btnPlay.title = isRecording ? 
+                'Detén la grabación primero para reproducir' : 
+                (hasMultipleFrames ? 'Reproducir animación' : 'Necesitas al menos 2 frames para reproducir');
+        }
+        
+        // Eliminar frame - disponible solo cuando hay múltiples frames (no eliminar el último)
+        if (this.btnDelete) {
+            this.btnDelete.disabled = !hasMultipleFrames;
+            this.btnDelete.style.opacity = hasMultipleFrames ? '1' : '0.5';
+            this.btnDelete.title = hasMultipleFrames ? 
+                `Eliminar frame actual (${this.currentFrame + 1}/${this.frames.length})` : 
+                'Necesitas al menos 2 frames para poder eliminar uno';
+        }
+        
+        console.log(`[AnimationManager] Botones actualizados - Frames: ${this.frames.length}, Grabando: ${isRecording}`);
     }
     
     // Guardar frame en modo grabación
@@ -135,8 +211,9 @@ export default class AnimationManager {
         this.frames.push(currentState);
         this.currentFrame = this.frames.length - 1;
         this.updateFrameIndicator();
+        this.updateButtonsAvailability(); // ✨ Actualizar botones cuando se graba automáticamente
         
-        console.log(`[AnimationManager] Frame ${this.frames.length} guardado automáticamente`);
+        console.log(`[AnimationManager] 🎬 Frame ${this.frames.length} guardado automáticamente durante grabación`);
     }
     
     getCurrentState() {
@@ -162,10 +239,18 @@ export default class AnimationManager {
     }
     
     setStateFromFrame(frame) {
-        if (!frame || !frame.players) return;
+        if (!frame || !frame.players) {
+            console.log('[AnimationManager] ⚠️ Frame inválido:', frame);
+            return;
+        }
+        
+        console.log('[AnimationManager] 🔄 Aplicando estado desde frame:', frame);
+        console.log('[AnimationManager] Players en frame:', frame.players.length);
         
         // Restaurar posiciones de jugadores preservando toda la información
         const existingPlayers = this.getActivePlayers();
+        console.log('[AnimationManager] Players existentes:', existingPlayers.length);
+        
         const newPlayers = frame.players.map(framePlayer => {
             // Buscar jugador existente
             let player = existingPlayers.find(p => p.id === framePlayer.id);
@@ -200,17 +285,26 @@ export default class AnimationManager {
             }
         });
         
+        console.log('[AnimationManager] 📋 Players finales para aplicar:', newPlayers.length);
+        
         this.setActivePlayers(newPlayers);
         this.ensureBallInPlayers();
         
         if (this.uiManager) {
+            console.log('[AnimationManager] 🖼️ Renderizando jugadores en el campo...');
             this.uiManager.renderPlayersOnPitch();
+        } else {
+            console.log('[AnimationManager] ⚠️ UIManager no disponible');
         }
+        
+        console.log('[AnimationManager] ✅ Estado del frame aplicado correctamente');
     }
     
     updateFrameIndicator() {
         if (this.frameIndicator) {
-            this.frameIndicator.textContent = `${this.currentFrame + 1}/${this.frames.length}`;
+            const indicator = `${this.currentFrame + 1}/${this.frames.length}`;
+            this.frameIndicator.textContent = indicator;
+            console.log(`[AnimationManager] 📊 Indicador actualizado: ${indicator}`);
         }
     }
     
@@ -221,24 +315,71 @@ export default class AnimationManager {
     }
     
     addFrame() {
+        // Guardar el frame actual antes de agregar uno nuevo
         this.saveCurrentFrame();
-        this.frames.splice(this.currentFrame + 1);
-        this.frames.push(this.getCurrentState());
+        
+        // Agregar nuevo frame con el estado actual
+        const newState = this.getCurrentState();
+        this.frames.push(newState);
         this.currentFrame = this.frames.length - 1;
-        this.setStateFromFrame(this.frames[this.currentFrame]);
+        
+        // Actualizar UI
         this.updateFrameIndicator();
+        this.updateButtonsAvailability(); // ✨ Actualizar botones después de agregar frame
+        
+        console.log(`[AnimationManager] ✅ Nuevo frame agregado - Total: ${this.frames.length}, Actual: ${this.currentFrame + 1}`);
         
         // Sugerir grabación de audio cuando se tienen suficientes frames
         this.checkForAudioRecordingSuggestion();
     }
     
+    deleteCurrentFrame() {
+        // No permitir eliminar si solo hay un frame
+        if (this.frames.length <= 1) {
+            console.log('[AnimationManager] ❌ No se puede eliminar: debe haber al menos 1 frame');
+            return;
+        }
+        
+        const frameToDelete = this.currentFrame + 1; // Para mostrar en consola (1-based)
+        const totalFrames = this.frames.length;
+        
+        // Eliminar el frame actual
+        this.frames.splice(this.currentFrame, 1);
+        
+        console.log(`[AnimationManager] 🗑️ Frame ${frameToDelete}/${totalFrames} eliminado - Nuevos totales: ${this.frames.length}`);
+        
+        // Ajustar el currentFrame después de eliminar
+        if (this.currentFrame >= this.frames.length) {
+            // Si eliminamos el último frame, ir al anterior
+            this.currentFrame = this.frames.length - 1;
+        }
+        // Si no era el último, el currentFrame automáticamente apunta al siguiente frame
+        // (porque los índices se desplazaron hacia abajo)
+        
+        // Cargar el nuevo frame actual
+        this.setStateFromFrame(this.frames[this.currentFrame]);
+        
+        // Actualizar UI
+        this.updateFrameIndicator();
+        this.updateButtonsAvailability();
+        
+        console.log(`[AnimationManager] 📍 Ahora en frame ${this.currentFrame + 1}/${this.frames.length}`);
+    }
+    
     gotoFrame(idx) {
-        if (idx < 0 || idx >= this.frames.length) return;
+        if (idx < 0 || idx >= this.frames.length) {
+            console.log(`[AnimationManager] ⚠️ Navegación inválida: ${idx + 1} (disponibles: 1-${this.frames.length})`);
+            return;
+        }
+        
+        console.log(`[AnimationManager] 🚀 Iniciando navegación desde frame ${this.currentFrame + 1} hacia frame ${idx + 1}`);
         
         this.saveCurrentFrame();
         this.currentFrame = idx;
         this.setStateFromFrame(this.frames[this.currentFrame]);
         this.updateFrameIndicator();
+        
+        console.log(`[AnimationManager] 📍 Navegado a frame ${idx + 1}/${this.frames.length}`);
     }
     
     // Función de interpolación lineal
