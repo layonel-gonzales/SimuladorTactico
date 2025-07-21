@@ -279,14 +279,27 @@ export default class BallDrawingManager {
         if (!this.canvas) return;
         
         const rect = this.canvas.parentElement.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
+        
+        // MEJORA: Usar devicePixelRatio para alta resolución
+        const dpr = window.devicePixelRatio || 1;
+        
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        
+        // Escalar el contexto
+        if (this.ctx) {
+            this.ctx.scale(dpr, dpr);
+        }
+        
+        // Establecer el tamaño CSS
+        this.canvas.style.width = rect.width + 'px';
+        this.canvas.style.height = rect.height + 'px';
         
         // Redibujar estela si existe
         if (this.ballPath.length > 0) {
             this.drawTrail();
         }
         
-        console.log('[BallDrawingManager] Canvas redimensionado:', rect.width, 'x', rect.height);
+        console.log(`[BallDrawingManager] Canvas redimensionado con DPR: ${dpr}:`, rect.width, 'x', rect.height);
     }
 }

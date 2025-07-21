@@ -426,22 +426,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Esta función solo se encarga del fondo del campo.
     function renderFootballField() {
         const rect = pitchContainer.getBoundingClientRect();
-        footballFieldCanvas.width = rect.width;
-        footballFieldCanvas.height = rect.height;
+        
+        // MEJORA: Usar devicePixelRatio para alta resolución
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Tamaño CSS (lo que ve el usuario)
+        const cssWidth = rect.width;
+        const cssHeight = rect.height;
+        
+        // Tamaño real del canvas en píxeles de dispositivo
+        const canvasWidth = cssWidth * dpr;
+        const canvasHeight = cssHeight * dpr;
+        
+        // Configurar tamaños del canvas
+        footballFieldCanvas.width = canvasWidth;
+        footballFieldCanvas.height = canvasHeight;
+        
+        // Establecer el tamaño CSS para que se muestre correctamente
+        footballFieldCanvas.style.width = cssWidth + 'px';
+        footballFieldCanvas.style.height = cssHeight + 'px';
+        
+        // Escalar el contexto para que coincida con el ratio de píxeles
+        // IMPORTANTE: Limpiar transformaciones previas
+        fieldCtx.setTransform(1, 0, 0, 1, 0, 0);
+        fieldCtx.scale(dpr, dpr);
+        
+        // Dibujar el campo usando las dimensiones CSS
         drawFootballField(footballFieldCanvas, fieldCtx);
-        console.log('main.js: Campo de fútbol de fondo redibujado.');
+        console.log(`main.js: Campo redibujado - CSS: ${cssWidth}x${cssHeight}, Canvas: ${canvasWidth}x${canvasHeight}, DPR: ${dpr}`);
+        console.log(`main.js: Forzando redibujo completo del campo con arcos actualizados`);
     }
 
     // El UIManager ya tiene un listener para 'resize' que llama a drawingManager.resizeCanvas()
     // y repositionPlayersOnPitch(). Aquí solo necesitamos asegurarnos de que el campo de fondo
     // también se redibuje.
     let resizeFieldTimeout;
-    window.addEventListener('resize', () => {
+    
+    // MEJORA: Detectar dispositivos móviles para manejar mejor el redimensionado
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                     window.innerWidth <= 768;
+    
+    function handleResize() {
         clearTimeout(resizeFieldTimeout);
+        const delay = isMobile ? 100 : 250; // Menos delay en móviles para mejor responsividad
+        
         resizeFieldTimeout = setTimeout(() => {
+            console.log('[Main] Redimensionando campo para:', isMobile ? 'MÓVIL' : 'ESCRITORIO');
             renderFootballField(); // Redibujar el fondo del campo
-        }, 250); // Mismo debounce que en UIManager para sincronizar
-    });
+        }, delay);
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // NUEVO: También escuchar cambios de orientación en móviles
+    if (isMobile) {
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                console.log('[Main] Cambio de orientación detectado');
+                handleResize();
+            }, 300); // Pequeño delay para que la orientación termine de cambiar
+        });
+    }
 
 
     // Ejecutar renderizado inicial del campo

@@ -367,8 +367,19 @@ export default class DrawingManager {
     // Redimensionar el canvas para que coincida con su contenedor
     resizeCanvas() {
         const rect = this.canvas.parentElement.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
+        
+        // MEJORA: Usar devicePixelRatio para alta resolución en el canvas de dibujo
+        const dpr = window.devicePixelRatio || 1;
+        
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        
+        // Escalar el contexto
+        this.ctx.scale(dpr, dpr);
+        
+        // Establecer el tamaño CSS
+        this.canvas.style.width = rect.width + 'px';
+        this.canvas.style.height = rect.height + 'px';
         
         // Solo redibujar si hay líneas para redibujar
         if (this.lines && this.lines.length > 0) {
@@ -376,7 +387,7 @@ export default class DrawingManager {
         }
         
         this.applyContextProperties();
-        console.log('DrawingManager: Canvas redimensionado - líneas actuales:', this.lines?.length || 0);
+        console.log(`DrawingManager: Canvas redimensionado con DPR: ${dpr} - líneas actuales:`, this.lines?.length || 0);
     }
     
     // Método para habilitar/deshabilitar el dibujo de líneas
