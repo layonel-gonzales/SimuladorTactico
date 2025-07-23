@@ -150,7 +150,242 @@ html, body {
     overflow: hidden;
 }
 
-canvas {
+/* Separadores visuales */
+.vertical-separator {
+    width: 1px;
+    height: 32px; /* Aumentar altura para coincidir con botones */
+    background: rgba(255,255,255,0.2);
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* Frame counter compacto */
+.frame-counter {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    min-width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Inputs compactos */
+.color-input-compact {
+    width: 32px !important; /* Aumentar para uniformidad */
+    height: 32px !important; /* Coincidir con altura de botones */
+    padding: 0 !important;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.width-compact {
+    width: 60px !important; /* Aumentar ancho */
+    height: 32px !important; /* Coincidir con altura de botones */
+    font-size: 0.75rem !important; /* Coincidir con tamaño de fuente de botones */
+    flex-shrink: 0;
+}
+
+/* Fila de controles básicos eliminada */
+.basic-controls-row {
+    display: none;
+}
+
+/* Controles de cada modo - MÁXIMA ESPECIFICIDAD PARA FORZAR CAMBIOS */
+#unified-single-bottom-menu .mode-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1; /* Ocupa todo el espacio disponible después de los botones siempre visibles */
+    gap: 2px; /* Espacio uniforme entre elementos */
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: all 0.3s ease;
+}
+
+#unified-single-bottom-menu .mode-controls.visible {
+    display: flex !important; /* Mostrar y ocupar espacio completo */
+}
+
+#unified-single-bottom-menu .mode-controls.hidden {
+    display: none !important; /* Ocultar SIN ocupar espacio */
+}
+
+/* Estados específicos por ID con MÁXIMA especificidad */
+#unified-single-bottom-menu #drawing-mode-controls.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#unified-single-bottom-menu #animation-mode-controls.hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#unified-single-bottom-menu #drawing-mode-controls.visible {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#unified-single-bottom-menu #animation-mode-controls.visible {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+.mobile-controls-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(40,40,40,0.85);
+    border-radius: 8px;
+    padding: 2px 3px;
+    flex: 1 1 0;
+    justify-content: center;
+    margin: 0 2px;
+    min-width: 0;
+}
+
+/* Estilos para controles del menú unificado - BOTONES FLEXIBLES Y UNIFORMES */
+#unified-single-bottom-menu .btn,
+#unified-single-bottom-menu .form-select {
+    font-size: 0.75rem !important;
+    padding: 4px 6px !important;
+    height: 32px !important; /* Aumentar altura para mejor uniformidad */
+    min-height: 32px !important;
+    border-radius: 4px !important;
+    margin: 0 !important; /* Sin margen para maximizar espacio */
+    flex: 1 1 auto !important; /* Los botones se expanden igualmente para llenar el espacio */
+    min-width: 32px !important; /* Ancho mínimo para iconos */
+    width: auto !important; /* Ancho automático basado en flex */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+/* Botones siempre visibles - SOLO el espacio que necesitan */
+#unified-single-bottom-menu .mode-toggle-always-visible,
+#unified-single-bottom-menu .squad-btn-always-visible,
+#unified-single-bottom-menu .custom-players-btn-always-visible,
+#unified-single-bottom-menu .configuration-btn-always-visible,
+#unified-single-bottom-menu .fullscreen-btn-always-visible {
+    flex: 0 0 auto !important; /* NO se expanden, solo ocupan el espacio necesario */
+    min-width: 32px !important;
+    width: auto !important; /* Ancho automático según contenido */
+    height: 32px !important;
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important; /* Padding un poco mayor para mejor apariencia */
+    margin: 0 2px !important; /* Pequeño margen para separación */
+}
+
+/* Los botones DENTRO de los mode-controls sí se expanden para llenar el espacio restante */
+#unified-single-bottom-menu .mode-controls .btn,
+#unified-single-bottom-menu .mode-controls .form-select {
+    flex: 1 1 auto !important; /* Estos SÍ se expanden */
+    margin: 0 !important;
+}
+
+/* Asegurar que los inputs también participen en la distribución flex */
+#unified-single-bottom-menu .color-input-compact,
+#unified-single-bottom-menu .width-compact {
+    flex: 0 0 auto !important; /* No se expanden, mantienen su tamaño fijo */
+    margin: 0 !important;
+}
+
+/* Mejores contrastes para botones sobre fondo transparente */
+#unified-single-bottom-menu .btn {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    font-weight: 500 !important;
+    text-shadow: none !important;
+}
+
+#unified-single-bottom-menu .btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    color: #000 !important;
+    transform: scale(1.02) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* Botones específicos con colores preservados */
+#unified-single-bottom-menu .btn-primary {
+    background: rgba(13, 110, 253, 0.9) !important;
+    color: white !important;
+    border-color: rgba(13, 110, 253, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-primary:hover {
+    background: rgba(13, 110, 253, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-danger {
+    background: rgba(220, 53, 69, 0.9) !important;
+    color: white !important;
+    border-color: rgba(220, 53, 69, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-danger:hover {
+    background: rgba(220, 53, 69, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-warning {
+    background: rgba(255, 193, 7, 0.9) !important;
+    color: #000 !important;
+    border-color: rgba(255, 193, 7, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-warning:hover {
+    background: rgba(255, 193, 7, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-success {
+    background: rgba(25, 135, 84, 0.9) !important;
+    color: white !important;
+    border-color: rgba(25, 135, 84, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-success:hover {
+    background: rgba(25, 135, 84, 1) !important;
+}
+
+#unified-single-bottom-menu .btn-info {
+    background: rgba(13, 202, 240, 0.9) !important;
+    color: #000 !important;
+    border-color: rgba(13, 202, 240, 0.8) !important;
+}
+
+#unified-single-bottom-menu .btn-info:hover {
+    background: rgba(13, 202, 240, 1) !important;
+}
+
+/* Select elements con mejor contraste */
+#unified-single-bottom-menu .form-select {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+#unified-single-bottom-menu .form-select:focus {
+    background: rgba(255, 255, 255, 1) !important;
+    border-color: rgba(13, 110, 253, 0.8) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Frame counter con mejor contraste */
+#unified-single-bottom-menu .frame-counter {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #fff !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* El canvas debe ocupar todo el espacio */
+#football-field, #drawing-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -183,6 +418,491 @@ canvas {
     z-index: 2;
 }
 
+
+:root {
+    --primary-color: #00ff80; /* Un verde vibrante, puedes probar #FFD700 (oro) o #00BFFF (azul cielo) */
+    --dark-bg: #1a1a1a;       /* Fondo oscuro principal, puedes probar #2c3e50 (gris azulado) */
+    --medium-bg: #2a2a2a;     /* Fondo oscuro secundario, puedes probar #34495e */
+    --light-bg: #333;        /* Fondo más claro, puedes probar #ecf0f1 (casi blanco) */
+    --text-color: #f0f0f0;    /* Color de texto principal (blanco), puedes probar #2c3e50 (oscuro) */
+    --pitch-green: #2d8a2d;   /* Verde del campo, puedes probar #4CAF50 (verde más claro) */
+    --pitch-line: #ffffff;   /* Líneas del campo (blanco), puedes probar #CCCCCC (gris claro) */
+    --gold-color: gold;       /* Color dorado para ratings */
+    --info-color: #17a2b8;    /* Color para botones de info (Bootstrap info) */
+    --warning-color: #ffc107; /* Color para botones de warning (Bootstrap warning) */
+    --light-color: #f8f9fa;   /* Color para botones light (Bootstrap light) */
+    --secondary-color: #6c757d; /* Color para botones secondary (Bootstrap secondary) */
+    --success-color: #28a745; /* Color para insignias de éxito (Bootstrap success) */
+    --danger-color: #dc3545;  /* Color para insignias de peligro (Bootstrap danger) */
+    --border-color-medium: var(--medium-bg); /* Un color de borde basado en el bg */
+    --border-color-secondary: var(--secondary-color); /* Otro color de borde */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg); /* Usando variable */
+    overflow: hidden; /* Esto es importante para evitar el scroll del body */
+    height: 100vh;
+    margin: 0; /* Asegúrate de que no haya margen por defecto en el body */
+    /* display: flex;  Usamos flexbox para el layout principal */
+    /* flex-direction: column;  Apila el contenido verticalmente si es necesario */
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Contenedor principal para la aplicación */
+#app-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    /* display: block; */
+    flex-grow: unset;
+}
+
+/* Estilos para el campo de juego */
+#pitch-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background-color: var(--pitch-green);
+    background-image:
+        linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
+        linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
+    background-size: 100px 100px;
+    z-index: 1;
+}
+
+/* Estilos para el contenedor de controles (sidebar) */
+#controls-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 326px;
+    background-color: var(--dark-bg);
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+#controls-wrapper.show-controls {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+    #controls-wrapper {
+        display: none !important;
+    }
+}
+
+/* Estilo para el botón de toggle de controles en móviles */
+#mobile-controls-toggle-btn {
+    position: fixed;
+    top: 4px;
+    left: 4px;
+    z-index: 2100; /* Refuerzo para estar por encima de todo */
+    background-color: var(--primary-color); /* Usando variable */
+    color: var(--dark-bg); /* Usando variable */
+    border: none;
+    border-radius: 5px;
+    padding: 7px 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    pointer-events: auto;
+}
+
+/* Botón de menú flotante, siempre visible y por encima de la cancha y el menú */
+.menu-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2101;
+    background: var(--primary-color);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: left 0.3s;
+}
+
+.menu-toggle-btn:active {
+    background: var(--medium-bg);
+}
+
+/* El botón de menú siempre fijo en la esquina, nunca se mueve */
+/* Ya está cubierto por .menu-toggle-btn { position: fixed; left: 20px; ... } */
+
+@media (max-width: 400px) {
+    #controls-wrapper {
+        width: 230px;
+    }
+}
+@media (min-width: 916px) {
+    #controls-wrapper {
+        width: 350px;
+    }
+}
+
+/* Overlay cuando el menú está abierto */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1999; /* Debajo del menú pero por encima del campo */
+    display: none;
+    pointer-events: none;
+}
+
+.overlay.show-overlay {
+    display: block;
+    pointer-events: auto;
+}
+
+/* Estilos para el canvas */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    max-width: 100vw;
+    max-height: 100vh;
+    /* MEJORA: Asegurar responsividad total */
+    object-fit: contain;
+    box-sizing: border-box;
+}
+
+#football-field {
+    z-index: 1;
+    /* MEJORA: Asegurar que el canvas del campo sea completamente responsivo */
+    touch-action: none;
+}
+
+#drawing-canvas {
+    z-index: 10; /* Por encima del campo */
+    cursor: crosshair;
+    pointer-events: auto; /* Crucial: Asegura que el canvas reciba eventos del ratón/touch */
+    /* MEJORA: Optimizar para dispositivos táctiles */
+    touch-action: none;
+    /* El color de la línea se define en drawingManager.js, pero puedes poner un default aquí */
+    /* stroke-color: var(--pitch-line);  Esto no funciona aquí, el color de línea se establece en JS */
+}
+
+/* NUEVA: Mejoras específicas para móviles */
+@media (max-width: 768px) {
+    canvas {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+    
+    #football-field, #drawing-canvas {
+        image-rendering: auto;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* Estilos de las "minicards" generales (usadas por player-token y squad-player-item) */
+.minicard-overall {
+    position: absolute;
+    top: 15px;
+    left: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--gold-color); /* Usando variable */
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1; /* Asegura que el texto se centre verticalmente */
+}
+
+.minicard-position {
+    position: absolute;
+    top: 15px;
+    right: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-color); /* Usando variable */
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.minicard-player-image {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 58px;
+    object-fit: cover;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.minicard-name {
+    position: absolute;
+    bottom: 20px;
+    left: 8px; /* Ajuste para centrar visualmente */
+    right: 0;
+    text-align: center;
+    font-size: 0.55em;
+    font-weight: bold;
+    color: var(--text-color); /* Usando variable */
+    background-color: black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 83%; /* Ajuste para ocupar el ancho del marco */
+    padding: 0 5px; /* Pequeño padding horizontal */
+    box-sizing: border-box; /* Incluir padding en el width */
+}
+
+.minicard-jersey-number {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--text-color); /* Usando variable */
+    text-shadow: 0 0 3px black;
+}
+
+
+/* Estilos para el modal de selección de jugadores */
+#squad-selection-modal .modal-content {
+    background: var(--dark-bg); /* Usando variable */
+    border: 1px solid var(--medium-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+}
+
+#squad-selection-modal .modal-header,
+#squad-selection-modal .modal-footer {
+    border-color: var(--medium-bg); /* Usando variable */
+}
+
+#squad-selection-modal .modal-title {
+    color: var(--primary-color); /* Usando variable */
+}
+
+/* Lista de jugadores en el modal */
+#squad-player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centra los elementos */
+    gap: 10px; /* Espacio entre las tarjetas */
+    max-height: 70vh; /* Para que sea scrollable si hay muchos jugadores */
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Estilo para cada ítem de jugador en el modal de selección */
+.squad-player-item {
+    position: relative;
+    width: 130px;
+    height: 168px;
+    background-image: url('../img/marco3.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Asegura el contenido centrado */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0; /* Evita que las tarjetas se achiquen si no hay espacio */
+}
+
+.squad-player-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.squad-player-item.selected {
+    filter: brightness(0.7) saturate(1.1);
+    transform: scale(0.95);
+}
+
+/* Elementos dentro de squad-player-item, ajustados para el marco */
+.squad-player-item img {
+    width: 60px;
+    height: 70px;  /* Ratio 6:7 para fotos de jugadores */
+    border-radius: 4px; /* Esquinas ligeramente redondeadas */
+    object-fit: cover;
+    margin-top: 15px; /* Ajuste para posicionar la imagen dentro del marco */
+    border: 2px solid var(--primary-color); /* Usando variable */
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3); /* Sombra más sutil */
+    background: #f8f9fa; /* Fondo por si no carga la imagen */
+    transition: all 0.3s ease;
+}
+
+.squad-player-item img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.squad-player-item .player-name {
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 0.8em;
+    text-align: center;
+    color: var(--text-color); /* Usando variable */
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2px 5px;
+    border-radius: 3px;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.squad-player-item .player-position {
+    font-size: 0.7em;
+    color: #ccc; /* Mantener este color si no quieres que cambie con text-color */
+}
+
+/* Reutilizando minicard-overall y minicard-jersey-number para squad-player-item */
+.squad-player-item .minicard-overall {
+    top: 20px; /* Ajuste específico para este marco */
+    left: 10px;
+}
+
+.squad-player-item .minicard-jersey-number {
+    bottom: 40px; /* Ajuste específico para este marco */
+}
+
+
+/* Estilos para los tokens de jugador en la cancha (player-token) */
+.player-token {
+    position: absolute;
+    width: 90px;
+    height: 120px;
+    background-image: url('../img/marco3.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: grab;
+    z-index: 15; /* Por encima del drawing-canvas (10) */
+    transition: transform 0.2s, filter 0.2s; /* Animación para hover/dragging */
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    pointer-events: auto; /* Asegura que el token sea clickeable/arrastrable */
+}
+
+.player-token:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+
+.player-token.dragging {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+    z-index: 100; /* Asegura que el jugador arrastrado esté por encima de todo lo demás en el campo */
+}
+
+/* Elementos dentro de player-token, ajustados para el marco del campo */
+.player-token .minicard-overall {
+    top: 21px; /* Ajuste para este marco */
+}
+
+.player-token .minicard-position {
+    top: 21px; /* Ajuste para este marco */
+    border-radius: 25px; /* Más redondo */
+}
+
+.player-token .minicard-player-image {
+    top: 37px; /* Ajuste para este marco */
+}
+
+.player-token .minicard-jersey-number {
+    bottom: 40px; /* Ajuste para este marco */
+}
+
+
+/* Estilos para el modal de visualización de jugador (player-modal) */
+#player-modal .modal-content {
+    background: var(--dark-bg); /* Usando variable */
+    border: 1px solid var(--medium-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+}
+
+#player-modal .modal-header,
+#player-modal .modal-footer {
+    border-color: var(--medium-bg); /* Usando variable */
+}
+
+/* Estilos para la tarjeta de jugador detallada (usada en player-modal) */
+.fifa-card {
+    background-color: var(--dark-bg); /* Usando variable */
+    color: var(--text-color); /* Usando variable */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    max-width: 350px; /* Ancho máximo para la tarjeta */
+    margin: auto; /* Centrar en el modal */
+}
+
+.fifa-card img {
+    border: 3px solid var(--primary-color); /* Usando variable */
+    box-shadow: 0 0 10px var(--primary-color); /* Usando variable con opacidad */
+}
+
+.fifa-card .display-4 {
+    color: var(--gold-color); /* Usando variable */
+}
+
+.fifa-card .badge {
+    background-color: var(--primary-color) !important; /* Usando variable */
+    color: var(--dark-bg) !important; /* Usando variable */
+}
+
+.fifa-card h5 {
+    color: var(--text-color); /* Usando variable */
+}
+
+.fifa-card small {
+    color: #bbb !important; /* Mantener este color específico si no quieres variable */
+}
+
+.fifa-card span, .fifa-card strong {
+    color: var(--text-color); /* Usando variable */
+    font-size: 0.95em;
+}
+
+/* Watermark */
 .center-logo-watermark::before {
     content: "";
     display: block;
@@ -535,6 +1255,142 @@ canvas {
     }
     
     /* === BOTONES FLOTANTES DESKTOP === */
+/* Colores específicos para botón de modo según estado */
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning {
+    background: rgba(255, 152, 0, 0.95) !important; /* Naranja para modo animación */
+    color: white !important;
+    border-color: rgba(255, 152, 0, 0.8) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning:hover {
+    background: rgba(255, 152, 0, 1) !important;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-info {
+    background: rgba(23, 162, 184, 0.95) !important; /* Azul para modo dibujo */
+    color: white !important;
+    border-color: rgba(23, 162, 184, 0.8) !important;
+}
+
+#unified-single-bottom-menu .mode-toggle-always-visible.btn-info:hover {
+    background: rgba(23, 162, 184, 1) !important;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4) !important;
+}
+
+/* ===== TUTORIAL STYLES ===== */
+
+/* Botón flotante del tutorial */
+.tutorial-btn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 7777 !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Tutorial de Dibujo - Verde */
+.tutorial-drawing {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4) !important;
+}
+
+.tutorial-drawing:hover {
+    background: linear-gradient(135deg, #218838, #1ea080) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6) !important;
+    color: white !important;
+}
+
+/* Tutorial de Animación - Azul */
+.tutorial-animation {
+    background: linear-gradient(135deg, #007bff, #17a2b8) !important;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4) !important;
+}
+
+.tutorial-animation:hover {
+    background: linear-gradient(135deg, #0056b3, #138496) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6) !important;
+    color: white !important;
+}
+
+/* Controlar visibilidad según el modo */
+.tutorial-drawing.hidden,
+.tutorial-animation.hidden {
+    display: none !important;
+}
+
+/* Posicionamiento: cuando solo se muestra uno, va a la derecha */
+.tutorial-drawing {
+    right: 20px !important;
+}
+
+.tutorial-animation {
+    right: 20px !important;
+}
+
+/* ===== RESPONSIVE TUTORIAL STYLES ===== */
+
+/* Personalización de Intro.js para móvil */
+.introjs-tooltip {
+    background: rgba(40, 40, 40, 0.95) !important;
+    border: 2px solid #17a2b8 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    max-width: 350px !important;
+}
+
+.introjs-tooltip-header {
+    background: linear-gradient(135deg, #17a2b8, #007bff) !important;
+    color: white !important;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.introjs-tooltiptext {
+    color: #fff !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+}
+
+.introjs-button {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin: 0 4px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.introjs-button:hover {
+    background: linear-gradient(135deg, #0056b3, #004085) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;
+}
+
+.introjs-skipbutton:hover {
+    background: linear-gradient(135deg, #495057, #343a40) !important;
+}
+
+/* Estilos responsive para móvil */
+@media (max-width: 768px) {
+    /* Botones de tutorial más pequeños en móvil */
+
     .tutorial-btn {
         position: fixed !important;
         top: var(--spacing-lg) !important;
@@ -1467,4 +2323,557 @@ canvas {
 
 .basic-controls-row {
     display: none;
+}
+
+/* === ESTILOS PARA JUGADORES PERSONALIZADOS === */
+
+.custom-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border: 2px solid white;
+}
+
+.custom-badge i {
+    color: white;
+    font-size: 10px;
+}
+
+/* Formulario de jugadores personalizados */
+#custom-player-form .form-control:focus,
+#custom-player-form .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+#calculated-overall {
+    font-size: 1.2rem;
+    color: #28a745;
+}
+
+/* Preview de foto del jugador - Optimizado para 120x140px */
+#player-photo-preview {
+    width: 120px !important;
+    height: 140px !important;
+    object-fit: cover !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease;
+    border: 3px solid #dee2e6 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #f8f9fa;
+}
+
+#player-photo-preview:hover {
+    transform: scale(1.05);
+    border-color: #28a745 !important;
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+/* Tarjetas de jugadores personalizados en gestión */
+.custom-player-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    background: rgba(40, 167, 69, 0.05);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.custom-player-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.custom-player-card .player-photo {
+    width: 60px;
+    height: 70px;  /* Mantener ratio 6:7 */
+    border-radius: 4px; /* Esquinas menos redondeadas para fotos rectangulares */
+    object-fit: cover;
+    border: 2px solid #28a745;
+    background: #f8f9fa;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.custom-player-card .player-photo:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.custom-player-card .player-stats {
+    font-size: 0.8rem;
+}
+
+.custom-player-card .overall-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #28a745;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Botones de acción en tarjetas */
+.custom-player-card .action-buttons {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.custom-player-card:hover .action-buttons {
+    opacity: 1;
+}
+
+/* Info de almacenamiento */
+.storage-info {
+    background: rgba(13, 202, 240, 0.1);
+    border: 1px solid rgba(13, 202, 240, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+/* Drag and drop para importar */
+.file-drop-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: rgba(248, 249, 250, 0.5);
+}
+
+.file-drop-area.dragover {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.file-drop-area:hover {
+    border-color: #6c757d;
+    background: rgba(248, 249, 250, 0.8);
+}
+
+/* === ESTILOS DEL MÓDULO DE CONFIGURACIÓN === */
+
+/* Botón de configuración */
+#configuration-btn {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+    transition: all 0.3s ease;
+}
+
+#configuration-btn:hover {
+    background-color: #ffca2c;
+    border-color: #ffca2c;
+    color: #212529;
+    transform: scale(1.05);
+}
+
+/* Modal de configuración */
+#configuration-modal .modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#configuration-modal .modal-header {
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+#configuration-modal .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#configuration-modal .modal-body {
+    padding: 1.5rem;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Tabs de configuración */
+#configuration-modal .nav-tabs {
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+#configuration-modal .nav-tabs .nav-link {
+    color: var(--text-muted);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#configuration-modal .nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: transparent;
+    border-bottom-color: var(--primary-color);
+}
+
+#configuration-modal .nav-tabs .nav-link:hover:not(.active) {
+    color: var(--text-color);
+    border-bottom-color: var(--border-color);
+}
+
+/* Cards dentro del modal */
+#configuration-modal .card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+}
+
+#configuration-modal .card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+#configuration-modal .card-header {
+    background: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+#configuration-modal .card-body {
+    padding: 1rem;
+}
+
+/* Controles de formulario */
+#configuration-modal .form-control,
+#configuration-modal .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    background: var(--card-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+#configuration-modal .form-control:focus,
+#configuration-modal .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Switches y checkboxes */
+#configuration-modal .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+#configuration-modal .form-check-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Rangos */
+#configuration-modal .form-range {
+    background: transparent;
+}
+
+#configuration-modal .form-range::-webkit-slider-track {
+    background: var(--border-color);
+    border-radius: 4px;
+    height: 6px;
+}
+
+#configuration-modal .form-range::-webkit-slider-thumb {
+    background: var(--primary-color);
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Estadísticas de vista previa */
+.stat-box {
+    text-align: center;
+    padding: 1rem;
+    background: var(--light-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    min-width: 100px;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Cards de equipo */
+.team-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+}
+
+.team-card .team-color-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.team-card .card-body {
+    padding-left: 1.5rem;
+}
+
+.team-card .team-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.team-card .team-description {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.team-card .team-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.team-card .team-stat {
+    color: var(--text-muted);
+}
+
+.team-card .team-stat strong {
+    color: var(--primary-color);
+}
+
+/* Botones del modal */
+#configuration-modal .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+#configuration-modal .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Mensajes vacíos */
+#configuration-modal .text-center i.fa-3x {
+    opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #configuration-modal .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    #configuration-modal .modal-body {
+        padding: 1rem;
+    }
+    
+    #configuration-modal .nav-tabs .nav-link {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .stat-box {
+        min-width: 80px;
+        padding: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+}
+
+/* === ELEMENTOS DE INFORMACIÓN DEL SISTEMA === */
+
+.progress-sm {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #f1f3f4;
+    overflow: hidden;
+}
+
+.progress-sm .progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Cards de información técnica */
+.card.border-primary {
+    border-color: #007bff !important;
+}
+
+.card.border-success {
+    border-color: #28a745 !important;
+}
+
+.card.border-info {
+    border-color: #17a2b8 !important;
+}
+
+.card.border-warning {
+    border-color: #ffc107 !important;
+}
+
+/* Texto técnico pequeño */
+.small {
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.small strong {
+    font-weight: 600;
+}
+
+/* Indicadores de estado */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-indicator.success {
+    background-color: #28a745;
+}
+
+.status-indicator.warning {
+    background-color: #ffc107;
+}
+
+.status-indicator.error {
+    background-color: #dc3545;
+}
+
+/* === ESTILOS OPTIMIZADOS PARA IMÁGENES DE JUGADORES === */
+
+/* Clase base para todas las imágenes de jugadores */
+.player-image-optimized {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    object-fit: cover;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.player-image-optimized:hover {
+    transform: scale(1.05);
+    border-color: #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Tamaño estándar para vista de lista */
+.player-image-standard {
+    width: 60px;
+    height: 70px;
+}
+
+/* Tamaño mediano para previews */
+.player-image-medium {
+    width: 90px;
+    height: 105px;
+}
+
+/* Tamaño grande para previews principales */
+.player-image-large {
+    width: 120px;
+    height: 140px;
+}
+
+/* Placeholder cuando no hay imagen */
+.player-image-placeholder {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 1.5rem;
+    border: 2px dashed #dee2e6;
+}
+
+.player-image-placeholder:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    border-color: #28a745;
+}
+
+/* Estados de carga */
+.player-image-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.player-image-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Optimización para dispositivos móviles */
+@media (max-width: 576px) {
+    .player-image-large {
+        width: 100px;
+        height: 120px;
+    }
+    
+    .player-image-medium {
+        width: 75px;
+        height: 90px;
+    }
+    
+    .player-image-standard {
+        width: 50px;
+        height: 60px;
+    }
+}
 }

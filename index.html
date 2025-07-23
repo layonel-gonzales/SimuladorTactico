@@ -61,6 +61,20 @@
             <i class="fas fa-users"></i>
         </button>
         
+        <button id="custom-players-btn" class="btn btn-success btn-sm custom-players-btn-always-visible" 
+                title="Mis jugadores personalizados"
+                data-intro="Gestiona tus propios jugadores personalizados. Agrega, edita y organiza tu propia plantilla." 
+                data-step="3b">
+            <i class="fas fa-user-plus"></i>
+        </button>
+        
+        <button id="configuration-btn" class="btn btn-warning btn-sm configuration-btn-always-visible" 
+                title="Configuración del simulador"
+                data-intro="Accede a la configuración avanzada: crea equipos, establece filtros y personaliza la interfaz." 
+                data-step="3c">
+            <i class="fas fa-cogs"></i>
+        </button>
+        
         <button id="fullscreen-toggle-btn" class="btn btn-secondary btn-sm fullscreen-btn-always-visible" 
                 title="Pantalla completa"
                 data-intro="Activa o desactiva el modo pantalla completa para una mejor experiencia de juego." 
@@ -210,7 +224,7 @@
         </div>
     </div>
 
-    <div class="modal fade custom-z-index-modal" style="z-index: 9999;" id="squad-selection-modal" tabindex="-1" aria-labelledby="squadSelectionModalLabel" aria-hidden="true">
+    <div class="modal fade custom-z-index-modal" style="z-index: 8888;" id="squad-selection-modal" tabindex="-1" aria-labelledby="squadSelectionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -241,6 +255,247 @@
                 </div>
                 <div class="modal-body" id="player-modal-body-content">
                     </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para gestión de jugadores personalizados -->
+    <div class="modal fade custom-z-index-modal" style="z-index: 9999;" id="custom-players-modal" tabindex="-1" aria-labelledby="customPlayersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customPlayersModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>Mis Jugadores Personalizados
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs de navegación -->
+                    <ul class="nav nav-tabs mb-4" id="customPlayersTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="add-player-tab" data-bs-toggle="tab" data-bs-target="#add-player-panel" type="button" role="tab">
+                                <i class="fas fa-plus me-1"></i>Agregar Jugador
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="manage-players-tab" data-bs-toggle="tab" data-bs-target="#manage-players-panel" type="button" role="tab">
+                                <i class="fas fa-users me-1"></i>Gestionar Jugadores
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="import-export-tab" data-bs-toggle="tab" data-bs-target="#import-export-panel" type="button" role="tab">
+                                <i class="fas fa-exchange-alt me-1"></i>Importar/Exportar
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="customPlayersTabContent">
+                        <!-- Panel: Agregar Jugador -->
+                        <div class="tab-pane fade show active" id="add-player-panel" role="tabpanel">
+                            <form id="custom-player-form" class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="player-name" class="form-label">Nombre del Jugador *</label>
+                                    <input type="text" class="form-control" id="player-name" required maxlength="30">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="player-jersey" class="form-label">Dorsal</label>
+                                    <input type="number" class="form-control" id="player-jersey" min="1" max="99">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="player-position" class="form-label">Posición *</label>
+                                    <select class="form-select" id="player-position" required>
+                                        <option value="">Seleccionar...</option>
+                                        <optgroup label="Porteros">
+                                            <option value="GK">GK - Portero</option>
+                                        </optgroup>
+                                        <optgroup label="Defensas">
+                                            <option value="CB">CB - Central</option>
+                                            <option value="LB">LB - Lateral Izq</option>
+                                            <option value="RB">RB - Lateral Der</option>
+                                        </optgroup>
+                                        <optgroup label="Mediocampistas">
+                                            <option value="CDM">CDM - Pivote</option>
+                                            <option value="CM">CM - Centro</option>
+                                            <option value="CAM">CAM - Enganche</option>
+                                            <option value="LM">LM - Medio Izq</option>
+                                            <option value="RM">RM - Medio Der</option>
+                                        </optgroup>
+                                        <optgroup label="Delanteros">
+                                            <option value="LW">LW - Extremo Izq</option>
+                                            <option value="RW">RW - Extremo Der</option>
+                                            <option value="ST">ST - Delantero</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <!-- Estadísticas del jugador -->
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-chart-bar me-2"></i>Estadísticas (1-99)
+                                    </h6>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <label for="player-pace" class="form-label">Velocidad</label>
+                                    <input type="number" class="form-control" id="player-pace" min="1" max="99" value="70">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="player-shooting" class="form-label">Disparo</label>
+                                    <input type="number" class="form-control" id="player-shooting" min="1" max="99" value="70">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="player-passing" class="form-label">Pase</label>
+                                    <input type="number" class="form-control" id="player-passing" min="1" max="99" value="70">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="player-dribbling" class="form-label">Regate</label>
+                                    <input type="number" class="form-control" id="player-dribbling" min="1" max="99" value="70">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="player-defending" class="form-label">Defensa</label>
+                                    <input type="number" class="form-control" id="player-defending" min="1" max="99" value="70">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="player-physical" class="form-label">Físico</label>
+                                    <input type="number" class="form-control" id="player-physical" min="1" max="99" value="70">
+                                </div>
+
+                                <!-- Foto del jugador -->
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-camera me-2"></i>Foto del Jugador (Opcional)
+                                    </h6>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3">
+                                            <img id="player-photo-preview" src="img/default_player.png" 
+                                                 alt="Vista previa" class="img-fluid rounded border" 
+                                                 style="max-height: 150px; object-fit: cover;">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="file" class="form-control" id="player-photo" 
+                                                   accept="image/*" capture="user">
+                                            <div class="form-text">
+                                                <i class="fas fa-magic me-1 text-primary"></i>
+                                                <strong>Procesamiento inteligente:</strong> JPG, PNG, GIF (máx. 5MB) → 120×140px optimizado
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-sparkles me-1"></i>
+                                                    Preserva transparencia automáticamente. PNG para imágenes con transparencia, JPEG para opacas.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Overall calculado automáticamente -->
+                                <div class="col-12">
+                                    <div class="alert alert-info d-flex align-items-center">
+                                        <i class="fas fa-calculator me-2"></i>
+                                        <span>Overall calculado: <strong id="calculated-overall">70</strong>/99</span>
+                                    </div>
+                                </div>
+
+                                <!-- Botones -->
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary" id="reset-form-btn">
+                                            <i class="fas fa-undo me-1"></i>Limpiar Formulario
+                                        </button>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save me-1"></i>Agregar Jugador
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Panel: Gestionar Jugadores -->
+                        <div class="tab-pane fade" id="manage-players-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-users me-2"></i>
+                                    Jugadores Personalizados (<span id="custom-players-count">0</span>)
+                                </h6>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-danger btn-sm" id="clear-all-custom-btn">
+                                        <i class="fas fa-trash me-1"></i>Limpiar Todo
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" id="storage-info-btn">
+                                        <i class="fas fa-info-circle me-1"></i>Info de Almacenamiento
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="custom-players-list" class="row g-3">
+                                <!-- Los jugadores personalizados se cargarán aquí dinámicamente -->
+                            </div>
+                            
+                            <div id="no-custom-players" class="text-center py-5" style="display: none;">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No tienes jugadores personalizados</h5>
+                                <p class="text-muted">Agrega tu primer jugador en la pestaña "Agregar Jugador"</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel: Importar/Exportar -->
+                        <div class="tab-pane fade" id="import-export-panel" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-download me-2"></i>Exportar Jugadores
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">
+                                                Descarga todos tus jugadores personalizados como archivo JSON 
+                                                para hacer respaldo o compartir con otros usuarios.
+                                            </p>
+                                            <button class="btn btn-primary" id="export-players-btn">
+                                                <i class="fas fa-file-download me-2"></i>Exportar Jugadores
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-upload me-2"></i>Importar Jugadores
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">
+                                                Carga jugadores desde un archivo JSON exportado previamente.
+                                                Se agregarán a tus jugadores existentes.
+                                            </p>
+                                            <input type="file" class="form-control mb-3" id="import-players-file" accept=".json">
+                                            <button class="btn btn-success" id="import-players-btn" disabled>
+                                                <i class="fas fa-file-upload me-2"></i>Importar Jugadores
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="alert alert-warning">
+                                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Importante:</h6>
+                                        <ul class="mb-0">
+                                            <li>Los datos se almacenan localmente en tu dispositivo</li>
+                                            <li>Si borras los datos del navegador, perderás tus jugadores personalizados</li>
+                                            <li>Exporta regularmente para hacer respaldo</li>
+                                            <li>Los archivos importados deben ser válidos y exportados desde esta aplicación</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>

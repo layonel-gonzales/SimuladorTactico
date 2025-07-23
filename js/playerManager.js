@@ -1,6 +1,8 @@
 export default class PlayerManager {
-    constructor(players) {
+    constructor(players, customPlayersManager = null, configurationManager = null) {
         this.players = players;
+        this.customPlayersManager = customPlayersManager;
+        this.configurationManager = configurationManager;
         this.activePlayers = [];
     }
     
@@ -13,15 +15,21 @@ export default class PlayerManager {
     }
     
     getWeightsForPosition(position) {
-        const positionType = this.getPositionType(position);
         const weights = {
-            GK: { pace: 0.1, shooting: 0, passing: 0.1, dribbling: 0, defending: 0.5, physical: 0.3 },
-            DF: { pace: 0.2, shooting: 0.1, passing: 0.2, dribbling: 0.1, defending: 0.3, physical: 0.2 },
-            MC: { pace: 0.1, shooting: 0.1, passing: 0.3, dribbling: 0.25, defending: 0.1, physical: 0.15 },
-            FW: { pace: 0.2, shooting: 0.4, passing: 0.05, dribbling: 0.25, defending: 0.05, physical: 0.05 }
+            'GK': { pace: 0.1, shooting: 0.0, passing: 0.15, dribbling: 0.05, defending: 0.6, physical: 0.1 },
+            'CB': { pace: 0.1, shooting: 0.05, passing: 0.2, dribbling: 0.05, defending: 0.5, physical: 0.1 },
+            'LB': { pace: 0.2, shooting: 0.1, passing: 0.2, dribbling: 0.1, defending: 0.3, physical: 0.1 },
+            'RB': { pace: 0.2, shooting: 0.1, passing: 0.2, dribbling: 0.1, defending: 0.3, physical: 0.1 },
+            'CDM': { pace: 0.1, shooting: 0.1, passing: 0.25, dribbling: 0.15, defending: 0.3, physical: 0.1 },
+            'CM': { pace: 0.15, shooting: 0.15, passing: 0.25, dribbling: 0.2, defending: 0.15, physical: 0.1 },
+            'CAM': { pace: 0.15, shooting: 0.2, passing: 0.25, dribbling: 0.25, defending: 0.05, physical: 0.1 },
+            'LM': { pace: 0.2, shooting: 0.15, passing: 0.2, dribbling: 0.2, defending: 0.15, physical: 0.1 },
+            'RM': { pace: 0.2, shooting: 0.15, passing: 0.2, dribbling: 0.2, defending: 0.15, physical: 0.1 },
+            'LW': { pace: 0.25, shooting: 0.2, passing: 0.15, dribbling: 0.25, defending: 0.05, physical: 0.1 },
+            'RW': { pace: 0.25, shooting: 0.2, passing: 0.15, dribbling: 0.25, defending: 0.05, physical: 0.1 },
+            'ST': { pace: 0.2, shooting: 0.3, passing: 0.1, dribbling: 0.2, defending: 0.05, physical: 0.15 }
         };
-        
-        return weights[positionType] || weights.MC;
+        return weights[position] || weights['CM'];
     }
     
     getPositionType(position) {
@@ -97,15 +105,26 @@ export default class PlayerManager {
     }
     
     renderPlayerSelectionList() {
+        console.log('[PlayerManager] Renderizando lista de selección de jugadores...');
+        
         const container = document.getElementById('squad-player-list');
+        if (!container) {
+            console.warn('[PlayerManager] Contenedor squad-player-list no encontrado');
+            return;
+        }
+        
         container.innerHTML = '';
+        
+        // Obtener todos los jugadores (estáticos + personalizados) con filtros aplicados
+        const allPlayers = this.getAllPlayers();
+        console.log(`[PlayerManager] Jugadores después de filtros: ${allPlayers.length}`);
         
         // Agrupar por posición
         const byPosition = {
-            Porteros: this.players.filter(p => p.position === 'GK'),
-            Defensas: this.players.filter(p => ['CB','RB','LB'].includes(p.position)),
-            Mediocampistas: this.players.filter(p => ['CM','CDM','CAM','RM','LM'].includes(p.position)),
-            Delanteros: this.players.filter(p => ['ST','CF','RW','LW'].includes(p.position))
+            Porteros: allPlayers.filter(p => p.position === 'GK'),
+            Defensas: allPlayers.filter(p => ['CB','RB','LB'].includes(p.position)),
+            Mediocampistas: allPlayers.filter(p => ['CM','CDM','CAM','RM','LM'].includes(p.position)),
+            Delanteros: allPlayers.filter(p => ['ST','CF','RW','LW'].includes(p.position))
         };
         
         // Renderizar por grupos
@@ -118,24 +137,47 @@ export default class PlayerManager {
             container.appendChild(groupHeader);
             
             players.forEach(player => {
-                const playerItem = this.createPlayerSelectionItem(player);
+                const playerItem = this.createPlayerSelectionItem(player, player.isCustom);
                 container.appendChild(playerItem);
             });
         }
+
+        // Agregar sección de jugadores personalizados si no hay ninguno
+        if (this.customPlayersManager) {
+            const customPlayers = this.customPlayersManager.getCustomPlayers();
+            if (customPlayers.length === 0) {
+                const customPrompt = document.createElement('div');
+                customPrompt.className = 'col-12 mt-4';
+                customPrompt.innerHTML = `
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-user-plus me-2"></i>¿Quieres agregar tus propios jugadores?</h6>
+                        <p class="mb-2">Crea jugadores personalizados con fotos, nombres y estadísticas propias.</p>
+                        <button class="btn btn-success btn-sm" onclick="document.getElementById('custom-players-btn').click()">
+                            <i class="fas fa-plus me-1"></i>Crear Jugadores Personalizados
+                        </button>
+                    </div>
+                `;
+                container.appendChild(customPrompt);
+            }
+        }
     }
 
-    createPlayerSelectionItem(player) {
-        // Usar el sistema unificado de cards
+
+    createPlayerSelectionItem(player, isCustom = false) {
+        // Usar el sistema unificado de cards si está disponible
         if (window.playerCardManager) {
             return window.playerCardManager.createPlayerCard(player, 'selection');
         }
         
         // Fallback al método anterior si el manager no está disponible
         const playerItem = document.createElement('div');
-        playerItem.className = 'squad-player-item';
+        playerItem.className = 'squad-player-item' + (isCustom ? ' custom-player' : '');
         playerItem.dataset.playerId = player.id;
         
+        const customBadge = isCustom ? '<div class="custom-badge"><i class="fas fa-star"></i></div>' : '';
+        
         playerItem.innerHTML = `
+            ${customBadge}
             <div class="minicard-overall player-card-element" 
                  data-element="overall" 
                  data-player-id="${player.id}"
@@ -160,6 +202,31 @@ export default class PlayerManager {
     }
     
     getPlayerById(id) {
+        // Buscar primero en jugadores personalizados, luego en estáticos
+        if (this.customPlayersManager) {
+            const customPlayer = this.customPlayersManager.getPlayerById(id, this.players);
+            if (customPlayer) return customPlayer;
+        }
+        
         return this.players.find(player => player.id === id);
+    }
+
+    // Nuevo método para obtener todos los jugadores (estáticos + personalizados) con filtros
+    getAllPlayers() {
+        let allPlayers;
+        if (this.customPlayersManager) {
+            allPlayers = this.customPlayersManager.getAllPlayers(this.players);
+        } else {
+            allPlayers = this.players;
+        }
+
+        // Aplicar filtros de configuración si está disponible
+        if (this.configurationManager) {
+            return allPlayers.filter(player => 
+                this.configurationManager.shouldShowPlayer(player)
+            );
+        }
+
+        return allPlayers;
     }
 }

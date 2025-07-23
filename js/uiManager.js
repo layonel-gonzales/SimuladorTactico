@@ -179,6 +179,22 @@ export default class UIManager {
                 }
             });
         }
+
+        // Event listener para actualizar la lista cuando se abra el modal de selección
+        const squadSelectionModal = document.getElementById('squad-selection-modal');
+        if (squadSelectionModal) {
+            squadSelectionModal.addEventListener('shown.bs.modal', () => {
+                console.log('UIManager: Modal de selección de jugadores abierto - Actualizando lista...');
+                // Actualizar la lista de jugadores con filtros aplicados
+                if (this.playerManager && typeof this.playerManager.renderPlayerSelectionList === 'function') {
+                    this.playerManager.renderPlayerSelectionList();
+                } else {
+                    console.warn('UIManager: playerManager o renderPlayerSelectionList no disponible');
+                }
+            });
+        } else {
+            console.warn('UIManager: Modal squad-selection-modal no encontrado para event listener');
+        }
     }
 
     // --- NUEVO MÉTODO ---

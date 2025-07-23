@@ -10,6 +10,10 @@ import TutorialManager from './tutorialManager.js';
 import FullscreenManager from './fullscreenManager.js';
 import OrientationManager from './orientationManager.js';
 import AudioManager from './audioManager.js';
+import CustomPlayersManager from './customPlayersManager.js';
+import CustomPlayersUI from './customPlayersUI.js';
+import ConfigurationManager from './configurationManager.js';
+import ConfigurationUI from './configurationUI.js';
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
@@ -22,6 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Inicializar el gestor de audio
     const audioManager = new AudioManager();
+
+    // Inicializar el gestor de jugadores personalizados
+    const customPlayersManager = new CustomPlayersManager();
+
+    // Inicializar el gestor de configuración
+    const configurationManager = new ConfigurationManager(customPlayersManager);
 
     // Función global para comunicación con UIManager y BallDrawingManager
     window.main = {
@@ -108,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Inicialización de módulos especializados
-    const playerManager = new PlayerManager(staticPlayers);
+    const playerManager = new PlayerManager(staticPlayers, customPlayersManager, configurationManager);
     const drawingManager = new DrawingManager('drawing-canvas');
     
     // NUEVO: Gestores especializados para las dos funcionalidades principales
@@ -132,6 +142,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Crear UIManager y conectar con los gestores especializados
     const uiManager = new UIManager();
     
+    // Inicializar la interfaz de jugadores personalizados
+    const customPlayersUI = new CustomPlayersUI(customPlayersManager, playerManager);
+    window.customPlayersUI = customPlayersUI; // Hacer disponible globalmente
+    
+    // Inicializar la interfaz de configuración
+    const configurationUI = new ConfigurationUI(configurationManager, customPlayersManager, playerManager);
+    window.configurationUI = configurationUI; // Hacer disponible globalmente
+    
+    // Conectar el botón de configuración
+    const configurationBtn = document.getElementById('configuration-btn');
+    if (configurationBtn) {
+        configurationBtn.addEventListener('click', () => {
+            configurationUI.openConfigurationModal();
+        });
+    }
+    
     // Conectar todos los gestores
     animationManager.uiManager = uiManager;
     modeManager.setManagers(drawingManager, ballDrawingManager, animationManager, uiManager);
@@ -152,6 +178,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('- Botón global de plantilla existe:', !!document.getElementById('global-select-squad-btn'));
         console.log('- Drawing controls existe:', !!document.getElementById('drawing-mode-controls'));
         console.log('- Animation controls existe:', !!document.getElementById('animation-mode-controls'));
+        
+        // Agregar función global para debug de filtros
+        window.debugFilters = () => {
+            console.log('=== DEBUG DE FILTROS ===');
+            console.log('ConfigurationManager existe:', !!configurationManager);
+            console.log('PlayerManager existe:', !!playerManager);
+            if (configurationManager) {
+                const settings = configurationManager.getAllSettings();
+                console.log('Configuraciones actuales:', settings);
+            }
+            if (playerManager) {
+                const allPlayers = playerManager.getAllPlayers();
+                console.log('Jugadores filtrados:', allPlayers.length);
+            }
+        };
+        
+        console.log('[Main] Debug function available: window.debugFilters()');
     }, 100);
 
     // --- Exportar animación como JSON ---
