@@ -270,20 +270,47 @@ export default class ModeManager {
         const animationTutorialBtn = document.getElementById('start-tutorial-animation-btn');
         
         if (drawingTutorialBtn && animationTutorialBtn) {
+            // Notificar al sistema de configuración sobre el cambio de modo
+            if (window.safeConfigurationUpdater) {
+                window.safeConfigurationUpdater.handleModeChange(this.currentMode);
+            }
+            
+            // Solo aplicar la lógica de modo si no hay configuración específica del usuario
+            const drawingUserConfig = drawingTutorialBtn.getAttribute('data-config-visible');
+            const animationUserConfig = animationTutorialBtn.getAttribute('data-config-visible');
+            
             if (this.currentMode === 'drawing') {
-                // Mostrar solo el botón de tutorial de dibujo
-                drawingTutorialBtn.classList.remove('hidden');
-                drawingTutorialBtn.style.display = 'flex';
+                // Mostrar tutorial de dibujo solo si el usuario no lo ha configurado como oculto
+                if (drawingUserConfig !== 'false') {
+                    drawingTutorialBtn.classList.remove('hidden');
+                    if (!drawingTutorialBtn.classList.contains('config-hidden')) {
+                        drawingTutorialBtn.style.display = 'flex';
+                    }
+                }
+                
+                // Ocultar tutorial de animación (independiente de configuración usuario)
                 animationTutorialBtn.classList.add('hidden');
-                animationTutorialBtn.style.display = 'none';
-                console.log('[ModeManager] 📚 Mostrando tutorial de DIBUJO, ocultando tutorial de ANIMACIÓN');
+                if (!animationTutorialBtn.classList.contains('config-visible')) {
+                    animationTutorialBtn.style.display = 'none';
+                }
+                
+                console.log('[ModeManager] 📚 Modo DIBUJO activo');
             } else {
-                // Mostrar solo el botón de tutorial de animación
-                animationTutorialBtn.classList.remove('hidden');
-                animationTutorialBtn.style.display = 'flex';
+                // Mostrar tutorial de animación solo si el usuario no lo ha configurado como oculto
+                if (animationUserConfig !== 'false') {
+                    animationTutorialBtn.classList.remove('hidden');
+                    if (!animationTutorialBtn.classList.contains('config-hidden')) {
+                        animationTutorialBtn.style.display = 'flex';
+                    }
+                }
+                
+                // Ocultar tutorial de dibujo (independiente de configuración usuario)
                 drawingTutorialBtn.classList.add('hidden');
-                drawingTutorialBtn.style.display = 'none';
-                console.log('[ModeManager] 📚 Mostrando tutorial de ANIMACIÓN, ocultando tutorial de DIBUJO');
+                if (!drawingTutorialBtn.classList.contains('config-visible')) {
+                    drawingTutorialBtn.style.display = 'none';
+                }
+                
+                console.log('[ModeManager] 📚 Modo ANIMACIÓN activo');
             }
         } else {
             console.warn('[ModeManager] ❌ No se encontraron los botones de tutorial');

@@ -257,5 +257,3 @@ class PaymentManager {
 window.paymentManager = new PaymentManager();
 
 console.log('[Payment] Sistema de pagos inicializado');
-
-export default PaymentManager;

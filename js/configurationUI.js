@@ -1,234 +1,129 @@
 // configurationUI.js
-// Interfaz de usuario para el módulo de configuración
+// Interfaz de configuración de elementos visuales del simulador
 
 export default class ConfigurationUI {
     constructor(configurationManager, customPlayersManager, playerManager) {
         this.configurationManager = configurationManager;
         this.customPlayersManager = customPlayersManager;
         this.playerManager = playerManager;
-        this.currentEditingTeam = null;
         
         this.init();
+        
+        // Escuchar cambios de configuración
+        window.addEventListener('configurationChanged', this.handleConfigurationChange.bind(this));
+        
+        // Escuchar cambios de modo para actualizar botones de tutorial
+        document.addEventListener('modeChanged', this.handleModeChange.bind(this));
+        
+        console.log('[ConfigurationUI] Inicializado correctamente');
     }
 
     init() {
         this.setupEventListeners();
-        this.updateFilterControls();
-        console.log('[ConfigurationUI] Inicializado correctamente');
+        // Aplicar configuraciones guardadas al inicializar
+        setTimeout(() => this.applySavedSettings(), 1000);
     }
 
     setupEventListeners() {
-        // Escuchar cambios de configuración
-        document.addEventListener('settingsChanged', (e) => {
-            this.handleSettingChanged(e.detail);
-        });
-
-        // Event listeners para los modales y controles se configurarán cuando se abran
+        // Los event listeners se configurarán cuando se cree el modal
     }
 
     // === INTERFAZ PRINCIPAL ===
 
     createConfigurationModal() {
+        // Eliminar modal existente si existe
+        const existingModal = document.getElementById('configuration-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
         const modalHtml = `
-            <!-- Modal de Configuración -->
+            <!-- Modal de Configuración de Interfaz -->
             <div class="modal fade custom-z-index-modal" id="configuration-modal" style="z-index: 9999;" tabindex="-1" aria-labelledby="configurationModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="configurationModalLabel">
-                                <i class="fas fa-cogs me-2"></i>Configuración del Simulador
+                                <i class="fas fa-desktop me-2"></i>Configuración de Interfaz
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <!-- Tabs de navegación -->
-                            <ul class="nav nav-tabs mb-4" id="configurationTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="player-filters-tab" data-bs-toggle="tab" data-bs-target="#player-filters-panel" type="button" role="tab">
-                                        <i class="fas fa-filter me-1"></i>Filtros de Jugadores
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="teams-management-tab" data-bs-toggle="tab" data-bs-target="#teams-management-panel" type="button" role="tab">
-                                        <i class="fas fa-shield-alt me-1"></i>Gestión de Equipos
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="interface-settings-tab" data-bs-toggle="tab" data-bs-target="#interface-settings-panel" type="button" role="tab">
-                                        <i class="fas fa-palette me-1"></i>Interfaz
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="backup-settings-tab" data-bs-toggle="tab" data-bs-target="#backup-settings-panel" type="button" role="tab">
-                                        <i class="fas fa-download me-1"></i>Respaldo
-                                    </button>
-                                </li>
-                            </ul>
-
-                            <div class="tab-content" id="configurationTabContent">
-                                ${this.createPlayerFiltersPanel()}
-                                ${this.createTeamsManagementPanel()}
-                                ${this.createInterfaceSettingsPanel()}
-                                ${this.createBackupSettingsPanel()}
+                            <div class="row g-4">
+                                ${this.createPlayerCardSettingsCard()}
+                                ${this.createTutorialSettingsCard()}
+                                ${this.createDrawingSettingsCard()}
+                                ${this.createAnimationSettingsCard()}
+                                ${this.createGeneralSettingsCard()}
+                                ${this.createThemeSettingsCard()}
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-warning" id="reset-all-settings-btn">
                                 <i class="fas fa-undo me-1"></i>Restablecer Todo
                             </button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                <i class="fas fa-check me-1"></i>Guardar Cambios
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
 
-        // Agregar al DOM si no existe
-        if (!document.getElementById('configuration-modal')) {
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            this.setupModalEventListeners();
-        }
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        this.setupModalEventListeners();
     }
 
-    createPlayerFiltersPanel() {
+    // ==================== CARDS DE CONFIGURACIÓN DE INTERFAZ ====================
+
+    createPlayerCardSettingsCard() {
         return `
-            <div class="tab-pane fade show active" id="player-filters-panel" role="tabpanel">
-                <div class="row g-4">
-                    <!-- Filtro de tipo de jugadores -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-users me-2"></i>Tipo de Jugadores
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted small mb-3">
-                                    Elige qué jugadores mostrar en la selección de plantilla.
-                                </p>
-                                <div class="row g-2" id="player-filter-options">
-                                    <!-- Se llenará dinámicamente -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filtro por equipo -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-shield-alt me-2"></i>Filtro por Equipo
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted small mb-3">
-                                    Filtra jugadores por equipo específico (requiere equipos creados).
-                                </p>
-                                <select class="form-select" id="team-filter-select">
-                                    <option value="all">Todos los equipos</option>
-                                    <!-- Se llenará dinámicamente -->
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Vista previa de filtros -->
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-eye me-2"></i>Vista Previa
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="filter-preview" class="d-flex align-items-center gap-3">
-                                    <div class="stat-box">
-                                        <div class="stat-number" id="filtered-players-count">0</div>
-                                        <div class="stat-label">Jugadores mostrados</div>
-                                    </div>
-                                    <div class="stat-box">
-                                        <div class="stat-number" id="filtered-teams-count">0</div>
-                                        <div class="stat-label">Equipos incluidos</div>
-                                    </div>
-                                    <div class="stat-box">
-                                        <div class="stat-number" id="filtered-custom-count">0</div>
-                                        <div class="stat-label">Personalizados</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    createTeamsManagementPanel() {
-        return `
-            <div class="tab-pane fade" id="teams-management-panel" role="tabpanel">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h6 class="mb-1">
-                            <i class="fas fa-shield-alt me-2"></i>
-                            Mis Equipos (<span id="teams-count">0</span>)
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-id-card me-2"></i>Tarjeta de Jugador
                         </h6>
-                        <p class="text-muted small mb-0">
-                            Crea equipos para organizar mejor tus jugadores personalizados.
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Controla qué elementos se muestran en las tarjetas de jugadores
                         </p>
-                    </div>
-                    <button class="btn btn-success" id="add-team-btn">
-                        <i class="fas fa-plus me-1"></i>Crear Equipo
-                    </button>
-                </div>
-
-                <div id="teams-list" class="row g-3">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-
-                <div id="no-teams-message" class="text-center py-5" style="display: none;">
-                    <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No tienes equipos creados</h5>
-                    <p class="text-muted">Los equipos te ayudan a organizar jugadores por categorías como "Titulares", "Suplentes", "Juveniles", etc.</p>
-                    <button class="btn btn-success" onclick="document.getElementById('add-team-btn').click()">
-                        <i class="fas fa-plus me-1"></i>Crear tu Primer Equipo
-                    </button>
-                </div>
-
-                <!-- Modal para crear/editar equipo -->
-                <div class="modal fade" id="team-form-modal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="team-form-modal-title">Crear Equipo</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="team-form">
-                                    <div class="mb-3">
-                                        <label for="team-name" class="form-label">Nombre del Equipo *</label>
-                                        <input type="text" class="form-control" id="team-name" required maxlength="30">
-                                        <div class="form-text">Ejemplo: "Titulares", "Suplentes", "Real Madrid", etc.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="team-description" class="form-label">Descripción (Opcional)</label>
-                                        <textarea class="form-control" id="team-description" rows="2" maxlength="100"></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="team-color" class="form-label">Color Representativo</label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="color" class="form-control form-control-color" id="team-color" value="#007bff">
-                                            <small class="text-muted">Se usará para identificar el equipo visualmente</small>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" form="team-form" class="btn btn-success" id="save-team-btn">
-                                    <i class="fas fa-save me-1"></i>Guardar Equipo
-                                </button>
-                            </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="show-player-image" checked>
+                            <label class="form-check-label" for="show-player-image">
+                                <i class="fas fa-camera me-1"></i>Foto del jugador
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="show-player-name" checked>
+                            <label class="form-check-label" for="show-player-name">
+                                <i class="fas fa-user me-1"></i>Nombre del jugador
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="show-player-overall" checked>
+                            <label class="form-check-label" for="show-player-overall">
+                                <i class="fas fa-star me-1"></i>Overall (puntuación)
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="show-player-position" checked>
+                            <label class="form-check-label" for="show-player-position">
+                                <i class="fas fa-map-marker-alt me-1"></i>Posición
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="show-player-jersey" checked>
+                            <label class="form-check-label" for="show-player-jersey">
+                                <i class="fas fa-hashtag me-1"></i>Número de camiseta
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -236,105 +131,28 @@ export default class ConfigurationUI {
         `;
     }
 
-    createInterfaceSettingsPanel() {
+    createTutorialSettingsCard() {
         return `
-            <div class="tab-pane fade" id="interface-settings-panel" role="tabpanel">
-                <div class="row g-4">
-                    <!-- Configuraciones de visualización -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-eye me-2"></i>Visualización de Jugadores
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show-player-overalls" checked>
-                                    <label class="form-check-label" for="show-player-overalls">
-                                        Mostrar Overall de jugadores
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show-player-photos" checked>
-                                    <label class="form-check-label" for="show-player-photos">
-                                        Mostrar fotos de jugadores
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="compact-player-list">
-                                    <label class="form-check-label" for="compact-player-list">
-                                        Lista compacta de jugadores
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-graduation-cap me-2"></i>Tutorial
+                        </h6>
                     </div>
-
-                    <!-- Configuraciones de animación -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-play me-2"></i>Animaciones
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="animation-speed" class="form-label">Velocidad por defecto</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range" id="animation-speed" min="0.5" max="2.0" step="0.1" value="1.0">
-                                        <span class="badge bg-primary" id="speed-value">1.0x</span>
-                                    </div>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show-animation-trails" checked>
-                                    <label class="form-check-label" for="show-animation-trails">
-                                        Mostrar estelas en animaciones
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Configuraciones generales -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-cog me-2"></i>General
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="auto-save" checked>
-                                    <label class="form-check-label" for="auto-save">
-                                        Guardar automáticamente
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show-tutorial-hints" checked>
-                                    <label class="form-check-label" for="show-tutorial-hints">
-                                        Mostrar consejos del tutorial
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Información del sistema -->
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>Información del Sistema
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="system-info">
-                                    <!-- Se llenará dinámicamente -->
-                                </div>
-                            </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Controla la visibilidad de los botones de tutorial
+                        </p>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="show-tutorial-buttons" checked>
+                            <label class="form-check-label" for="show-tutorial-buttons">
+                                <i class="fas fa-hand-pointer me-1"></i>Mostrar botones de tutorial
+                            </label>
+                            <small class="form-text text-muted d-block mt-1">
+                                Botones de ayuda según el modo actual
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -342,57 +160,174 @@ export default class ConfigurationUI {
         `;
     }
 
-    createBackupSettingsPanel() {
+    createDrawingSettingsCard() {
         return `
-            <div class="tab-pane fade" id="backup-settings-panel" role="tabpanel">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-download me-2"></i>Exportar Configuración
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    Descarga todas tus configuraciones y equipos como archivo JSON 
-                                    para hacer respaldo o transferir a otro dispositivo.
-                                </p>
-                                <button class="btn btn-primary" id="export-config-btn">
-                                    <i class="fas fa-file-download me-2"></i>Exportar Todo
-                                </button>
-                            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-pen me-2"></i>Herramientas de Dibujo
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Configura las opciones por defecto del dibujo
+                        </p>
+                        
+                        <div class="mb-3">
+                            <label for="default-line-color" class="form-label">
+                                <i class="fas fa-palette me-1"></i>Color por defecto
+                            </label>
+                            <input type="color" class="form-control form-control-color" id="default-line-color" value="#ffff00">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="default-line-thickness" class="form-label">
+                                <i class="fas fa-ruler me-1"></i>Grosor por defecto
+                            </label>
+                            <input type="range" class="form-range" id="default-line-thickness" min="1" max="15" value="6">
+                            <small class="form-text text-muted">Valor: <span id="thickness-value">6</span>px</small>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="show-drawing-toolbar" checked>
+                            <label class="form-check-label" for="show-drawing-toolbar">
+                                <i class="fas fa-tools me-1"></i>Mostrar barra de herramientas
+                            </label>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-upload me-2"></i>Importar Configuración
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    Carga configuraciones y equipos desde un archivo JSON exportado previamente.
-                                </p>
-                                <input type="file" class="form-control mb-3" id="import-config-file" accept=".json">
-                                <button class="btn btn-success" id="import-config-btn" disabled>
-                                    <i class="fas fa-file-upload me-2"></i>Importar
-                                </button>
+                </div>
+            </div>
+        `;
+    }
+
+    createAnimationSettingsCard() {
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-play me-2"></i>Animaciones
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Controla las animaciones y transiciones
+                        </p>
+                        
+                        <div class="mb-3">
+                            <label for="animation-speed" class="form-label">
+                                <i class="fas fa-tachometer-alt me-1"></i>Velocidad de animación
+                            </label>
+                            <input type="range" class="form-range" id="animation-speed" 
+                                   min="0.25" max="3" step="0.25" value="1">
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>0.25x (Muy lenta)</span>
+                                <span id="speed-value">1x</span>
+                                <span>3x (Muy rápida)</span>
                             </div>
                         </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="smooth-movements" checked>
+                            <label class="form-check-label" for="smooth-movements">
+                                <i class="fas fa-water me-1"></i>Movimientos suaves
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="fade-transitions" checked>
+                            <label class="form-check-label" for="fade-transitions">
+                                <i class="fas fa-eye me-1"></i>Transiciones de entrada/salida
+                            </label>
+                        </div>
                     </div>
-                    
-                    <div class="col-12">
-                        <div class="alert alert-warning">
-                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Información Importante:</h6>
-                            <ul class="mb-0">
-                                <li><strong>Configuraciones:</strong> Incluye filtros, preferencias de interfaz y configuraciones generales</li>
-                                <li><strong>Equipos:</strong> Incluye todos los equipos creados (pero no los jugadores asignados)</li>
-                                <li><strong>Los jugadores personalizados se exportan por separado</strong> en el módulo de jugadores</li>
-                                <li><strong>Importar sobrescribirá</strong> la configuración actual</li>
-                            </ul>
+                </div>
+            </div>
+        `;
+    }
+
+    createGeneralSettingsCard() {
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-cog me-2"></i>General
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Configuraciones generales de la interfaz
+                        </p>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirm-actions-toggle">
+                            <label class="form-check-label" for="confirm-actions-toggle">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Confirmar acciones destructivas
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Solicitar confirmación antes de borrar líneas, reiniciar animaciones, etc.
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="compact-mode-toggle">
+                            <label class="form-check-label" for="compact-mode-toggle">
+                                <i class="fas fa-compress me-1"></i>Modo compacto
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Ocultar separadores verticales para aprovechar mejor el espacio
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    createThemeSettingsCard() {
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-dark">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-paint-brush me-2"></i>Tema Visual
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted mb-3">
+                            Personaliza la apariencia visual
+                        </p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-moon me-1"></i>Modo de color
+                            </label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="theme-mode" id="theme-auto" checked>
+                                <label class="btn btn-outline-secondary btn-sm" for="theme-auto">Auto</label>
+                                
+                                <input type="radio" class="btn-check" name="theme-mode" id="theme-light">
+                                <label class="btn btn-outline-secondary btn-sm" for="theme-light">Claro</label>
+                                
+                                <input type="radio" class="btn-check" name="theme-mode" id="theme-dark">
+                                <label class="btn btn-outline-secondary btn-sm" for="theme-dark">Oscuro</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="accent-color" class="form-label">
+                                <i class="fas fa-star me-1"></i>Color de acento
+                            </label>
+                            <input type="color" class="form-control form-control-color" id="accent-color" value="#0d6efd">
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="high-contrast">
+                            <label class="form-check-label" for="high-contrast">
+                                <i class="fas fa-adjust me-1"></i>Alto contraste
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -403,37 +338,691 @@ export default class ConfigurationUI {
     // === EVENT HANDLERS ===
 
     setupModalEventListeners() {
-        // Event listeners se configurarán aquí
         const modal = document.getElementById('configuration-modal');
         
         modal.addEventListener('shown.bs.modal', () => {
-            this.refreshAllPanels();
+            this.loadCurrentSettings();
         });
 
-        // Configurar todos los event listeners de los controles
-        this.setupPlayerFilterListeners();
-        this.setupTeamManagementListeners();
-        this.setupInterfaceListeners();
-        this.setupBackupListeners();
+        // Configurar event listeners para cada card
+        this.setupPlayerCardListeners();
+        this.setupTutorialListeners();
+        this.setupDrawingListeners();
+        this.setupAnimationListeners();
+        this.setupGeneralListeners();
+        
+        // Botón de reset
+        const resetBtn = document.getElementById('reset-all-settings-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetAllSettings());
+        }
     }
 
-    setupPlayerFilterListeners() {
-        // Los event listeners específicos se implementarán aquí
+    setupPlayerCardListeners() {
+        // Checkboxes de elementos de la tarjeta de jugador
+        const playerElements = [
+            'show-player-image',
+            'show-player-name', 
+            'show-player-overall',
+            'show-player-position',
+            'show-player-jersey'
+        ];
+
+        playerElements.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    this.updatePlayerCardDisplay();
+                });
+            }
+        });
     }
 
-    setupTeamManagementListeners() {
-        // Los event listeners específicos se implementarán aquí
+    setupTutorialListeners() {
+        // Checkbox de mostrar botones de tutorial
+        const showTutorialButtons = document.getElementById('show-tutorial-buttons');
+        if (showTutorialButtons) {
+            showTutorialButtons.addEventListener('change', () => {
+                this.updateTutorialButtonsVisibility();
+            });
+        }
     }
 
-    setupInterfaceListeners() {
-        // Los event listeners específicos se implementarán aquí
+    setupDrawingListeners() {
+        // Color por defecto de línea
+        const defaultLineColor = document.getElementById('default-line-color');
+        if (defaultLineColor) {
+            defaultLineColor.addEventListener('change', () => {
+                this.updateDrawingSettings();
+            });
+        }
+
+        // Grosor por defecto de línea
+        const defaultLineThickness = document.getElementById('default-line-thickness');
+        const thicknessValue = document.getElementById('thickness-value');
+        if (defaultLineThickness && thicknessValue) {
+            defaultLineThickness.addEventListener('input', (e) => {
+                thicknessValue.textContent = e.target.value;
+                this.updateDrawingSettings();
+            });
+        }
+
+        // Mostrar barra de herramientas de dibujo
+        const showDrawingToolbar = document.getElementById('show-drawing-toolbar');
+        if (showDrawingToolbar) {
+            showDrawingToolbar.addEventListener('change', () => {
+                this.updateDrawingToolbarVisibility();
+            });
+        }
     }
 
-    setupBackupListeners() {
-        // Los event listeners específicos se implementarán aquí
+    setupAnimationListeners() {
+        // Velocidad de animación con display dinámico
+        const animationSpeed = document.getElementById('animation-speed');
+        const speedValue = document.getElementById('speed-value');
+        if (animationSpeed && speedValue) {
+            animationSpeed.addEventListener('input', (e) => {
+                speedValue.textContent = `${e.target.value}x`;
+                this.updateAnimationSettings();
+            });
+        }
+
+        // Movimientos suaves
+        const smoothMovements = document.getElementById('smooth-movements');
+        if (smoothMovements) {
+            smoothMovements.addEventListener('change', () => {
+                this.updateAnimationSettings();
+            });
+        }
+
+        // Transiciones de entrada/salida
+        const fadeTransitions = document.getElementById('fade-transitions');
+        if (fadeTransitions) {
+            fadeTransitions.addEventListener('change', () => {
+                this.updateAnimationSettings();
+            });
+        }
     }
 
-    // === MÉTODOS AUXILIARES ===
+    setupGeneralListeners() {
+        // Confirmar acciones
+        const confirmActionsToggle = document.getElementById('confirm-actions-toggle');
+        if (confirmActionsToggle) {
+            confirmActionsToggle.addEventListener('change', (e) => {
+                this.updateGeneralSettings();
+            });
+        }
+
+        // Modo compacto
+        const compactModeToggle = document.getElementById('compact-mode-toggle');
+        if (compactModeToggle) {
+            compactModeToggle.addEventListener('change', (e) => {
+                this.updateGeneralSettings();
+            });
+        }
+    }
+
+    // === MÉTODOS DE CARGA Y ACTUALIZACIÓN ===
+
+    loadCurrentSettings() {
+        // Cargar configuraciones actuales desde localStorage o valores por defecto
+        this.loadPlayerCardSettings();
+        this.loadTutorialSettings();
+        this.loadDrawingSettings();
+        this.loadAnimationSettings();
+        this.loadGeneralSettings();
+    }
+
+    loadPlayerCardSettings() {
+        const settings = JSON.parse(localStorage.getItem('playerCardSettings')) || {
+            showImage: true,
+            showName: true,
+            showOverall: true,
+            showPosition: true,
+            showJersey: true
+        };
+
+        document.getElementById('show-player-image').checked = settings.showImage;
+        document.getElementById('show-player-name').checked = settings.showName;
+        document.getElementById('show-player-overall').checked = settings.showOverall;
+        document.getElementById('show-player-position').checked = settings.showPosition;
+        document.getElementById('show-player-jersey').checked = settings.showJersey;
+    }
+
+    loadTutorialSettings() {
+        // Cargar configuración de mostrar botones de tutorial
+        const showTutorialButtons = localStorage.getItem('showTutorialButtons');
+        const showButtonsElement = document.getElementById('show-tutorial-buttons');
+        if (showButtonsElement) {
+            showButtonsElement.checked = showTutorialButtons === 'true' || showTutorialButtons === null; // Por defecto true
+        }
+    }
+
+    loadDrawingSettings() {
+        // Cargar color por defecto
+        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#ffff00';
+        const colorElement = document.getElementById('default-line-color');
+        if (colorElement) {
+            colorElement.value = defaultLineColor;
+        }
+
+        // Cargar grosor por defecto
+        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '6';
+        const thicknessElement = document.getElementById('default-line-thickness');
+        const thicknessValueElement = document.getElementById('thickness-value');
+        if (thicknessElement) {
+            thicknessElement.value = defaultLineThickness;
+        }
+        if (thicknessValueElement) {
+            thicknessValueElement.textContent = defaultLineThickness;
+        }
+
+        // Cargar visibilidad de barra de herramientas
+        const showDrawingToolbar = localStorage.getItem('showDrawingToolbar');
+        const toolbarElement = document.getElementById('show-drawing-toolbar');
+        if (toolbarElement) {
+            toolbarElement.checked = showDrawingToolbar === 'true' || showDrawingToolbar === null; // Por defecto true
+        }
+    }
+
+    loadAnimationSettings() {
+        // Cargar velocidad de animación
+        const animationSpeed = localStorage.getItem('animationSpeed') || '1';
+        const speedElement = document.getElementById('animation-speed');
+        const speedValueElement = document.getElementById('speed-value');
+        if (speedElement) {
+            speedElement.value = animationSpeed;
+        }
+        if (speedValueElement) {
+            speedValueElement.textContent = `${animationSpeed}x`;
+        }
+
+        // Cargar movimientos suaves
+        const smoothMovements = localStorage.getItem('smoothMovements');
+        const smoothElement = document.getElementById('smooth-movements');
+        if (smoothElement) {
+            smoothElement.checked = smoothMovements === 'true' || smoothMovements === null; // Por defecto true
+        }
+
+        // Cargar transiciones de entrada/salida
+        const fadeTransitions = localStorage.getItem('fadeTransitions');
+        const fadeElement = document.getElementById('fade-transitions');
+        if (fadeElement) {
+            fadeElement.checked = fadeTransitions === 'true' || fadeTransitions === null; // Por defecto true
+        }
+    }
+
+    loadGeneralSettings() {
+        // Cargar confirmar acciones (por defecto false)
+        const confirmActions = localStorage.getItem('confirmActions') === 'true';
+        const confirmElement = document.getElementById('confirm-actions-toggle');
+        if (confirmElement) {
+            confirmElement.checked = confirmActions;
+        }
+
+        // Cargar modo compacto (por defecto false)
+        const compactMode = localStorage.getItem('compactMode') === 'true';
+        const compactElement = document.getElementById('compact-mode-toggle');
+        if (compactElement) {
+            compactElement.checked = compactMode;
+        }
+
+        // Aplicar configuraciones al cargar
+        this.applyGeneralSettings();
+    }
+
+    updatePlayerCardDisplay() {
+        const settings = {
+            showImage: document.getElementById('show-player-image').checked,
+            showName: document.getElementById('show-player-name').checked,
+            showOverall: document.getElementById('show-player-overall').checked,
+            showPosition: document.getElementById('show-player-position').checked,
+            showJersey: document.getElementById('show-player-jersey').checked
+        };
+
+        localStorage.setItem('playerCardSettings', JSON.stringify(settings));
+        
+        // Aplicar cambios inmediatamente
+        this.applyPlayerCardSettings(settings);
+    }
+
+    resetAllSettings() {
+        if (confirm('¿Estás seguro de que quieres restablecer todas las configuraciones?')) {
+            // Limpiar localStorage
+            localStorage.removeItem('playerCardSettings');
+
+            // Recargar configuraciones por defecto
+            this.loadCurrentSettings();
+            
+            // Aplicar configuraciones
+            this.updatePlayerCardDisplay();
+
+            console.log('[ConfigurationUI] Configuraciones restablecidas');
+        }
+    }
+
+    // === MÉTODOS DE APLICACIÓN ===
+
+    applyPlayerCardSettings(settings) {
+        // Crear o actualizar estilos CSS para controlar la visibilidad
+        this.updatePlayerCardStyles(settings);
+        
+        console.log('[ConfigurationUI] Configuración de tarjetas aplicada:', settings);
+    }
+
+    updatePlayerCardStyles(settings) {
+        // Crear o actualizar un elemento <style> con las reglas CSS
+        let styleElement = document.getElementById('player-card-visibility-styles');
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = 'player-card-visibility-styles';
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        // Construir CSS con reglas que usen !important para sobreescribir otros estilos
+        const cssRules = [];
+        
+        // Imagen del jugador
+        const imageDisplay = settings.showImage ? 'block' : 'none';
+        cssRules.push(`
+            .player-card-element[data-element="image"],
+            .minicard-player-image {
+                display: ${imageDisplay} !important;
+                visibility: ${settings.showImage ? 'visible' : 'hidden'} !important;
+            }
+        `);
+
+        // Nombre del jugador
+        const nameDisplay = settings.showName ? 'block' : 'none';
+        cssRules.push(`
+            .player-card-element[data-element="name"],
+            .minicard-name,
+            .player-name {
+                display: ${nameDisplay} !important;
+                visibility: ${settings.showName ? 'visible' : 'hidden'} !important;
+            }
+        `);
+
+        // Overall del jugador
+        const overallDisplay = settings.showOverall ? 'block' : 'none';
+        cssRules.push(`
+            .player-card-element[data-element="overall"],
+            .minicard-overall {
+                display: ${overallDisplay} !important;
+                visibility: ${settings.showOverall ? 'visible' : 'hidden'} !important;
+            }
+        `);
+
+        // Posición del jugador
+        const positionDisplay = settings.showPosition ? 'block' : 'none';
+        cssRules.push(`
+            .player-card-element[data-element="position"],
+            .minicard-position {
+                display: ${positionDisplay} !important;
+                visibility: ${settings.showPosition ? 'visible' : 'hidden'} !important;
+            }
+        `);
+
+        // Número de camiseta
+        const jerseyDisplay = settings.showJersey ? 'block' : 'none';
+        cssRules.push(`
+            .player-card-element[data-element="jersey"],
+            .minicard-jersey-number {
+                display: ${jerseyDisplay} !important;
+                visibility: ${settings.showJersey ? 'visible' : 'hidden'} !important;
+            }
+        `);
+
+        // Aplicar todas las reglas CSS
+        styleElement.textContent = cssRules.join('\n');
+    }
+
+    updateTutorialButtonsVisibility() {
+        const showTutorialButtons = document.getElementById('show-tutorial-buttons').checked;
+        
+        // Guardar configuración
+        localStorage.setItem('showTutorialButtons', showTutorialButtons.toString());
+        
+        // Aplicar estilos inmediatamente
+        this.applyTutorialButtonsStyles(showTutorialButtons);
+        
+        console.log('[ConfigurationUI] Visibilidad de botones de tutorial configurada:', showTutorialButtons);
+    }
+
+    applyTutorialButtonsStyles(visible) {
+        const styleId = 'tutorial-buttons-config-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        // Obtener el modo actual del modeManager
+        const currentMode = window.modeManager ? window.modeManager.currentMode : 'drawing';
+        
+        let styles = '';
+        
+        if (visible) {
+            // Mostrar solo el botón del modo actual
+            if (currentMode === 'drawing') {
+                styles = `
+                    /* Mostrar solo botón de tutorial de dibujo */
+                    #start-tutorial-drawing-btn {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                    
+                    /* Ocultar botón de tutorial de animación */
+                    #start-tutorial-animation-btn {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Otros elementos de tutorial */
+                    .tutorial-btn:not(#start-tutorial-animation-btn),
+                    .tutorial-text {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                `;
+            } else {
+                styles = `
+                    /* Mostrar solo botón de tutorial de animación */
+                    #start-tutorial-animation-btn {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                    
+                    /* Ocultar botón de tutorial de dibujo */
+                    #start-tutorial-drawing-btn {
+                        display: none !important;
+                        visibility: hidden !important;
+                    }
+                    
+                    /* Otros elementos de tutorial */
+                    .tutorial-btn:not(#start-tutorial-drawing-btn),
+                    .tutorial-text {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                `;
+            }
+        } else {
+            // Ocultar todos los botones de tutorial
+            styles = `
+                #start-tutorial-drawing-btn,
+                #start-tutorial-animation-btn,
+                .tutorial-btn,
+                .tutorial-text {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+            `;
+        }
+        
+        styleElement.textContent = styles;
+    }
+
+    updateDrawingSettings() {
+        const defaultLineColor = document.getElementById('default-line-color').value;
+        const defaultLineThickness = document.getElementById('default-line-thickness').value;
+        
+        // Guardar configuraciones
+        localStorage.setItem('defaultLineColor', defaultLineColor);
+        localStorage.setItem('defaultLineThickness', defaultLineThickness);
+        
+        // Aplicar inmediatamente al drawingManager si existe
+        if (window.drawingManager) {
+            window.drawingManager.lineProperties.color = defaultLineColor;
+            window.drawingManager.lineProperties.width = parseInt(defaultLineThickness);
+            window.drawingManager.applyContextProperties();
+        }
+        
+        // También actualizar los controles de la interfaz principal Y disparar sus eventos
+        const mainColorPicker = document.getElementById('line-color-picker');
+        const mainWidthPicker = document.getElementById('line-width-picker');
+        
+        if (mainColorPicker) {
+            mainColorPicker.value = defaultLineColor;
+            // Disparar el evento 'input' para que main.js se entere del cambio
+            mainColorPicker.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        if (mainWidthPicker) {
+            mainWidthPicker.value = defaultLineThickness;
+            // Disparar el evento 'input' para que main.js se entere del cambio
+            mainWidthPicker.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        console.log('[ConfigurationUI] Configuración de dibujo actualizada:', { defaultLineColor, defaultLineThickness });
+    }
+
+    updateDrawingToolbarVisibility() {
+        const showDrawingToolbar = document.getElementById('show-drawing-toolbar').checked;
+        
+        // Guardar configuración
+        localStorage.setItem('showDrawingToolbar', showDrawingToolbar.toString());
+        
+        // Aplicar estilos inmediatamente
+        this.applyDrawingToolbarStyles(showDrawingToolbar);
+        
+        console.log('[ConfigurationUI] Visibilidad de barra de herramientas de dibujo configurada:', showDrawingToolbar);
+    }
+
+    applyDrawingToolbarStyles(visible) {
+        const styleId = 'drawing-toolbar-config-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        const displayValue = visible ? 'flex' : 'none';
+        
+        const styles = `
+            /* Barra de herramientas de dibujo */
+            #drawing-mode-controls {
+                display: ${displayValue} !important;
+                visibility: ${visible ? 'visible' : 'hidden'} !important;
+            }
+            
+            /* Elementos específicos de la barra de dibujo */
+            #undo-line,
+            #redo-line,
+            #line-color-picker,
+            #line-width-picker,
+            #delete-line-mode,
+            #clear-lines {
+                display: ${visible ? 'inline-block' : 'none'} !important;
+                visibility: ${visible ? 'visible' : 'hidden'} !important;
+            }
+        `;
+        
+        styleElement.textContent = styles;
+    }
+
+    updateAnimationSettings() {
+        const animationSpeed = document.getElementById('animation-speed').value;
+        const smoothMovements = document.getElementById('smooth-movements').checked;
+        const fadeTransitions = document.getElementById('fade-transitions').checked;
+        
+        // Actualizar el display del valor de velocidad
+        const speedValueElement = document.getElementById('speed-value');
+        if (speedValueElement) {
+            speedValueElement.textContent = `${animationSpeed}x`;
+        }
+        
+        // Guardar configuraciones
+        localStorage.setItem('animationSpeed', animationSpeed);
+        localStorage.setItem('smoothMovements', smoothMovements.toString());
+        localStorage.setItem('fadeTransitions', fadeTransitions.toString());
+        
+        // Aplicar inmediatamente las configuraciones
+        this.applyAnimationSettings(animationSpeed, smoothMovements, fadeTransitions);
+        
+        console.log('[ConfigurationUI] Configuración de animación actualizada:', { 
+            animationSpeed, smoothMovements, fadeTransitions 
+        });
+    }
+
+    applyAnimationSettings(speed, smoothMovements, fadeTransitions) {
+        // ⚠️ CRÍTICO: No modificar el speedInput del animationManager directamente
+        // ya que puede interferir con la funcionalidad existente.
+        // En su lugar, creamos un input temporal que el animationManager pueda leer
+        
+        // Crear o actualizar un input oculto para que animationManager lo lea
+        let hiddenSpeedInput = document.getElementById('animation-speed-hidden');
+        if (!hiddenSpeedInput) {
+            hiddenSpeedInput = document.createElement('input');
+            hiddenSpeedInput.type = 'hidden';
+            hiddenSpeedInput.id = 'animation-speed-hidden';
+            document.body.appendChild(hiddenSpeedInput);
+        }
+        hiddenSpeedInput.value = speed;
+        
+        // Actualizar la referencia del animationManager si existe
+        if (window.animationManager) {
+            // Solo reemplazar la referencia si no existe o es diferente
+            if (!window.animationManager.speedInput || 
+                window.animationManager.speedInput.id !== 'animation-speed-hidden') {
+                window.animationManager.speedInput = hiddenSpeedInput;
+            }
+        }
+        
+        // Aplicar estilos CSS para movimientos suaves y transiciones
+        this.applyAnimationStylesCSS(smoothMovements, fadeTransitions);
+    }
+
+    applyAnimationStylesCSS(smoothMovements, fadeTransitions) {
+        const styleId = 'animation-config-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        const smoothTransition = smoothMovements ? 'ease-in-out' : 'linear';
+        const fadeOpacity = fadeTransitions ? '0.8' : '1';
+        
+        const styles = `
+            /* Configuración de movimientos suaves */
+            .player-card {
+                transition: ${smoothMovements ? 'all 0.3s ease-in-out' : 'none'} !important;
+            }
+            
+            .player-card.moving {
+                transition: ${smoothMovements ? 'transform 0.5s ' + smoothTransition : 'none'} !important;
+            }
+            
+            /* Configuración de transiciones de entrada/salida */
+            .player-card.fade-in {
+                opacity: ${fadeOpacity} !important;
+                transition: ${fadeTransitions ? 'opacity 0.4s ease-in' : 'none'} !important;
+            }
+            
+            .player-card.fade-out {
+                opacity: ${fadeTransitions ? '0.3' : '1'} !important;
+                transition: ${fadeTransitions ? 'opacity 0.4s ease-out' : 'none'} !important;
+            }
+        `;
+        
+        styleElement.textContent = styles;
+    }
+
+    updateGeneralSettings() {
+        const confirmActions = document.getElementById('confirm-actions-toggle').checked;
+        const compactMode = document.getElementById('compact-mode-toggle').checked;
+        
+        // Guardar configuraciones
+        localStorage.setItem('confirmActions', confirmActions.toString());
+        localStorage.setItem('compactMode', compactMode.toString());
+        
+        // Aplicar inmediatamente las configuraciones
+        this.applyGeneralSettings();
+        
+        console.log('[ConfigurationUI] Configuración general actualizada:', { 
+            confirmActions, compactMode 
+        });
+    }
+
+    applyGeneralSettings() {
+        const confirmActions = localStorage.getItem('confirmActions') === 'true';
+        const compactMode = localStorage.getItem('compactMode') === 'true';
+        
+        // Aplicar configuración de confirmación de acciones
+        this.setupActionConfirmations(confirmActions);
+        
+        // Aplicar configuración de modo compacto
+        this.applyCompactMode(compactMode);
+    }
+
+    setupActionConfirmations(enabled) {
+        // Almacenar el estado globalmente para acceso desde otras funciones
+        window.configurationSettings = window.configurationSettings || {};
+        window.configurationSettings.confirmActions = enabled;
+        
+        // Las confirmaciones se manejarán cuando se ejecuten las acciones críticas
+        // mediante la función de utilidad confirmCriticalAction()
+    }
+
+    applyCompactMode(enabled) {
+        const styleId = 'compact-mode-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        const styles = enabled ? `
+            /* Modo compacto activado - ocultar separadores verticales */
+            .vertical-separator {
+                display: none !important;
+            }
+            
+            #drawing-separator-1,
+            #animation-separator-1 {
+                display: none !important;
+            }
+            
+            /* Ajustar márgenes para aprovechar el espacio */
+            .container-fluid {
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+            }
+            
+            .btn-group {
+                margin-right: 2px !important;
+            }
+        ` : `
+            /* Modo compacto desactivado - mostrar separadores */
+            .vertical-separator {
+                display: block !important;
+            }
+            
+            #drawing-separator-1,
+            #animation-separator-1 {
+                display: block !important;
+            }
+        `;
+        
+        styleElement.textContent = styles;
+    }
+
+    // === INTERFAZ PÚBLICA ===
 
     openConfigurationModal() {
         this.createConfigurationModal();
@@ -441,187 +1030,123 @@ export default class ConfigurationUI {
         modal.show();
     }
 
-    refreshAllPanels() {
-        this.updatePlayerFilters();
-        this.updateTeamsList();
-        this.updateInterfaceSettings();
-        this.updateSystemInfo();
-    }
+    // Método público para aplicar configuraciones guardadas al inicializar
+    applySavedSettings() {
+        // Cargar y aplicar configuraciones de tarjetas de jugador
+        const playerCardSettings = JSON.parse(localStorage.getItem('playerCardSettings')) || {
+            showImage: true,
+            showName: true,
+            showOverall: true,
+            showPosition: true,
+            showJersey: true
+        };
+        this.applyPlayerCardSettings(playerCardSettings);
 
-    updatePlayerFilters() {
-        // Implementar actualización de filtros
-    }
-
-    updateTeamsList() {
-        // Implementar actualización de equipos
-    }
-
-    updateInterfaceSettings() {
-        // Implementar actualización de configuraciones de interfaz
-    }
-
-    updateSystemInfo() {
-        const systemInfoContainer = document.getElementById('system-info');
-        if (!systemInfoContainer) return;
-
-        // Obtener información del sistema y configuraciones de imágenes
-        const imageConfigs = this.customPlayersManager.constructor.getImageConfigurations();
-        const storageInfo = this.getStorageInfo();
-
-        const systemInfo = `
-            <div class="row g-3">
-                <!-- Información de localStorage -->
-                <div class="col-md-6">
-                    <div class="card border-primary">
-                        <div class="card-body">
-                            <h6 class="card-title text-primary">
-                                <i class="fas fa-database me-2"></i>Almacenamiento Local
-                            </h6>
-                            <div class="mb-2">
-                                <small class="text-muted">Usado:</small>
-                                <div class="progress progress-sm">
-                                    <div class="progress-bar bg-primary" role="progressbar" 
-                                         style="width: ${storageInfo.percentage}%"
-                                         aria-valuenow="${storageInfo.percentage}" 
-                                         aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                                <small class="text-muted">${storageInfo.used} / ~${storageInfo.total}</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Configuraciones de imagen -->
-                <div class="col-md-6">
-                    <div class="card border-success">
-                        <div class="card-body">
-                            <h6 class="card-title text-success">
-                                <i class="fas fa-image me-2"></i>Procesamiento de Imágenes
-                            </h6>
-                            <div class="small">
-                                <div><strong>Estándar:</strong> ${imageConfigs.player.width}×${imageConfigs.player.height}px</div>
-                                <div><strong>Calidad:</strong> ${Math.round(imageConfigs.player.quality * 100)}%</div>
-                                <div><strong>Formato:</strong> JPEG optimizado</div>
-                                <div><strong>Tamaño máximo:</strong> ~200KB</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Información del navegador -->
-                <div class="col-12">
-                    <div class="card border-info">
-                        <div class="card-body">
-                            <h6 class="card-title text-info">
-                                <i class="fas fa-globe me-2"></i>Navegador y Compatibilidad
-                            </h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="small">
-                                        <div><strong>User Agent:</strong> ${navigator.userAgent.substring(0, 80)}...</div>
-                                        <div><strong>Canvas API:</strong> ${this.checkCanvasSupport() ? '✅ Soportado' : '❌ No disponible'}</div>
-                                        <div><strong>File API:</strong> ${this.checkFileSupport() ? '✅ Soportado' : '❌ No disponible'}</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="small">
-                                        <div><strong>localStorage:</strong> ${this.checkLocalStorageSupport() ? '✅ Disponible' : '❌ No disponible'}</div>
-                                        <div><strong>PWA:</strong> ${this.checkPWASupport() ? '✅ Instalable' : '⚠️ Solo web'}</div>
-                                        <div><strong>Pantalla:</strong> ${screen.width}×${screen.height}px</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        systemInfoContainer.innerHTML = systemInfo;
-    }
-
-    getStorageInfo() {
-        try {
-            const used = JSON.stringify(localStorage).length;
-            const usedKB = (used / 1024).toFixed(1);
-            const totalMB = 5; // Aproximación común de límite de localStorage
-            const percentage = Math.min((used / (totalMB * 1024 * 1024)) * 100, 100);
-
-            return {
-                used: `${usedKB}KB`,
-                total: `${totalMB}MB`,
-                percentage: percentage.toFixed(1)
-            };
-        } catch (e) {
-            return {
-                used: 'N/A',
-                total: 'N/A',
-                percentage: 0
-            };
+        // Cargar y aplicar configuraciones de botones de tutorial
+        const showTutorialButtons = localStorage.getItem('showTutorialButtons');
+        if (showTutorialButtons !== null) {
+            const visible = showTutorialButtons === 'true';
+            this.applyTutorialButtonsStyles(visible);
+        } else {
+            // Por defecto, mostrar botones de tutorial
+            this.applyTutorialButtonsStyles(true);
         }
-    }
 
-    checkCanvasSupport() {
-        try {
-            const canvas = document.createElement('canvas');
-            return !!(canvas.getContext && canvas.getContext('2d'));
-        } catch (e) {
-            return false;
-        }
-    }
-
-    checkFileSupport() {
-        return !!(window.File && window.FileReader && window.FileList && window.Blob);
-    }
-
-    checkLocalStorageSupport() {
-        try {
-            const test = '__localStorage_test__';
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    checkPWASupport() {
-        return !!('serviceWorker' in navigator && 'PushManager' in window);
-    }
-
-    updateFilterControls() {
-        // Implementar controles de filtro en la interfaz principal
-    }
-
-    handleSettingChanged(detail) {
-        console.log('[ConfigurationUI] Configuración cambiada:', detail.key, '=', detail.value);
+        // Cargar y aplicar configuraciones de dibujo
+        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#ffff00';
+        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '6';
         
-        // Actualizar interfaz según el cambio
-        if (detail.key === 'defaultPlayerFilter' || detail.key === 'defaultTeamFilter') {
-            this.updateFilterControls();
-            
-            // Actualizar lista de jugadores si está abierta
-            if (this.playerManager && document.getElementById('squad-selection-modal').classList.contains('show')) {
-                this.playerManager.renderPlayerSelectionList();
-            }
+        // Aplicar al drawingManager si existe
+        if (window.drawingManager) {
+            window.drawingManager.lineProperties.color = defaultLineColor;
+            window.drawingManager.lineProperties.width = parseInt(defaultLineThickness);
+            window.drawingManager.applyContextProperties();
         }
+        
+        // Aplicar a los controles principales Y disparar eventos
+        const mainColorPicker = document.getElementById('line-color-picker');
+        const mainWidthPicker = document.getElementById('line-width-picker');
+        
+        if (mainColorPicker) {
+            mainColorPicker.value = defaultLineColor;
+            // Disparar el evento 'input' para que main.js se entere del cambio
+            mainColorPicker.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        if (mainWidthPicker) {
+            mainWidthPicker.value = defaultLineThickness;
+            // Disparar el evento 'input' para que main.js se entere del cambio
+            mainWidthPicker.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // Cargar y aplicar visibilidad de barra de herramientas de dibujo
+        const showDrawingToolbar = localStorage.getItem('showDrawingToolbar');
+        if (showDrawingToolbar !== null) {
+            const visible = showDrawingToolbar === 'true';
+            this.applyDrawingToolbarStyles(visible);
+        } else {
+            // Por defecto, mostrar barra de herramientas
+            this.applyDrawingToolbarStyles(true);
+        }
+
+        // Cargar y aplicar configuraciones de animación
+        const animationSpeed = localStorage.getItem('animationSpeed') || '1';
+        const smoothMovements = localStorage.getItem('smoothMovements');
+        const fadeTransitions = localStorage.getItem('fadeTransitions');
+        
+        const smooth = smoothMovements === 'true' || smoothMovements === null; // Por defecto true
+        const fade = fadeTransitions === 'true' || fadeTransitions === null; // Por defecto true
+        
+        this.applyAnimationSettings(animationSpeed, smooth, fade);
+
+        // Cargar y aplicar configuraciones generales
+        this.applyGeneralSettings();
+
+        console.log('[ConfigurationUI] Configuraciones guardadas aplicadas');
     }
 
-    showSuccess(message) {
-        // Usar el mismo sistema de toasts que customPlayersUI
-        this.showToast(message, 'success');
+    handleConfigurationChange(event) {
+        // Manejar cambios de configuración desde otros componentes
+        console.log('[ConfigurationUI] Configuración cambiada:', event.detail);
     }
 
-    showError(message) {
-        this.showToast(message, 'error');
-    }
-
-    showToast(message, type = 'info') {
-        // Implementar sistema de toasts
-        console.log(`[ConfigurationUI] ${type.toUpperCase()}: ${message}`);
+    handleModeChange(event) {
+        // Cuando cambia el modo, actualizar qué botones de tutorial se muestran
+        console.log('[ConfigurationUI] Modo cambiado:', event.detail);
+        
+        // Solo actualizar si los botones de tutorial están habilitados
+        const showTutorialButtons = localStorage.getItem('showTutorialButtons');
+        if (showTutorialButtons === 'true' || showTutorialButtons === null) {
+            this.applyTutorialButtonsStyles(true);
+        }
     }
 }
 
-// Hacer disponible globalmente
+// === FUNCIÓN DE UTILIDAD GLOBAL PARA CONFIRMACIONES ===
+
+/**
+ * Función de utilidad para confirmar acciones críticas
+ * @param {string} message - Mensaje de confirmación a mostrar
+ * @param {string} actionType - Tipo de acción (opcional, para logging)
+ * @returns {boolean} - true si el usuario confirma, false si cancela
+ */
+function confirmCriticalAction(message, actionType = '') {
+    // Verificar si las confirmaciones están habilitadas
+    const confirmationsEnabled = window.configurationSettings?.confirmActions || false;
+    
+    if (!confirmationsEnabled) {
+        return true; // Si las confirmaciones están deshabilitadas, proceder siempre
+    }
+    
+    const confirmed = confirm(message);
+    
+    if (actionType) {
+        console.log(`[ConfirmActions] ${actionType} - Usuario ${confirmed ? 'confirmó' : 'canceló'} la acción`);
+    }
+    
+    return confirmed;
+}
+
+// Hacer disponible globalmente para debugging
 window.configurationUI = null;
+window.confirmCriticalAction = confirmCriticalAction;

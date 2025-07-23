@@ -88,10 +88,32 @@ export default class AnimationManager {
             this.btnAdd.addEventListener('click', () => this.addFrame());
         }
         if (this.btnDelete) {
-            this.btnDelete.addEventListener('click', () => this.deleteCurrentFrame());
+            this.btnDelete.addEventListener('click', () => {
+                // Confirmar acción crítica si está habilitado
+                const shouldProceed = window.confirmCriticalAction && 
+                    window.confirmCriticalAction(
+                        '¿Estás seguro de que quieres eliminar el frame actual?\n\nEsta acción no se puede deshacer.',
+                        'DeleteFrame'
+                    );
+                
+                if (shouldProceed !== false) { // Proceder si la función no existe o si el usuario confirma
+                    this.deleteCurrentFrame();
+                }
+            });
         }
         if (this.btnReset) {
-            this.btnReset.addEventListener('click', () => this.resetAnimation());
+            this.btnReset.addEventListener('click', () => {
+                // Confirmar acción crítica si está habilitado
+                const shouldProceed = window.confirmCriticalAction && 
+                    window.confirmCriticalAction(
+                        '¿Estás seguro de que quieres reiniciar la animación?\n\nSe perderán todos los frames configurados.',
+                        'ResetAnimation'
+                    );
+                
+                if (shouldProceed !== false) { // Proceder si la función no existe o si el usuario confirma
+                    this.resetAnimation();
+                }
+            });
         }
         if (this.playBtn) {
             this.playBtn.addEventListener('click', () => {

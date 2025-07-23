@@ -157,7 +157,17 @@ export default class UIManager {
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', () => {
                 console.log('UIManager: Click en Borrar Dibujo.');
-                this.drawingManager.clearAllLines();
+                
+                // Confirmar acción crítica si está habilitado
+                const shouldProceed = window.confirmCriticalAction && 
+                    window.confirmCriticalAction(
+                        '¿Estás seguro de que quieres borrar todas las líneas de dibujo?\n\nEsta acción no se puede deshacer.',
+                        'ClearAllLines'
+                    );
+                
+                if (shouldProceed !== false) { // Proceder si la función no existe o si el usuario confirma
+                    this.drawingManager.clearAllLines();
+                }
             });
         }
 
@@ -413,10 +423,11 @@ export default class UIManager {
                 `;
             }
 
-            token.addEventListener('dblclick', () => {
-                console.log('UIManager: Doble clic en jugador', player.id);
-                this.showPlayerCard(player.id);
-            });
+            // ELIMINADO: Ya no se abre el menú de jugador al hacer doble clic
+            // token.addEventListener('dblclick', () => {
+            //     console.log('UIManager: Doble clic en jugador', player.id);
+            //     this.showPlayerCard(player.id);
+            // });
 
             // Eventos para arrastrar (Touch events para móvil)
             const startDrag = (e) => {
@@ -470,26 +481,8 @@ export default class UIManager {
         });
     }
 
-    showPlayerCard(playerId) {
-        const player = this.playerManager.getPlayerById(playerId);
-        if (!player) return;
-
-        // Inyectar la tarjeta en el modal-body del modal de jugador
-        const modalBodyContent = document.getElementById('player-modal-body-content');
-        if (modalBodyContent) {
-             modalBodyContent.innerHTML = this.playerManager.renderPlayerCard(player);
-        } else {
-            console.error('UIManager: Elemento #player-modal-body-content no encontrado en el modal de jugador.');
-        }
-
-        const modal = new bootstrap.Modal(document.getElementById('player-modal'));
-        if (modal) {
-            modal.show();
-            console.log('UIManager: Modal de jugador mostrado.');
-        } else {
-            console.error('UIManager: No se pudo instanciar el modal de jugador. Asegúrate de que Bootstrap JS esté cargado.');
-        }
-    }
+    // ELIMINADO: Método showPlayerCard ya no se usa
+    // showPlayerCard(playerId) { ... }
 
     updateModeIndicator() {
         const modeSpan = document.getElementById('current-mode');

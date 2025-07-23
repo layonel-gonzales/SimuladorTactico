@@ -1331,6 +1331,15 @@ canvas {
     display: none !important;
 }
 
+/* Clase especial para configuración - MAYOR PRIORIDAD */
+.tutorial-btn.config-hidden {
+    display: none !important;
+}
+
+.tutorial-btn.config-visible {
+    display: flex !important;
+}
+
 /* Posicionamiento: cuando solo se muestra uno, va a la derecha */
 .tutorial-drawing {
     right: 20px !important;

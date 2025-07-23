@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar el gestor de configuración
     const configurationManager = new ConfigurationManager(customPlayersManager);
 
+    // Inicializar el gestor de cards de jugador (después de configuración)
+    window.playerCardManager = new PlayerCardManager();
+
     // Función global para comunicación con UIManager y BallDrawingManager
     window.main = {
         setBallDragStarted: function(isDragging) {
@@ -51,18 +54,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar activePlayers con los jugadores y balón desde staticPlayers
     // Asegura que siempre haya un balón en la cancha
     function ensureBallInPlayers() {
-        console.log('[DEBUG] Llamada a ensureBallInPlayers');
+        // console.log('[DEBUG] Llamada a ensureBallInPlayers');
         
         // Si no hay activePlayers, inicializar como array vacío
         if (!state.activePlayers || !Array.isArray(state.activePlayers)) {
-            console.log('[DEBUG] Inicializando activePlayers como array vacío');
+            // console.log('[DEBUG] Inicializando activePlayers como array vacío');
             state.activePlayers = [];
         }
         
         // Elimina cualquier balón duplicado
         let balls = state.activePlayers.filter(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
         if (balls.length > 1) {
-            console.log('[DEBUG] Se encontraron balones duplicados, eliminando extras');
+            // console.log('[DEBUG] Se encontraron balones duplicados, eliminando extras');
             // Deja solo uno
             const first = balls[0];
             state.activePlayers = state.activePlayers.filter(p => !(p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'));
@@ -80,13 +83,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 y: 50  // centro vertical
             };
             state.activePlayers.push(ballPlayer);
-            console.log('[DEBUG] Balón agregado al centro de la cancha', ballPlayer);
+            // console.log('[DEBUG] Balón agregado al centro de la cancha', ballPlayer);
         }
         // Asegura que tenga todas las propiedades y posición válida
         if (typeof ballPlayer.x !== 'number' || typeof ballPlayer.y !== 'number') {
             ballPlayer.x = 50; // centro horizontal del campo
             ballPlayer.y = 50; // centro vertical del campo
-            console.log('[DEBUG] Balón reposicionado al centro', ballPlayer);
+            // console.log('[DEBUG] Balón reposicionado al centro', ballPlayer);
         }
         
         // Validar que las coordenadas están en rango válido (0-100%)
@@ -98,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ballPlayer.type = 'ball';
         ballPlayer.role = 'ball';
         // Mensaje de depuración para ver el estado de los jugadores
-        console.log('[DEBUG] Estado de activePlayers tras asegurar balón:', state.activePlayers);
+        // console.log('[DEBUG] Estado de activePlayers tras asegurar balón:', state.activePlayers);
     }
     // Estado global (debe ir antes de cualquier uso)
     const state = {
@@ -114,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (ballPlayerInit) {
         ballPlayerInit.x = 50; // centro en porcentaje
         ballPlayerInit.y = 50; // centro en porcentaje
-        console.log('[DEBUG] Balón forzado al centro al cargar', ballPlayerInit);
+        // console.log('[DEBUG] Balón forzado al centro al cargar', ballPlayerInit);
     }
 
     // Inicialización de módulos especializados
@@ -146,11 +149,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const customPlayersUI = new CustomPlayersUI(customPlayersManager, playerManager);
     window.customPlayersUI = customPlayersUI; // Hacer disponible globalmente
     
-    // Inicializar la interfaz de configuración
+    // Inicializar la interfaz de configuración COMPLETA
     const configurationUI = new ConfigurationUI(configurationManager, customPlayersManager, playerManager);
     window.configurationUI = configurationUI; // Hacer disponible globalmente
     
-    // Conectar el botón de configuración
+    // Conectar el botón de configuración al modal COMPLETO
     const configurationBtn = document.getElementById('configuration-btn');
     if (configurationBtn) {
         configurationBtn.addEventListener('click', () => {
@@ -166,35 +169,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     // No necesitamos duplicar la conexión aquí
 
     // Establecer modo inicial (dibujo) y verificar
-    console.log('[Main] Estableciendo modo inicial...');
+    // console.log('[Main] Estableciendo modo inicial...');
     modeManager.switchToMode('drawing');
     
     // Verificación adicional después de un pequeño delay
     setTimeout(() => {
-        console.log('[Main] Verificación post-inicialización:');
-        console.log('- Modo actual:', modeManager.currentMode);
-        console.log('- Clases del body:', document.body.className);
-        console.log('- Botón global de modo existe:', !!document.getElementById('global-mode-toggle'));
-        console.log('- Botón global de plantilla existe:', !!document.getElementById('global-select-squad-btn'));
-        console.log('- Drawing controls existe:', !!document.getElementById('drawing-mode-controls'));
-        console.log('- Animation controls existe:', !!document.getElementById('animation-mode-controls'));
+        // console.log('[Main] Verificación post-inicialización:');
+        // console.log('- Modo actual:', modeManager.currentMode);
+        // console.log('- Clases del body:', document.body.className);
+        // console.log('- Botón global de modo existe:', !!document.getElementById('global-mode-toggle'));
+        // console.log('- Botón global de plantilla existe:', !!document.getElementById('global-select-squad-btn'));
+        // console.log('- Drawing controls existe:', !!document.getElementById('drawing-mode-controls'));
+        // console.log('- Animation controls existe:', !!document.getElementById('animation-mode-controls'));
         
         // Agregar función global para debug de filtros
         window.debugFilters = () => {
-            console.log('=== DEBUG DE FILTROS ===');
-            console.log('ConfigurationManager existe:', !!configurationManager);
-            console.log('PlayerManager existe:', !!playerManager);
+            // console.log('=== DEBUG DE FILTROS ===');
+            // console.log('ConfigurationManager existe:', !!configurationManager);
+            // console.log('PlayerManager existe:', !!playerManager);
             if (configurationManager) {
                 const settings = configurationManager.getAllSettings();
-                console.log('Configuraciones actuales:', settings);
+                // console.log('Configuraciones actuales:', settings);
             }
             if (playerManager) {
                 const allPlayers = playerManager.getAllPlayers();
-                console.log('Jugadores filtrados:', allPlayers.length);
+                // console.log('Jugadores filtrados:', allPlayers.length);
             }
         };
         
-        console.log('[Main] Debug function available: window.debugFilters()');
+        // console.log('[Main] Debug function available: window.debugFilters()');
     }, 100);
 
     // --- Exportar animación como JSON ---

@@ -246,21 +246,7 @@
         </div>
     </div>
 
-    <div class="modal fade custom-z-index-modal" id="player-modal" tabindex="-1" aria-labelledby="playerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="playerModalLabel">Detalles del Jugador</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="player-modal-body-content">
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ELIMINADO: Modal de detalles de jugador (player-modal) ya no se usa -->
 
     <!-- Modal para gestión de jugadores personalizados -->
     <div class="modal fade custom-z-index-modal" style="z-index: 9999;" id="custom-players-modal" tabindex="-1" aria-labelledby="customPlayersModalLabel" aria-hidden="true">
@@ -513,8 +499,13 @@
     <!-- Player Card Manager para gestión unificada de cards -->
     <script src="js/playerCardManager.js"></script>
     
-    <!-- Player Card Demo (solo en desarrollo) -->
-    <script src="js/playerCardDemo.js"></script>
+    <!-- ELIMINADOS: Archivos del sistema Phase1 ya no se usan -->
+    <!-- <script src="js/safeConfigurationUpdater_v2.js"></script> -->
+    <!-- <script src="js/configurationManagerPhase1.js"></script> -->
+    <!-- <script src="js/phase1Validator.js"></script> -->
+    
+    <!-- Validador de IDs únicos -->
+    <script src="js/uniqueIdValidator.js"></script>
     
     <!-- PWA Manager (cargar antes que los módulos) -->
     <script src="js/pwaManager.js"></script>
