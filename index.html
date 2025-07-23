@@ -27,6 +27,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="img/icon-192.png">
 </head>
 <body>
+    <!-- Toggle de tema claro/oscuro -->
+    <button id="theme-toggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar entre modo claro y oscuro">
+        <i class="fas fa-sun" id="theme-icon"></i>
+    </button>
+
     <div id="orientation-message">
         <img src="img/rotate-device.png" alt="Girar dispositivo">
         <h2>Por favor, gira tu dispositivo</h2>
@@ -102,7 +107,7 @@
             </button>
             
             <!-- Separador visual -->
-            <div class="vertical-separator"></div>
+            <div id="drawing-separator-1" class="vertical-separator"></div>
             
             <button id="share-pitch-btn" class="btn btn-success btn-sm" title="Compartir imagen"
                     data-intro="Exporta y comparte tu táctica como imagen. Perfecto para enviar a tu equipo o entrenador." 
@@ -161,7 +166,7 @@
             </button>
             
             <!-- Separador visual -->
-            <div class="vertical-separator"></div>
+            <div id="animation-separator-1" class="vertical-separator"></div>
             
             <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar JSON"
                     data-intro="Exporta tu animación como archivo JSON para guardarla o compartirla (incluye audio si fue grabado)." 
@@ -247,8 +252,20 @@
     <!-- Intro.js Tutorial Library -->
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
     
+    <!-- Theme Manager para modo claro/oscuro -->
+    <script src="js/themeManager.js"></script>
+    
+    <!-- Player Card Manager para gestión unificada de cards -->
+    <script src="js/playerCardManager.js"></script>
+    
+    <!-- Player Card Demo (solo en desarrollo) -->
+    <script src="js/playerCardDemo.js"></script>
+    
     <!-- PWA Manager (cargar antes que los módulos) -->
     <script src="js/pwaManager.js"></script>
+    
+    <!-- Payment Manager para funcionalidades premium -->
+    <script src="js/paymentManager.js"></script>
     
     <!-- HTML Updater para tutoriales -->
     <script src="js/htmlUpdater.js"></script>

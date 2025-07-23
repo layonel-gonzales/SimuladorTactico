@@ -125,14 +125,35 @@ export default class PlayerManager {
     }
 
     createPlayerSelectionItem(player) {
+        // Usar el sistema unificado de cards
+        if (window.playerCardManager) {
+            return window.playerCardManager.createPlayerCard(player, 'selection');
+        }
+        
+        // Fallback al método anterior si el manager no está disponible
         const playerItem = document.createElement('div');
         playerItem.className = 'squad-player-item';
         playerItem.dataset.playerId = player.id;
         
         playerItem.innerHTML = `
-            <div class="minicard-overall">${this.calculateOverall(player)}</div>
-            <img src="${player.image_url}" alt="${player.name}">
-            <div class="player-name">${player.name}</div>
+            <div class="minicard-overall player-card-element" 
+                 data-element="overall" 
+                 data-player-id="${player.id}"
+                 title="Overall: ${this.calculateOverall(player)}">
+                ${this.calculateOverall(player)}
+            </div>
+            <img src="${player.image_url}" 
+                 class="player-card-element" 
+                 data-element="image" 
+                 data-player-id="${player.id}"
+                 alt="${player.name}"
+                 title="${player.name}">
+            <div class="player-name player-card-element" 
+                 data-element="name" 
+                 data-player-id="${player.id}"
+                 title="Nombre: ${player.name}">
+                ${player.name}
+            </div>
         `;
         
         return playerItem;

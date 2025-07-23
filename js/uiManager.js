@@ -350,17 +350,52 @@ export default class UIManager {
                 player.y = (initialY / pitchRect.height) * 100;
             }
 
-            const token = document.createElement('div');
-            token.className = 'player-token';
-            token.dataset.playerId = player.id;
-            token.style.left = `${(player.x / 100) * pitchRect.width}px`;
-            token.style.top = `${(player.y / 100) * pitchRect.height}px`;
-            token.innerHTML = `
-                <div class="minicard-overall">${this.playerManager.calculateOverall(player)}</div>
-                <div class="minicard-position">${player.position}</div>
-                <img src="${player.image_url}" class="minicard-player-image">
-                <div class="minicard-name">${player.name}</div>
-            `;
+            // Crear token usando el sistema unificado
+            let token;
+            if (window.playerCardManager) {
+                token = window.playerCardManager.createPlayerCard(player, 'field');
+                token.style.left = `${(player.x / 100) * pitchRect.width}px`;
+                token.style.top = `${(player.y / 100) * pitchRect.height}px`;
+            } else {
+                // Fallback al método anterior
+                token = document.createElement('div');
+                token.className = 'player-token';
+                token.dataset.playerId = player.id;
+                token.style.left = `${(player.x / 100) * pitchRect.width}px`;
+                token.style.top = `${(player.y / 100) * pitchRect.height}px`;
+                token.innerHTML = `
+                    <div class="minicard-overall player-card-element" 
+                         data-element="overall" 
+                         data-player-id="${player.id}"
+                         title="Overall: ${this.playerManager.calculateOverall(player)}">
+                        ${this.playerManager.calculateOverall(player)}
+                    </div>
+                    <div class="minicard-position player-card-element" 
+                         data-element="position" 
+                         data-player-id="${player.id}"
+                         title="Posición: ${player.position}">
+                        ${player.position}
+                    </div>
+                    <img src="${player.image_url}" 
+                         class="minicard-player-image player-card-element" 
+                         data-element="image" 
+                         data-player-id="${player.id}"
+                         alt="${player.name}"
+                         title="${player.name}">
+                    <div class="minicard-name player-card-element" 
+                         data-element="name" 
+                         data-player-id="${player.id}"
+                         title="Nombre: ${player.name}">
+                        ${player.name}
+                    </div>
+                    <div class="minicard-jersey-number player-card-element" 
+                         data-element="jersey" 
+                         data-player-id="${player.id}"
+                         title="Dorsal: ${player.jersey_number || '?'}">
+                        ${player.jersey_number || '?'}
+                    </div>
+                `;
+            }
 
             token.addEventListener('dblclick', () => {
                 console.log('UIManager: Doble clic en jugador', player.id);

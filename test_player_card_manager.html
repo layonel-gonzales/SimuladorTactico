@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PlayerCardManager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/estilo.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Test PlayerCardManager - Detección de Pantalla y IDs Únicos</h2>
+        
+        <div id="test-info" class="alert alert-info mb-4">
+            <h5>Información de Pantalla:</h5>
+            <p id="screen-info"></p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Prueba de Creación de Cards</h4>
+                <button id="create-card-btn" class="btn btn-primary mb-3">Crear Card de Prueba</button>
+                <div id="cards-container"></div>
+            </div>
+            
+            <div class="col-md-6">
+                <h4>Log de IDs Generados</h4>
+                <div id="ids-log" class="border p-3" style="height: 300px; overflow-y: auto; background-color: #f8f9fa;">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4>Pruebas de Redimensionamiento</h4>
+                <p>Redimensiona la ventana para ver cómo cambia la detección de tipo de pantalla.</p>
+                <button id="resize-test-btn" class="btn btn-secondary">Simular Diferentes Tamaños</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts necesarios -->
+    <script src="js/utils.js"></script>
+    <script src="js/playerManager.js"></script>
+    <script src="js/uiManager.js"></script>
+    <script src="js/playerCardManager.js"></script>
+    
+    <script>
+        // Test script
+        let cardCounter = 0;
+        let idsGenerated = [];
+        
+        function updateScreenInfo() {
+            const screenInfo = document.getElementById('screen-info');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Detectar tipo de pantalla usando la misma lógica que PlayerCardManager
+            let screenType = 'desktop';
+            if (width <= 480) {
+                screenType = 'mobile';
+            } else if (width <= 768) {
+                screenType = 'tablet';
+            } else if (width <= 1024) {
+                screenType = 'tablet';
+            }
+            
+            screenInfo.innerHTML = `
+                <strong>Ancho:</strong> ${width}px | 
+                <strong>Alto:</strong> ${height}px | 
+                <strong>Tipo:</strong> ${screenType}
+            `;
+        }
+        
+        function logId(id, screenType) {
+            idsGenerated.push({id, screenType, timestamp: new Date().toLocaleTimeString()});
+            updateIdsLog();
+        }
+        
+        function updateIdsLog() {
+            const log = document.getElementById('ids-log');
+            log.innerHTML = idsGenerated.map(item => 
+                `<div class="mb-1">
+                    <small class="text-muted">${item.timestamp}</small><br>
+                    <strong>ID:</strong> ${item.id}<br>
+                    <strong>Pantalla:</strong> ${item.screenType}
+                </div>`
+            ).join('<hr class="my-2">');
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Función de prueba para crear cards
+        function createTestCard() {
+            cardCounter++;
+            
+            // Crear un jugador de prueba
+            const testPlayer = {
+                name: `Jugador Test ${cardCounter}`,
+                position: `P${cardCounter}`,
+                number: cardCounter,
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+            };
+            
+            // Usar PlayerCardManager para crear la card
+            const cardElement = PlayerCardManager.createPlayerCard(testPlayer, 'offensive');
+            
+            // Extraer el ID único generado
+            const uniqueId = cardElement.getAttribute('data-unique-id');
+            const screenType = cardElement.getAttribute('data-screen-type');
+            
+            if (uniqueId) {
+                logId(uniqueId, screenType);
+            }
+            
+            // Añadir la card al contenedor
+            document.getElementById('cards-container').appendChild(cardElement);
+        }
+        
+        // Función para simular diferentes tamaños de pantalla
+        function simulateResize() {
+            const sizes = [
+                {width: 320, height: 568, name: 'Mobile Small'},
+                {width: 480, height: 800, name: 'Mobile Large'},
+                {width: 768, height: 1024, name: 'Tablet'},
+                {width: 1024, height: 768, name: 'Tablet Landscape'},
+                {width: 1200, height: 800, name: 'Desktop'},
+                {width: 1920, height: 1080, name: 'Desktop Large'}
+            ];
+            
+            let index = 0;
+            function cycleSize() {
+                if (index < sizes.length) {
+                    const size = sizes[index];
+                    console.log(`Simulando ${size.name}: ${size.width}x${size.height}`);
+                    
+                    // Nota: En un entorno real no podemos cambiar el tamaño de la ventana
+                    // pero podemos simular la detección
+                    updateScreenInfo();
+                    
+                    index++;
+                    setTimeout(cycleSize, 1000);
+                }
+            }
+            cycleSize();
+        }
+        
+        // Event listeners
+        document.getElementById('create-card-btn').addEventListener('click', createTestCard);
+        document.getElementById('resize-test-btn').addEventListener('click', simulateResize);
+        window.addEventListener('resize', updateScreenInfo);
+        
+        // Inicializar
+        updateScreenInfo();
+        
+        // Verificar que PlayerCardManager esté disponible
+        if (typeof PlayerCardManager !== 'undefined') {
+            console.log('PlayerCardManager cargado correctamente');
+            console.log('Métodos disponibles:', Object.getOwnPropertyNames(PlayerCardManager));
+        } else {
+            console.error('PlayerCardManager no está disponible');
+        }
+    </script>
+</body>
+</html>
