@@ -320,7 +320,20 @@ export default class ConfigurationUI {
                             <label for="accent-color" class="form-label">
                                 <i class="fas fa-star me-1"></i>Color de acento
                             </label>
-                            <input type="color" class="form-control form-control-color" id="accent-color" value="#0d6efd">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <input type="color" class="form-control form-control-color" id="accent-color" value="#0d6efd">
+                                <small class="text-muted">Personalizado</small>
+                            </div>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-sm preset-color" data-color="#0d6efd" style="background-color: #0d6efd; width: 30px; height: 30px; border-radius: 50%;" title="Bootstrap Azul"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#198754" style="background-color: #198754; width: 30px; height: 30px; border-radius: 50%;" title="Verde"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#dc3545" style="background-color: #dc3545; width: 30px; height: 30px; border-radius: 50%;" title="Rojo"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#fd7e14" style="background-color: #fd7e14; width: 30px; height: 30px; border-radius: 50%;" title="Naranja"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#6f42c1" style="background-color: #6f42c1; width: 30px; height: 30px; border-radius: 50%;" title="Púrpura"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#d63384" style="background-color: #d63384; width: 30px; height: 30px; border-radius: 50%;" title="Rosa"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#20c997" style="background-color: #20c997; width: 30px; height: 30px; border-radius: 50%;" title="Teal"></button>
+                                <button type="button" class="btn btn-sm preset-color" data-color="#ffc107" style="background-color: #ffc107; width: 30px; height: 30px; border-radius: 50%;" title="Amarillo"></button>
+                            </div>
                         </div>
                         
                         <div class="form-check">
@@ -350,6 +363,7 @@ export default class ConfigurationUI {
         this.setupDrawingListeners();
         this.setupAnimationListeners();
         this.setupGeneralListeners();
+        this.setupThemeListeners();
         
         // Botón de reset
         const resetBtn = document.getElementById('reset-all-settings-btn');
@@ -462,6 +476,46 @@ export default class ConfigurationUI {
         }
     }
 
+    setupThemeListeners() {
+        // Radio buttons para modo de color
+        const themeModeRadios = document.querySelectorAll('input[name="theme-mode"]');
+        themeModeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.checked) {
+                    this.updateThemeSettings();
+                }
+            });
+        });
+
+        // Color de acento
+        const accentColorPicker = document.getElementById('accent-color');
+        if (accentColorPicker) {
+            accentColorPicker.addEventListener('change', () => {
+                this.updateThemeSettings();
+            });
+        }
+
+        // Botones de colores predefinidos
+        const presetColorButtons = document.querySelectorAll('.preset-color');
+        presetColorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const color = button.getAttribute('data-color');
+                if (accentColorPicker) {
+                    accentColorPicker.value = color;
+                    this.updateThemeSettings();
+                }
+            });
+        });
+
+        // Alto contraste
+        const highContrastToggle = document.getElementById('high-contrast');
+        if (highContrastToggle) {
+            highContrastToggle.addEventListener('change', () => {
+                this.updateThemeSettings();
+            });
+        }
+    }
+
     // === MÉTODOS DE CARGA Y ACTUALIZACIÓN ===
 
     loadCurrentSettings() {
@@ -471,6 +525,7 @@ export default class ConfigurationUI {
         this.loadDrawingSettings();
         this.loadAnimationSettings();
         this.loadGeneralSettings();
+        this.loadThemeSettings();
     }
 
     loadPlayerCardSettings() {
@@ -571,6 +626,32 @@ export default class ConfigurationUI {
         this.applyGeneralSettings();
     }
 
+    loadThemeSettings() {
+        // Cargar modo de color (por defecto auto)
+        const themeMode = localStorage.getItem('themeMode') || 'auto';
+        const themeModeRadio = document.getElementById(`theme-${themeMode}`);
+        if (themeModeRadio) {
+            themeModeRadio.checked = true;
+        }
+
+        // Cargar color de acento (por defecto azul Bootstrap)
+        const accentColor = localStorage.getItem('accentColor') || '#0d6efd';
+        const accentColorElement = document.getElementById('accent-color');
+        if (accentColorElement) {
+            accentColorElement.value = accentColor;
+        }
+
+        // Cargar alto contraste (por defecto false)
+        const highContrast = localStorage.getItem('highContrast') === 'true';
+        const highContrastElement = document.getElementById('high-contrast');
+        if (highContrastElement) {
+            highContrastElement.checked = highContrast;
+        }
+
+        // Aplicar configuraciones al cargar
+        this.applyThemeSettings();
+    }
+
     updatePlayerCardDisplay() {
         const settings = {
             showImage: document.getElementById('show-player-image').checked,
@@ -587,17 +668,35 @@ export default class ConfigurationUI {
     }
 
     resetAllSettings() {
-        if (confirm('¿Estás seguro de que quieres restablecer todas las configuraciones?')) {
-            // Limpiar localStorage
+        if (confirm('¿Estás seguro de que quieres restablecer todas las configuraciones a sus valores por defecto?')) {
+            // Limpiar todas las configuraciones de localStorage
             localStorage.removeItem('playerCardSettings');
+            localStorage.removeItem('showTutorialButtons');
+            localStorage.removeItem('defaultLineColor');
+            localStorage.removeItem('defaultLineThickness');
+            localStorage.removeItem('showDrawingToolbar');
+            localStorage.removeItem('animationSpeed');
+            localStorage.removeItem('smoothMovements');
+            localStorage.removeItem('fadeTransitions');
+            localStorage.removeItem('confirmActions');
+            localStorage.removeItem('compactMode');
+            localStorage.removeItem('themeMode');
+            localStorage.removeItem('accentColor');
+            localStorage.removeItem('highContrast');
 
             // Recargar configuraciones por defecto
             this.loadCurrentSettings();
             
-            // Aplicar configuraciones
+            // Aplicar todas las configuraciones
             this.updatePlayerCardDisplay();
+            this.updateTutorialButtonsVisibility();
+            this.updateDrawingSettings();
+            this.updateDrawingToolbarVisibility();
+            this.updateAnimationSettings();
+            this.updateGeneralSettings();
+            this.updateThemeSettings();
 
-            console.log('[ConfigurationUI] Configuraciones restablecidas');
+            console.log('[ConfigurationUI] Todas las configuraciones restablecidas a valores por defecto');
         }
     }
 
@@ -1022,6 +1121,304 @@ export default class ConfigurationUI {
         styleElement.textContent = styles;
     }
 
+    updateThemeSettings() {
+        // Obtener modo de color seleccionado
+        const selectedThemeMode = document.querySelector('input[name="theme-mode"]:checked');
+        const themeMode = selectedThemeMode ? selectedThemeMode.id.replace('theme-', '') : 'auto';
+        
+        // Obtener color de acento
+        const accentColor = document.getElementById('accent-color').value;
+        
+        // Obtener estado de alto contraste
+        const highContrast = document.getElementById('high-contrast').checked;
+        
+        // Guardar configuraciones
+        localStorage.setItem('themeMode', themeMode);
+        localStorage.setItem('accentColor', accentColor);
+        localStorage.setItem('highContrast', highContrast.toString());
+        
+        // Aplicar inmediatamente las configuraciones
+        this.applyThemeSettings();
+        
+        console.log('[ConfigurationUI] Configuración de tema actualizada:', { 
+            themeMode, accentColor, highContrast 
+        });
+    }
+
+    applyThemeSettings() {
+        const themeMode = localStorage.getItem('themeMode') || 'auto';
+        const accentColor = localStorage.getItem('accentColor') || '#0d6efd';
+        const highContrast = localStorage.getItem('highContrast') === 'true';
+        
+        // Aplicar modo de color
+        this.applyColorMode(themeMode);
+        
+        // Aplicar color de acento
+        this.applyAccentColor(accentColor);
+        
+        // Aplicar alto contraste
+        this.applyHighContrast(highContrast);
+    }
+
+    applyColorMode(mode) {
+        const html = document.documentElement;
+        
+        // Remover clases de tema existentes
+        html.classList.remove('theme-auto', 'theme-light', 'theme-dark');
+        
+        // Aplicar nueva clase de tema
+        html.classList.add(`theme-${mode}`);
+        
+        // Configurar el atributo data-bs-theme para Bootstrap
+        if (mode === 'auto') {
+            // Detectar preferencia del sistema
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+            
+            // Escuchar cambios en la preferencia del sistema
+            if (!this.colorSchemeListener) {
+                this.colorSchemeListener = (e) => {
+                    if (localStorage.getItem('themeMode') === 'auto') {
+                        html.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+                    }
+                };
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.colorSchemeListener);
+            }
+        } else {
+            html.setAttribute('data-bs-theme', mode);
+        }
+        
+        // Aplicar estilos CSS personalizados
+        this.applyColorModeStyles(mode);
+    }
+
+    applyColorModeStyles(mode) {
+        const styleId = 'color-mode-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        let styles = '';
+        
+        if (mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            styles = `
+                /* Modo oscuro personalizado */
+                body {
+                    background-color: #212529 !important;
+                    color: #f8f9fa !important;
+                }
+                
+                .card {
+                    background-color: #343a40 !important;
+                    border-color: #495057 !important;
+                    color: #f8f9fa !important;
+                }
+                
+                .modal-content {
+                    background-color: #343a40 !important;
+                    color: #f8f9fa !important;
+                }
+                
+                .form-control {
+                    background-color: #495057 !important;
+                    border-color: #6c757d !important;
+                    color: #f8f9fa !important;
+                }
+                
+                .form-control:focus {
+                    background-color: #495057 !important;
+                    border-color: var(--bs-primary) !important;
+                    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+                }
+                
+                .btn-outline-secondary {
+                    color: #adb5bd !important;
+                    border-color: #6c757d !important;
+                }
+                
+                .btn-outline-secondary:hover {
+                    background-color: #6c757d !important;
+                    border-color: #6c757d !important;
+                }
+            `;
+        } else {
+            styles = `
+                /* Modo claro personalizado */
+                body {
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
+                }
+                
+                .card {
+                    background-color: #ffffff !important;
+                    border-color: #dee2e6 !important;
+                    color: #212529 !important;
+                }
+                
+                .modal-content {
+                    background-color: #ffffff !important;
+                    color: #212529 !important;
+                }
+            `;
+        }
+        
+        styleElement.textContent = styles;
+    }
+
+    applyAccentColor(color) {
+        const styleId = 'accent-color-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        // Convertir color hex a RGB para uso en CSS custom properties
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        };
+
+        const rgb = hexToRgb(color);
+        const rgbString = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '13, 110, 253'; // fallback a azul Bootstrap
+
+        const styles = `
+            /* Color de acento personalizado */
+            :root {
+                --bs-primary: ${color} !important;
+                --bs-primary-rgb: ${rgbString} !important;
+            }
+            
+            /* Aplicar color de acento a elementos específicos */
+            .btn-primary {
+                background-color: ${color} !important;
+                border-color: ${color} !important;
+            }
+            
+            .btn-primary:hover {
+                background-color: ${color}dd !important;
+                border-color: ${color}dd !important;
+            }
+            
+            .btn-outline-primary {
+                color: ${color} !important;
+                border-color: ${color} !important;
+            }
+            
+            .btn-outline-primary:hover {
+                background-color: ${color} !important;
+                border-color: ${color} !important;
+            }
+            
+            .text-primary {
+                color: ${color} !important;
+            }
+            
+            .border-primary {
+                border-color: ${color} !important;
+            }
+            
+            .bg-primary {
+                background-color: ${color} !important;
+            }
+            
+            /* Enlaces y elementos interactivos */
+            a {
+                color: ${color} !important;
+            }
+            
+            a:hover {
+                color: ${color}dd !important;
+            }
+            
+            .form-check-input:checked {
+                background-color: ${color} !important;
+                border-color: ${color} !important;
+            }
+            
+            .form-range::-webkit-slider-thumb {
+                background-color: ${color} !important;
+            }
+            
+            .form-range::-moz-range-thumb {
+                background-color: ${color} !important;
+            }
+        `;
+        
+        styleElement.textContent = styles;
+    }
+
+    applyHighContrast(enabled) {
+        const styleId = 'high-contrast-styles';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            styleElement.type = 'text/css';
+            document.head.appendChild(styleElement);
+        }
+
+        const styles = enabled ? `
+            /* Alto contraste activado */
+            body {
+                filter: contrast(1.5) !important;
+            }
+            
+            .card {
+                border-width: 2px !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            .btn {
+                border-width: 2px !important;
+                font-weight: bold !important;
+            }
+            
+            .form-control {
+                border-width: 2px !important;
+            }
+            
+            .form-control:focus {
+                box-shadow: 0 0 0 0.5rem rgba(var(--bs-primary-rgb), 0.5) !important;
+            }
+            
+            .text-muted {
+                color: #6c757d !important;
+                font-weight: 500 !important;
+            }
+            
+            /* Mejorar legibilidad de texto */
+            .small {
+                font-size: 0.9rem !important;
+            }
+            
+            /* Iconos más visibles */
+            .fas, .far, .fab {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+            }
+        ` : `
+            /* Alto contraste desactivado */
+            body {
+                filter: none !important;
+            }
+        `;
+        
+        styleElement.textContent = styles;
+    }
+
     // === INTERFAZ PÚBLICA ===
 
     openConfigurationModal() {
@@ -1101,6 +1498,9 @@ export default class ConfigurationUI {
 
         // Cargar y aplicar configuraciones generales
         this.applyGeneralSettings();
+
+        // Cargar y aplicar configuraciones de tema
+        this.applyThemeSettings();
 
         console.log('[ConfigurationUI] Configuraciones guardadas aplicadas');
     }
