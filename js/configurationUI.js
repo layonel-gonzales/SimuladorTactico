@@ -92,7 +92,7 @@ export default class ConfigurationUI {
                         </p>
                         
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="show-player-image" checked>
+                            <input class="form-check-input" type="checkbox" id="show-player-image">
                             <label class="form-check-label" for="show-player-image">
                                 <i class="fas fa-camera me-1"></i>Foto del jugador
                             </label>
@@ -106,21 +106,21 @@ export default class ConfigurationUI {
                         </div>
                         
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="show-player-overall" checked>
+                            <input class="form-check-input" type="checkbox" id="show-player-overall">
                             <label class="form-check-label" for="show-player-overall">
                                 <i class="fas fa-star me-1"></i>Overall (puntuación)
                             </label>
                         </div>
                         
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="show-player-position" checked>
+                            <input class="form-check-input" type="checkbox" id="show-player-position">
                             <label class="form-check-label" for="show-player-position">
                                 <i class="fas fa-map-marker-alt me-1"></i>Posición
                             </label>
                         </div>
                         
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="show-player-jersey" checked>
+                            <input class="form-check-input" type="checkbox" id="show-player-jersey">
                             <label class="form-check-label" for="show-player-jersey">
                                 <i class="fas fa-hashtag me-1"></i>Número de camiseta
                             </label>
@@ -178,19 +178,19 @@ export default class ConfigurationUI {
                             <label for="default-line-color" class="form-label">
                                 <i class="fas fa-palette me-1"></i>Color por defecto
                             </label>
-                            <input type="color" class="form-control form-control-color" id="default-line-color" value="#ffff00">
+                            <input type="color" class="form-control form-control-color" id="default-line-color" value="#000000">
                         </div>
                         
                         <div class="mb-3">
                             <label for="default-line-thickness" class="form-label">
                                 <i class="fas fa-ruler me-1"></i>Grosor por defecto
                             </label>
-                            <input type="range" class="form-range" id="default-line-thickness" min="1" max="15" value="6">
-                            <small class="form-text text-muted">Valor: <span id="thickness-value">6</span>px</small>
+                            <input type="range" class="form-range" id="default-line-thickness" min="1" max="15" value="4">
+                            <small class="form-text text-muted">Valor: <span id="thickness-value">4</span>px</small>
                         </div>
                         
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="show-drawing-toolbar" checked>
+                            <input class="form-check-input" type="checkbox" id="show-drawing-toolbar">
                             <label class="form-check-label" for="show-drawing-toolbar">
                                 <i class="fas fa-tools me-1"></i>Mostrar barra de herramientas
                             </label>
@@ -262,7 +262,7 @@ export default class ConfigurationUI {
                         </p>
                         
                         <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="confirm-actions-toggle">
+                            <input class="form-check-input" type="checkbox" id="confirm-actions-toggle" checked>
                             <label class="form-check-label" for="confirm-actions-toggle">
                                 <i class="fas fa-exclamation-triangle me-1"></i>Confirmar acciones destructivas
                             </label>
@@ -321,7 +321,7 @@ export default class ConfigurationUI {
                                 <i class="fas fa-star me-1"></i>Color de acento
                             </label>
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <input type="color" class="form-control form-control-color" id="accent-color" value="#0d6efd">
+                                <input type="color" class="form-control form-control-color" id="accent-color" value="#fd7e14">
                                 <small class="text-muted">Personalizado</small>
                             </div>
                             <div class="d-flex gap-1 flex-wrap">
@@ -530,11 +530,11 @@ export default class ConfigurationUI {
 
     loadPlayerCardSettings() {
         const settings = JSON.parse(localStorage.getItem('playerCardSettings')) || {
-            showImage: true,
+            showImage: false,
             showName: true,
-            showOverall: true,
-            showPosition: true,
-            showJersey: true
+            showOverall: false,
+            showPosition: false,
+            showJersey: false
         };
 
         document.getElementById('show-player-image').checked = settings.showImage;
@@ -554,15 +554,15 @@ export default class ConfigurationUI {
     }
 
     loadDrawingSettings() {
-        // Cargar color por defecto
-        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#ffff00';
+        // Cargar color por defecto (negro según imagen)
+        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#000000';
         const colorElement = document.getElementById('default-line-color');
         if (colorElement) {
             colorElement.value = defaultLineColor;
         }
 
-        // Cargar grosor por defecto
-        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '6';
+        // Cargar grosor por defecto (4px según imagen)
+        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '4';
         const thicknessElement = document.getElementById('default-line-thickness');
         const thicknessValueElement = document.getElementById('thickness-value');
         if (thicknessElement) {
@@ -576,7 +576,7 @@ export default class ConfigurationUI {
         const showDrawingToolbar = localStorage.getItem('showDrawingToolbar');
         const toolbarElement = document.getElementById('show-drawing-toolbar');
         if (toolbarElement) {
-            toolbarElement.checked = showDrawingToolbar === 'true' || showDrawingToolbar === null; // Por defecto true
+            toolbarElement.checked = showDrawingToolbar === 'true'; // Por defecto false
         }
     }
 
@@ -608,8 +608,8 @@ export default class ConfigurationUI {
     }
 
     loadGeneralSettings() {
-        // Cargar confirmar acciones (por defecto false)
-        const confirmActions = localStorage.getItem('confirmActions') === 'true';
+        // Cargar confirmar acciones (por defecto true según imagen)
+        const confirmActions = localStorage.getItem('confirmActions') === 'true' || localStorage.getItem('confirmActions') === null;
         const confirmElement = document.getElementById('confirm-actions-toggle');
         if (confirmElement) {
             confirmElement.checked = confirmActions;
@@ -634,8 +634,8 @@ export default class ConfigurationUI {
             themeModeRadio.checked = true;
         }
 
-        // Cargar color de acento (por defecto azul Bootstrap)
-        const accentColor = localStorage.getItem('accentColor') || '#0d6efd';
+        // Cargar color de acento (por defecto naranja según imagen)
+        const accentColor = localStorage.getItem('accentColor') || '#fd7e14';
         const accentColorElement = document.getElementById('accent-color');
         if (accentColorElement) {
             accentColorElement.value = accentColor;
@@ -684,6 +684,39 @@ export default class ConfigurationUI {
             localStorage.removeItem('accentColor');
             localStorage.removeItem('highContrast');
 
+            // Configurar valores por defecto según la imagen
+            
+            // Tarjeta de Jugador: Solo nombre activado
+            localStorage.setItem('playerCardSettings', JSON.stringify({
+                showImage: false,
+                showName: true,
+                showOverall: false,
+                showPosition: false,
+                showJersey: false
+            }));
+            
+            // Tutorial: Botones activados
+            localStorage.setItem('showTutorialButtons', 'true');
+            
+            // Herramientas de Dibujo: Color negro, grosor 4px, barra oculta
+            localStorage.setItem('defaultLineColor', '#000000');
+            localStorage.setItem('defaultLineThickness', '4');
+            localStorage.setItem('showDrawingToolbar', 'false');
+            
+            // Animaciones: Velocidad 1x, movimientos suaves y transiciones activados
+            localStorage.setItem('animationSpeed', '1');
+            localStorage.setItem('smoothMovements', 'true');
+            localStorage.setItem('fadeTransitions', 'true');
+            
+            // General: Confirmar acciones activado, modo compacto desactivado
+            localStorage.setItem('confirmActions', 'true');
+            localStorage.setItem('compactMode', 'false');
+            
+            // Tema Visual: Modo auto, color naranja, alto contraste desactivado
+            localStorage.setItem('themeMode', 'auto');
+            localStorage.setItem('accentColor', '#fd7e14');
+            localStorage.setItem('highContrast', 'false');
+
             // Recargar configuraciones por defecto
             this.loadCurrentSettings();
             
@@ -696,7 +729,7 @@ export default class ConfigurationUI {
             this.updateGeneralSettings();
             this.updateThemeSettings();
 
-            console.log('[ConfigurationUI] Todas las configuraciones restablecidas a valores por defecto');
+            console.log('[ConfigurationUI] Todas las configuraciones restablecidas según valores por defecto de la imagen');
         }
     }
 
@@ -1431,11 +1464,11 @@ export default class ConfigurationUI {
     applySavedSettings() {
         // Cargar y aplicar configuraciones de tarjetas de jugador
         const playerCardSettings = JSON.parse(localStorage.getItem('playerCardSettings')) || {
-            showImage: true,
+            showImage: false,
             showName: true,
-            showOverall: true,
-            showPosition: true,
-            showJersey: true
+            showOverall: false,
+            showPosition: false,
+            showJersey: false
         };
         this.applyPlayerCardSettings(playerCardSettings);
 
@@ -1450,8 +1483,8 @@ export default class ConfigurationUI {
         }
 
         // Cargar y aplicar configuraciones de dibujo
-        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#ffff00';
-        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '6';
+        const defaultLineColor = localStorage.getItem('defaultLineColor') || '#000000';
+        const defaultLineThickness = localStorage.getItem('defaultLineThickness') || '4';
         
         // Aplicar al drawingManager si existe
         if (window.drawingManager) {
