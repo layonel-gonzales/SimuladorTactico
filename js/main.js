@@ -20,6 +20,52 @@ import ConfigurationUI from './configurationUI.js';
 // Modo 2: Crear animaciones tácticas con frames
 
 document.addEventListener('DOMContentLoaded', async () => {
+    
+    // SISTEMA DE AUTENTICACIÓN: Verificar acceso antes de inicializar la aplicación
+    const waitForAuthentication = () => {
+        return new Promise((resolve) => {
+            console.log('[Main] Verificando sistema de autenticación...');
+            
+            // Si no hay sistema de autenticación, continuar
+            if (!window.authSystem) {
+                console.log('[Main] No hay sistema de autenticación presente, continuando...');
+                resolve();
+                return;
+            }
+            
+            console.log('[Main] Sistema de autenticación encontrado, estado:', window.authSystem.isAuthenticated);
+            
+            // Si ya está autenticado, continuar
+            if (window.authSystem.isAuthenticated) {
+                console.log('[Main] Ya autenticado, continuando...');
+                resolve();
+                return;
+            }
+            
+            // Esperar hasta que se autentique o se haga bypass
+            let checkCount = 0;
+            const checkAuth = setInterval(() => {
+                checkCount++;
+                console.log(`[Main] Verificando autenticación (intento ${checkCount})...`);
+                
+                if (window.authSystem.isAuthenticated) {
+                    console.log('[Main] Autenticación exitosa, continuando...');
+                    clearInterval(checkAuth);
+                    resolve();
+                }
+            }, 100);
+            
+            // Timeout de seguridad después de 30 segundos (aumentado)
+            setTimeout(() => {
+                clearInterval(checkAuth);
+                console.warn('[Main] Timeout de autenticación alcanzado después de 30 segundos, continuando...');
+                resolve();
+            }, 30000);
+        });
+    };
+    
+    // Esperar autenticación antes de continuar
+    await waitForAuthentication();
 
     // Inicializar el gestor de orientación PRIMERO (antes que cualquier otra cosa)
     const orientationManager = new OrientationManager();

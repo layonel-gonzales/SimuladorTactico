@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba del Sistema de Autenticación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        .danger { border-left-color: #dc3545; background: #f8d7da; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-danger { background: #dc3545; }
+        code {
+            background: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Prueba del Sistema de Autenticación</h1>
+    
+    <div class="test-section">
+        <h3>📋 Estado Actual del Sistema</h3>
+        <p><strong>Estado de autenticación:</strong> <span id="auth-status">Verificando...</span></p>
+        <p><strong>Timestamp de sesión:</strong> <span id="auth-time">Verificando...</span></p>
+        <p><strong>Tiempo restante:</strong> <span id="time-remaining">Verificando...</span></p>
+    </div>
+    
+    <div class="test-section warning">
+        <h3>🧪 Pruebas del Sistema</h3>
+        <p>Utiliza estos botones para probar diferentes escenarios:</p>
+        
+        <button onclick="testLogin()">✅ Simular Login Exitoso</button>
+        <button onclick="testLogout()" class="btn-warning">🚪 Cerrar Sesión</button>
+        <button onclick="testExpire()" class="btn-danger">⏰ Simular Expiración</button>
+        <button onclick="refreshStatus()" class="btn-success">🔄 Actualizar Estado</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>🚀 Enlaces de Navegación</h3>
+        <p>Prueba la navegación entre páginas:</p>
+        
+        <button onclick="goToLogin()">🔐 Ir a Login</button>
+        <button onclick="goToApp()">📱 Ir a Aplicación</button>
+    </div>
+    
+    <div class="test-section success">
+        <h3>📝 Instrucciones de Prueba</h3>
+        <ol>
+            <li><strong>Prueba Normal:</strong> Haz clic en "Ir a Login" → Ingresa <code>Anibal2023</code> → Deberías llegar a la aplicación</li>
+            <li><strong>Prueba de Protección:</strong> Haz clic en "Ir a Aplicación" sin autenticarte → Debería redirigir al login</li>
+            <li><strong>Prueba de Expiración:</strong> Autentícate → Haz clic en "Simular Expiración" → Intenta ir a la aplicación</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>🔍 Logs del Sistema</h3>
+        <p>Abre la consola del navegador (F12) para ver los logs detallados del sistema de autenticación.</p>
+        <button onclick="showLogs()">📊 Mostrar Estado en Consola</button>
+    </div>
+
+    <script>
+        // Función para verificar y mostrar el estado actual
+        function updateStatus() {
+            const auth = sessionStorage.getItem('app_authenticated');
+            const time = sessionStorage.getItem('auth_timestamp');
+            
+            const authStatus = document.getElementById('auth-status');
+            const authTime = document.getElementById('auth-time');
+            const timeRemaining = document.getElementById('time-remaining');
+            
+            if (auth === 'true' && time) {
+                authStatus.textContent = '✅ Autenticado';
+                authStatus.style.color = '#28a745';
+                
+                const timestamp = parseInt(time);
+                const date = new Date(timestamp);
+                authTime.textContent = date.toLocaleString();
+                
+                const elapsed = Date.now() - timestamp;
+                const remaining = (60 * 60 * 1000) - elapsed; // 1 hora menos tiempo transcurrido
+                
+                if (remaining > 0) {
+                    const minutes = Math.floor(remaining / (60 * 1000));
+                    timeRemaining.textContent = `${minutes} minutos`;
+                    timeRemaining.style.color = '#28a745';
+                } else {
+                    timeRemaining.textContent = 'Expirado';
+                    timeRemaining.style.color = '#dc3545';
+                }
+            } else {
+                authStatus.textContent = '❌ No autenticado';
+                authStatus.style.color = '#dc3545';
+                authTime.textContent = 'N/A';
+                timeRemaining.textContent = 'N/A';
+            }
+        }
+        
+        // Funciones de prueba
+        function testLogin() {
+            sessionStorage.setItem('app_authenticated', 'true');
+            sessionStorage.setItem('auth_timestamp', Date.now().toString());
+            alert('✅ Login simulado exitosamente');
+            updateStatus();
+        }
+        
+        function testLogout() {
+            sessionStorage.removeItem('app_authenticated');
+            sessionStorage.removeItem('auth_timestamp');
+            alert('🚪 Sesión cerrada');
+            updateStatus();
+        }
+        
+        function testExpire() {
+            // Simular una sesión que expiró hace 2 horas
+            const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+            sessionStorage.setItem('auth_timestamp', twoHoursAgo.toString());
+            alert('⏰ Sesión expirada simulada');
+            updateStatus();
+        }
+        
+        function refreshStatus() {
+            updateStatus();
+            alert('🔄 Estado actualizado');
+        }
+        
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+        
+        function goToApp() {
+            window.location.href = 'index.html';
+        }
+        
+        function showLogs() {
+            console.log('=== ESTADO DEL SISTEMA DE AUTENTICACIÓN ===');
+            console.log('app_authenticated:', sessionStorage.getItem('app_authenticated'));
+            console.log('auth_timestamp:', sessionStorage.getItem('auth_timestamp'));
+            
+            const time = sessionStorage.getItem('auth_timestamp');
+            if (time) {
+                const elapsed = Date.now() - parseInt(time);
+                console.log('Tiempo transcurrido:', Math.floor(elapsed / (60 * 1000)), 'minutos');
+            }
+            
+            alert('📊 Revisa la consola para ver los logs detallados');
+        }
+        
+        // Actualizar estado cada segundo
+        setInterval(updateStatus, 1000);
+        
+        // Actualizar estado inicial
+        updateStatus();
+        
+        console.log('🔧 Página de pruebas cargada');
+    </script>
+</body>
+</html>
