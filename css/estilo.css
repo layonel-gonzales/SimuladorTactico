@@ -6,7 +6,6 @@
    ESTRUCTURA:
    1. Variables Globales y Reset
    2. 🖥️ ESTILOS PARA DESKTOP (1025px+)
-   3. 📱 ESTILOS PARA MOBILE/TABLET (<=1024px)
    ============================================ */
 
 /* ============================================
@@ -15,7 +14,6 @@
 
 /* === PALETA DE COLORES Y VARIABLES === */
 :root {
-    /* Colores principales */
     --color-primary: #17a2b8;
     --color-secondary: #6c757d;
     --color-success: #28a745;
@@ -26,115 +24,143 @@
     --color-dark: #343a40;
     --color-accent: #fd7e14;
     --color-gold: #ffd700;
-    
-    /* Campo de fútbol */
     --pitch-green-primary: #2d8a2d;
     --pitch-green-secondary: #238a23;
     --pitch-line-color: #ffffff;
-    
-    /* Modo oscuro (default) */
+    --z-field: 1;
+    --z-canvas: 10;
+    --z-tokens: 20;
+    --z-menu: 1000;
+    --z-modal: 2000;
     --bg-primary: #1a1a1a;
     --bg-secondary: #2a2a2a;
     --bg-tertiary: #333333;
-    --bg-overlay: rgba(40, 40, 40, 0.95);
-    
-    --text-primary: #ffffff;
-    --text-secondary: #b8b8b8;
-    --text-muted: #6c757d;
-    --text-inverse: #000000;
-    
-    --border-primary: rgba(255, 255, 255, 0.2);
-    --border-secondary: rgba(255, 255, 255, 0.1);
-    --border-accent: var(--color-primary);
-    
-    /* Sombras */
-    --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-large: 0 8px 20px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 10px;
-    
-    /* Gradientes */
-    --gradient-primary: linear-gradient(135deg, #17a2b8, #28a745);
-    --gradient-dark: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
-    --gradient-modal: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 50%, #1a1a1a 100%);
-    
-    /* Transiciones */
-    --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
-    --transition-bounce: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    
-    /* Espaciados */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-xxl: 3rem;
-    
-    /* Tamaños de fuente */
-    --size-xs: 0.75rem;
-    --size-sm: 0.875rem;
-    --size-base: 1rem;
-    --size-lg: 1.125rem;
-    --size-xl: 1.25rem;
-    --size-xxl: 1.5rem;
-    
-    /* Radios de borde */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 20px;
-    --radius-round: 50%;
-    
-    /* Z-index layers */
-    --z-field: 1;
-    --z-canvas: 10;
-    --z-tokens: 15;
-    --z-ui: 100;
-    --z-menu: 1000;
-    --z-modal: 9999;
-    --z-tooltip: 10000;
 }
 
-/* === MODO CLARO === */
-[data-theme="light"] {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --bg-tertiary: #e9ecef;
-    --bg-overlay: rgba(248, 249, 250, 0.95);
-    
-    --text-primary: #212529;
-    --text-secondary: #495057;
-    --text-muted: #6c757d;
-    --text-inverse: #ffffff;
-    
-    --border-primary: rgba(0, 0, 0, 0.2);
-    --border-secondary: rgba(0, 0, 0, 0.1);
-    
-    --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-large: 0 8px 20px rgba(0, 0, 0, 0.2);
-    
-    --gradient-dark: linear-gradient(145deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
-    --gradient-modal: linear-gradient(145deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
+/* Reset y prevención de zoom/scroll no deseado */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
-
-/* === BASE Y RESET === */
 html, body {
     width: 100vw;
     height: 100vh;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+}
+
+/* === PLAYER TOKEN UNIFICADO Y RESPONSIVO === */
+.player-token {
+    position: absolute;
+    width: clamp(60px, 8vw, 110px);
+    height: clamp(80px, 11vw, 150px);
+    background-image: url('../img/marco3.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: grab;
+    z-index: var(--z-tokens);
+    transition: transform 0.2s, filter 0.2s;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    pointer-events: auto;
+    border: 2px solid red !important; /* DEBUG: Borde temporal para depuración visual */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.player-token .minicard-overall {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    color: var(--color-gold, gold);
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.player-token .minicard-position {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.player-token .minicard-player-image {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(32px, 40%, 48px);
+    height: clamp(32px, 40%, 48px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--text-primary, #fff);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.player-token .minicard-name {
+    position: absolute;
+    bottom: 18px;
+    left: 8px;
+    right: 8px;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
     overflow: hidden;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    font-size: var(--size-base);
-    line-height: 1.5;
-    color: var(--text-primary);
-    background-color: var(--bg-primary);
+    text-overflow: ellipsis;
+    padding: 0 4px;
+    border-radius: 6px;
+    user-select: none;
+}
+
+.player-token .minicard-jersey-number {
+    position: absolute;
+    bottom: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+    touch-action: manipulation;
 }
 
 /* === CAMPO DE FÚTBOL Y CANVAS (COMÚN) === */
+/* Cancha ocupa toda la pantalla, debajo del menú */
 #pitch-container {
     position: fixed;
     top: 0;
@@ -148,6 +174,134 @@ html, body {
     background-size: 100px 100px;
     z-index: var(--z-field);
     overflow: hidden;
+    pointer-events: auto;
+}
+
+/* Canchas y canvas siempre debajo del menú */
+/* Canvas de la cancha SIEMPRE ocupa toda la pantalla */
+#football-field, #drawing-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
+
+/* === PLAYER TOKEN UNIFICADO Y RESPONSIVO === */
+.player-token {
+    position: absolute;
+    width: clamp(60px, 8vw, 110px);
+    height: clamp(80px, 11vw, 150px);
+    background-image: url('../img/marco3.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: grab;
+    z-index: var(--z-tokens);
+    transition: transform 0.2s, filter 0.2s;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    pointer-events: auto;
+    border: 2px solid red !important; /* DEBUG: Borde temporal para depuración visual */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.player-token .minicard-overall {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    color: var(--color-gold, gold);
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.player-token .minicard-position {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.player-token .minicard-player-image {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(32px, 40%, 48px);
+    height: clamp(32px, 40%, 48px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--text-primary, #fff);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.player-token .minicard-name {
+    position: absolute;
+    bottom: 18px;
+    left: 8px;
+    right: 8px;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+    border-radius: 6px;
+    user-select: none;
+}
+
+.player-token .minicard-jersey-number {
+    position: absolute;
+    bottom: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+    }
+    body.orientation-locked #pitch-container,
+    body.orientation-locked #football-field,
+    body.orientation-locked #drawing-canvas,
+    body.orientation-locked #unified-single-bottom-menu,
+    body.orientation-locked #app-container {
+        filter: blur(2px) grayscale(0.7) brightness(0.7);
+        pointer-events: none !important;
+        user-select: none !important;
+    }
+    body.orientation-locked #drawing-canvas {
+        outline: 4px solid red !important;
+    }
+    }
+}
 }
 
 /* Separadores visuales */
@@ -164,52 +318,49 @@ html, body {
     font-size: 0.75rem;
     font-weight: bold;
     color: white;
-    min-width: 32px;
-    text-align: center;
-    flex-shrink: 0;
-}
 
-/* Inputs compactos */
+#unified-single-bottom-menu {
+    /* Estilos responsivos generales para todas las resoluciones */
+    min-height: clamp(45px, 6vh, 60px);
+    max-height: clamp(50px, 8vh, 70px);
+    padding: clamp(3px, 0.8vw, 10px) clamp(6px, 2vw, 20px);
+    gap: clamp(2px, 0.5vw, 8px);
+    font-size: clamp(0.75rem, 1vw, 1rem);
+}
+#unified-single-bottom-menu .btn {
+    font-size: clamp(0.75rem, 1vw, 1rem);
+    height: clamp(32px, 5vh, 40px);
+    min-width: clamp(32px, 5vw, 40px);
+    max-width: clamp(60px, 10vw, 100px);
+    padding: clamp(3px, 0.5vw, 8px) clamp(6px, 1vw, 12px);
+}
+#unified-single-bottom-menu .mode-toggle-always-visible,
+#unified-single-bottom-menu .squad-btn-always-visible,
+#unified-single-bottom-menu .custom-players-btn-always-visible,
+#unified-single-bottom-menu .configuration-btn-always-visible,
+#unified-single-bottom-menu .fullscreen-btn-always-visible {
+    font-size: clamp(0.85rem, 1vw, 1.1rem);
+    min-width: clamp(32px, 5vw, 40px);
+    max-width: clamp(40px, 7vw, 50px);
+    height: clamp(32px, 5vh, 40px);
+}
 .color-input-compact {
-    width: 32px !important; /* Aumentar para uniformidad */
-    height: 32px !important; /* Coincidir con altura de botones */
-    padding: 0 !important;
-    border: 1px solid var(--primary-color);
-    border-radius: 4px;
-    flex-shrink: 0;
+    width: clamp(28px, 4vw, 36px);
+    height: clamp(28px, 4vw, 36px);
 }
-
 .width-compact {
-    width: 60px !important; /* Aumentar ancho */
-    height: 32px !important; /* Coincidir con altura de botones */
-    font-size: 0.75rem !important; /* Coincidir con tamaño de fuente de botones */
-    flex-shrink: 0;
+    width: clamp(40px, 7vw, 60px);
+    height: clamp(28px, 4vw, 36px);
+    font-size: clamp(0.75rem, 1vw, 1rem);
 }
-
-/* Fila de controles básicos eliminada */
-.basic-controls-row {
-    display: none;
+.vertical-separator {
+    height: clamp(28px, 4vw, 36px);
 }
-
-/* Controles de cada modo - MÁXIMA ESPECIFICIDAD PARA FORZAR CAMBIOS */
-#unified-single-bottom-menu .mode-controls {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex: 1; /* Ocupa todo el espacio disponible después de los botones siempre visibles */
-    gap: 2px; /* Espacio uniforme entre elementos */
-    height: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    transition: all 0.3s ease;
+.frame-counter {
+    min-width: clamp(25px, 4vw, 32px);
+    height: clamp(28px, 4vw, 36px);
+    font-size: clamp(0.75rem, 1vw, 1rem);
 }
-
-#unified-single-bottom-menu .mode-controls.visible {
-    display: flex !important; /* Mostrar y ocupar espacio completo */
-}
-
-#unified-single-bottom-menu .mode-controls.hidden {
-    display: none !important; /* Ocultar SIN ocupar espacio */
 }
 
 /* Estados específicos por ID con MÁXIMA especificidad */
@@ -282,9 +433,20 @@ html, body {
 }
 
 /* Los botones DENTRO de los mode-controls sí se expanden para llenar el espacio restante */
-#unified-single-bottom-menu .mode-controls .btn,
-#unified-single-bottom-menu .mode-controls .form-select {
-    flex: 1 1 auto !important; /* Estos SÍ se expanden */
+/* Los botones e inputs dentro de los mode-controls ocupan equitativamente el ancho */
+#unified-single-bottom-menu #drawing-mode-controls,
+#unified-single-bottom-menu #animation-mode-controls {
+    display: flex;
+    flex: 1 1 0%;
+    gap: clamp(2px, 0.5vw, 8px);
+    width: 100%;
+}
+#unified-single-bottom-menu #drawing-mode-controls > .btn,
+#unified-single-bottom-menu #drawing-mode-controls > .form-select,
+#unified-single-bottom-menu #animation-mode-controls > .btn,
+#unified-single-bottom-menu #animation-mode-controls > .form-select {
+    flex: 1 1 0%;
+    min-width: 0;
     margin: 0 !important;
 }
 
@@ -384,20 +546,60 @@ html, body {
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
-/* El canvas debe ocupar todo el espacio */
-#football-field, #drawing-canvas {
-    position: absolute;
-    top: 0;
+/* ...existing code... */
+/* Menú inferior siempre visible y sobre la cancha y tokens */
+#unified-single-bottom-menu {
+    position: fixed;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    max-width: 100vw;
-    max-height: 100vh;
-    object-fit: contain;
+    width: 100vw;
+    z-index: var(--z-menu);
+    background: rgba(40, 40, 40, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid var(--color-primary);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: clamp(2px, 0.5vw, 8px) clamp(4px, 1vw, 16px);
+    gap: clamp(2px, 0.5vw, 8px);
+    min-height: clamp(40px, 6vh, 60px);
+    max-height: clamp(45px, 8vh, 70px);
     box-sizing: border-box;
-    touch-action: none;
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transition: min-height 0.2s, max-height 0.2s, padding 0.2s;
 }
+
+/* Modal de selección de jugadores por encima de todo y fullscreen */
+/* Todos los modales principales siempre por encima del menú */
+#squad-selection-modal.modal,
+#custom-players-modal.modal,
+#player-modal.modal {
+    z-index: var(--z-modal) !important;
+}
+#squad-selection-modal .modal-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#squad-selection-modal .modal-content {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    overflow: auto !important;
+}
+
+/* Eliminada media query que podía ocultar o modificar el menú inferior en pantallas grandes. El menú será visible y responsivo en todos los tamaños. */
 
 #football-field { z-index: var(--z-field); }
 #drawing-canvas { z-index: var(--z-canvas); cursor: crosshair; pointer-events: auto; }
@@ -453,7 +655,7 @@ html, body {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    /* overflow: hidden;  Eliminado para evitar que el menú se corte en desktop */
 }
 
 /* Contenedor principal para la aplicación */
@@ -463,6 +665,7 @@ html, body {
     position: relative;
     /* display: block; */
     flex-grow: unset;
+    overflow: visible;
 }
 
 /* Estilos para el campo de juego */
@@ -474,7 +677,7 @@ html, body {
     height: 100vh;
     min-width: 0;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     background-color: var(--pitch-green);
     background-image:
         linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
@@ -605,29 +808,13 @@ canvas {
 #drawing-canvas {
     z-index: 10; /* Por encima del campo */
     cursor: crosshair;
-    pointer-events: auto; /* Crucial: Asegura que el canvas reciba eventos del ratón/touch */
-    /* MEJORA: Optimizar para dispositivos táctiles */
+    pointer-events: auto !important; /* Crucial: Asegura que el canvas reciba eventos del ratón/touch SIEMPRE */
     touch-action: none;
     /* El color de la línea se define en drawingManager.js, pero puedes poner un default aquí */
     /* stroke-color: var(--pitch-line);  Esto no funciona aquí, el color de línea se establece en JS */
 }
 
 /* NUEVA: Mejoras específicas para móviles */
-@media (max-width: 768px) {
-    canvas {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-    }
-    
-    #football-field, #drawing-canvas {
-        image-rendering: auto;
-        image-rendering: crisp-edges;
-        image-rendering: pixelated;
-        image-rendering: -webkit-optimize-contrast;
-    }
-}
 
 /* Estilos de las "minicards" generales (usadas por player-token y squad-player-item) */
 .minicard-overall {
@@ -759,56 +946,6 @@ canvas {
 
 /* Elementos dentro de squad-player-item, ajustados para el marco */
 .squad-player-item img {
-    width: 60px;
-    height: 70px;  /* Ratio 6:7 para fotos de jugadores */
-    border-radius: 4px; /* Esquinas ligeramente redondeadas */
-    object-fit: cover;
-    margin-top: 15px; /* Ajuste para posicionar la imagen dentro del marco */
-    border: 2px solid var(--primary-color); /* Usando variable */
-    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3); /* Sombra más sutil */
-    background: #f8f9fa; /* Fondo por si no carga la imagen */
-    transition: all 0.3s ease;
-}
-
-.squad-player-item img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-}
-
-.squad-player-item .player-name {
-    font-weight: bold;
-    margin-top: 5px;
-    font-size: 0.8em;
-    text-align: center;
-    color: var(--text-color); /* Usando variable */
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 2px 5px;
-    border-radius: 3px;
-    max-width: 100px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.squad-player-item .player-position {
-    font-size: 0.7em;
-    color: #ccc; /* Mantener este color si no quieres que cambie con text-color */
-}
-
-/* Reutilizando minicard-overall y minicard-jersey-number para squad-player-item */
-.squad-player-item .minicard-overall {
-    top: 20px; /* Ajuste específico para este marco */
-    left: 10px;
-}
-
-.squad-player-item .minicard-jersey-number {
-    bottom: 40px; /* Ajuste específico para este marco */
-}
-
-
-/* Estilos para los tokens de jugador en la cancha (player-token) */
-.player-token {
-    position: absolute;
     width: 90px;
     height: 120px;
     background-image: url('../img/marco3.png');
@@ -932,2323 +1069,4 @@ canvas {
 /* ============================================
    🖥️ ESTILOS PARA DESKTOP (1025px y mayor)
    ============================================ */
-@media (min-width: 1025px) {
-    
-    /* === MENÚ INFERIOR DESKTOP === */
-    #unified-single-bottom-menu {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        z-index: var(--z-ui) !important;
-        background: var(--bg-overlay) !important;
-        backdrop-filter: blur(8px) !important;
-        border-top: 2px solid var(--color-primary) !important;
-        box-shadow: var(--shadow-medium) !important;
-        padding: var(--spacing-sm) var(--spacing-md) !important;
-        height: 52px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: var(--spacing-xs) !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-    }
-    
-    /* Botones del menú desktop */
-    #unified-single-bottom-menu .btn {
-        background: rgba(255, 255, 255, 0.9) !important;
-        color: var(--text-inverse) !important;
-        border: 1px solid rgba(255, 255, 255, 0.6) !important;
-        font-size: 0.8rem !important;
-        padding: 5px 8px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        border-radius: var(--radius-sm) !important;
-        transition: all var(--transition-normal) !important;
-        flex: 1 1 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        white-space: nowrap !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Inputs compactos desktop */
-    .color-input-compact {
-        width: 36px !important;
-        height: 36px !important;
-        padding: 0 !important;
-        border: 1px solid var(--color-primary);
-        border-radius: var(--radius-sm);
-        flex-shrink: 0;
-        cursor: pointer;
-    }
-    
-    .width-compact {
-        width: 70px !important;
-        height: 36px !important;
-        font-size: 0.8rem !important;
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-primary);
-        border-radius: var(--radius-sm);
-        flex-shrink: 0;
-    }
-    
-    .vertical-separator {
-        width: 1px;
-        height: 36px !important;
-        background: var(--border-primary);
-        margin: 0 var(--spacing-xs);
-        flex-shrink: 0;
-    }
-    
-    /* === CARDS DE JUGADOR DESKTOP === */
-    .player-token {
-        position: absolute;
-        width: 125px;
-        height: 145px;
-        background-image: url('../img/marco3.png');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        cursor: grab;
-        z-index: var(--z-tokens);
-        transition: all var(--transition-fast);
-        filter: drop-shadow(var(--shadow-small));
-        pointer-events: auto;
-    }
-    
-    .player-token:hover {
-        transform: scale(1.05);
-        filter: brightness(1.1) drop-shadow(var(--shadow-medium));
-    }
-    
-    .player-token.dragging {
-        transform: scale(1.1);
-        filter: brightness(1.2) drop-shadow(var(--shadow-large));
-        z-index: var(--z-ui);
-    }
-    
-    /* Elementos de card desktop */
-    .minicard-overall {
-        position: absolute;
-        top: 15px;
-        left: 10px;
-        font-size: 1.2em;
-        font-weight: bold;
-        color: var(--color-gold);
-        background-color: rgba(0, 0, 0, 0.6);
-        width: 25px;
-        height: 25px;
-        border-radius: var(--radius-round);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-position {
-        position: absolute;
-        top: 15px;
-        right: 10px;
-        font-size: 0.8em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 2px 5px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-player-image {
-        position: absolute;
-        top: 45px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 50px;
-        border-radius: var(--radius-round);
-        object-fit: cover;
-        border: 2px solid var(--text-primary);
-        box-shadow: var(--shadow-small);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-    }
-    
-    .minicard-name {
-        position: absolute;
-        bottom: 25px;
-        left: 11px;
-        right: 0;
-        text-align: center;
-        font-size: 0.67em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.7);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        width: 81%;
-        padding: 0 5px;
-        box-sizing: border-box;
-        cursor: pointer;
-        user-select: none;
-        border-radius: var(--radius-sm);
-    }
-    
-    .minicard-jersey-number {
-        position: absolute;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.9em;
-        font-weight: bold;
-        color: var(--text-primary);
-        text-shadow: 0 0 3px black;
-        cursor: pointer;
-        user-select: none;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: var(--radius-round);
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* === CARDS DE SELECCIÓN DESKTOP === */
-    .squad-player-item {
-        position: relative;
-        width: 130px;
-        height: 168px;
-        background-image: url('../img/marco3.png');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        flex-shrink: 0;
-    }
-    
-    .squad-player-item:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-medium);
-    }
-    
-    .squad-player-item.selected {
-        filter: brightness(0.7) saturate(1.1);
-        transform: scale(0.95);
-        outline: 3px solid var(--color-primary);
-        outline-offset: 2px;
-    }
-    
-    .squad-player-item img {
-        width: 70px;
-        height: 70px;
-        border-radius: var(--radius-round);
-        object-fit: cover;
-        border: 2px solid var(--color-primary);
-        box-shadow: var(--shadow-glow) var(--color-primary);
-        position: absolute;
-        top: 45px;
-        left: 50%;
-        transform: translateX(-50%);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-    }
-    
-    .squad-player-item .player-name {
-        font-weight: bold;
-        font-size: 0.8em;
-        text-align: center;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 2px 5px;
-        border-radius: var(--radius-sm);
-        max-width: 100px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        position: absolute;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .squad-player-item .minicard-overall {
-        position: absolute;
-        top: 15px;
-        left: 10px;
-        font-size: 1.1em;
-        font-weight: bold;
-        color: var(--color-gold);
-        background-color: rgba(0, 0, 0, 0.6);
-        width: 28px;
-        height: 28px;
-        border-radius: var(--radius-round);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    /* === MODALES DESKTOP === */
-    #squad-selection-modal .modal-content,
-    #player-modal .modal-content {
-        background: var(--gradient-modal);
-        border: 1px solid var(--border-primary);
-        color: var(--text-primary);
-    }
-    
-    #squad-selection-modal .modal-header,
-    #squad-selection-modal .modal-footer,
-    #player-modal .modal-header,
-    #player-modal .modal-footer {
-        border-color: var(--border-primary);
-        background: var(--bg-secondary);
-    }
-    
-    #squad-selection-modal .modal-title {
-        color: var(--color-primary);
-        font-weight: 700;
-    }
-    
-    #squad-player-list {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: var(--spacing-md);
-        max-height: 70vh;
-        overflow-y: auto;
-        padding: var(--spacing-md);
-    }
-    
-    /* FIFA Card detallada desktop */
-    .fifa-card {
-        background: var(--gradient-modal);
-        color: var(--text-primary);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-large);
-        max-width: 350px;
-        margin: auto;
-        border: 1px solid var(--border-primary);
-    }
-    
-    .fifa-card img {
-        border: 3px solid var(--color-primary);
-        box-shadow: var(--shadow-glow) var(--color-primary);
-    }
-    
-    .fifa-card .display-4 {
-        color: var(--color-gold);
-        font-weight: 900;
-    }
-    
-    .fifa-card .badge {
-        background-color: var(--color-primary) !important;
-        color: var(--text-inverse) !important;
-    }
-    
-    /* === BOTONES FLOTANTES DESKTOP === */
-/* Colores específicos para botón de modo según estado */
-#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning {
-    background: rgba(255, 152, 0, 0.95) !important; /* Naranja para modo animación */
-    color: white !important;
-    border-color: rgba(255, 152, 0, 0.8) !important;
-}
-
-#unified-single-bottom-menu .mode-toggle-always-visible.btn-warning:hover {
-    background: rgba(255, 152, 0, 1) !important;
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4) !important;
-}
-
-#unified-single-bottom-menu .mode-toggle-always-visible.btn-info {
-    background: rgba(23, 162, 184, 0.95) !important; /* Azul para modo dibujo */
-    color: white !important;
-    border-color: rgba(23, 162, 184, 0.8) !important;
-}
-
-#unified-single-bottom-menu .mode-toggle-always-visible.btn-info:hover {
-    background: rgba(23, 162, 184, 1) !important;
-    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4) !important;
-}
-
-/* ===== TUTORIAL STYLES ===== */
-
-/* Botón flotante del tutorial */
-.tutorial-btn {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    z-index: 7777 !important;
-    border: none !important;
-    border-radius: 50px !important;
-    padding: 12px 20px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: white !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-/* Tutorial de Dibujo - Verde */
-.tutorial-drawing {
-    background: linear-gradient(135deg, #28a745, #20c997) !important;
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4) !important;
-}
-
-.tutorial-drawing:hover {
-    background: linear-gradient(135deg, #218838, #1ea080) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6) !important;
-    color: white !important;
-}
-
-/* Tutorial de Animación - Azul */
-.tutorial-animation {
-    background: linear-gradient(135deg, #007bff, #17a2b8) !important;
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4) !important;
-}
-
-.tutorial-animation:hover {
-    background: linear-gradient(135deg, #0056b3, #138496) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6) !important;
-    color: white !important;
-}
-
-/* Controlar visibilidad según el modo */
-.tutorial-drawing.hidden,
-.tutorial-animation.hidden {
-    display: none !important;
-}
-
-/* Clase especial para configuración - MAYOR PRIORIDAD */
-.tutorial-btn.config-hidden {
-    display: none !important;
-}
-
-.tutorial-btn.config-visible {
-    display: flex !important;
-}
-
-/* Posicionamiento: cuando solo se muestra uno, va a la derecha */
-.tutorial-drawing {
-    right: 20px !important;
-}
-
-.tutorial-animation {
-    right: 20px !important;
-}
-
-/* ===== RESPONSIVE TUTORIAL STYLES ===== */
-
-/* Personalización de Intro.js para móvil */
-.introjs-tooltip {
-    background: rgba(40, 40, 40, 0.95) !important;
-    border: 2px solid #17a2b8 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(10px) !important;
-    max-width: 350px !important;
-}
-
-.introjs-tooltip-header {
-    background: linear-gradient(135deg, #17a2b8, #007bff) !important;
-    color: white !important;
-    border-radius: 10px 10px 0 0 !important;
-}
-
-.introjs-tooltiptext {
-    color: #fff !important;
-    font-size: 12px !important;
-    line-height: 1.5 !important;
-}
-
-.introjs-button {
-    background: linear-gradient(135deg, #007bff, #0056b3) !important;
-    border: none !important;
-    border-radius: 6px !important;
-    color: white !important;
-    padding: 8px 16px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    margin: 0 4px !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-}
-
-.introjs-button:hover {
-    background: linear-gradient(135deg, #0056b3, #004085) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;
-}
-
-.introjs-skipbutton:hover {
-    background: linear-gradient(135deg, #495057, #343a40) !important;
-}
-
-/* Estilos responsive para móvil */
-@media (max-width: 768px) {
-    /* Botones de tutorial más pequeños en móvil */
-
-    .tutorial-btn {
-        position: fixed !important;
-        top: var(--spacing-lg) !important;
-        right: var(--spacing-lg) !important;
-        z-index: var(--z-modal) !important;
-        border: none !important;
-        border-radius: 50px !important;
-        padding: var(--spacing-md) var(--spacing-lg) !important;
-        font-size: var(--size-sm) !important;
-        font-weight: 600 !important;
-        color: var(--text-inverse) !important;
-        cursor: pointer !important;
-        transition: all var(--transition-normal) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: var(--spacing-sm) !important;
-        box-shadow: var(--shadow-medium);
-    }
-    
-    .tutorial-drawing {
-        background: var(--gradient-primary) !important;
-    }
-    
-    .tutorial-animation {
-        background: linear-gradient(135deg, #007bff, #17a2b8) !important;
-    }
-    
-    /* === TOGGLE DE TEMA DESKTOP === */
-    .theme-toggle {
-        position: fixed;
-        top: var(--spacing-lg);
-        left: var(--spacing-lg);
-        z-index: var(--z-modal);
-        background: var(--gradient-primary);
-        border: none;
-        border-radius: var(--radius-round);
-        width: 48px;
-        height: 48px;
-        color: var(--text-inverse);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--size-lg);
-        box-shadow: var(--shadow-medium);
-    }
-    
-    /* === INDICADORES DESKTOP === */
-    #audio-indicator {
-        position: fixed;
-        top: var(--spacing-lg);
-        right: var(--spacing-lg);
-        background: rgba(220, 53, 69, 0.9);
-        color: var(--text-inverse);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-xl);
-        font-size: var(--size-sm);
-        font-weight: bold;
-        z-index: var(--z-menu);
-        display: none;
-        align-items: center;
-        gap: var(--spacing-sm);
-        box-shadow: var(--shadow-medium);
-    }
-}
-
-/* ============================================
-   📱 ESTILOS PARA MOBILE/TABLET (1024px y menor)
-   ============================================ */
-@media (max-width: 1024px) {
-    
-    /* === ORIENTACIÓN MÓVIL === */
-    @media (orientation: portrait) {
-        #orientation-message {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: var(--z-tooltip);
-            color: var(--text-inverse);
-            text-align: center;
-            padding: var(--spacing-lg);
-        }
-        
-        #orientation-message img {
-            width: 120px;
-            height: 120px;
-            margin-bottom: var(--spacing-lg);
-            opacity: 0.9;
-            animation: rotateAnimation 2s ease-in-out infinite;
-        }
-        
-        #orientation-message h2 {
-            font-size: 1.8rem;
-            margin-bottom: var(--spacing-md);
-            font-weight: 600;
-        }
-        
-        #orientation-message p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 300px;
-            line-height: 1.4;
-        }
-        
-        #app-container,
-        #unified-single-bottom-menu,
-        .tutorial-btn {
-            display: none !important;
-        }
-    }
-    
-    /* === CANVAS MÓVIL === */
-    canvas {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        image-rendering: auto;
-        image-rendering: crisp-edges;
-        image-rendering: pixelated;
-        image-rendering: -webkit-optimize-contrast;
-        object-fit: contain !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        z-index: 1 !important;
-    }
-    
-    /* Asegurar que el contenedor principal ocupe toda la pantalla */
-    #app-container {
-        width: 100vw !important;
-        height: 100vh !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    /* Eliminar cualquier scroll horizontal */
-    body, html {
-        overflow-x: hidden !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    /* Asegurar que el canvas del campo de fútbol se ajuste */
-    #soccer-field, #football-field {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        object-fit: contain !important;
-    }
-}
-
-/* === TABLETS Y MÓVILES MEDIANOS (481px a 768px) === */
-@media (min-width: 481px) and (max-width: 768px) {
-    
-    /* Menú para tablets */
-    #unified-single-bottom-menu {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        z-index: var(--z-ui) !important;
-        background: var(--bg-overlay) !important;
-        backdrop-filter: blur(10px) !important;
-        border-top: 2px solid var(--color-primary) !important;
-        box-shadow: var(--shadow-medium) !important;
-        height: auto !important;
-        min-height: 50px !important;
-        max-height: 70px !important;
-        padding: 6px !important;
-        gap: 3px !important;
-        display: flex !important;
-        align-items: center !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        scrollbar-width: thin !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* Botones para tablets */
-    #unified-single-bottom-menu .btn {
-        background: rgba(255, 255, 255, 0.95) !important;
-        color: var(--text-inverse) !important;
-        border: 1px solid rgba(255, 255, 255, 0.7) !important;
-        font-size: 11px !important;
-        padding: 4px 8px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        max-width: 120px !important;
-        border-radius: var(--radius-sm) !important;
-        transition: all var(--transition-normal) !important;
-        flex: 0 0 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        white-space: nowrap !important;
-        font-weight: 500 !important;
-        margin: 0 2px !important;
-    }
-    
-    /* Botones siempre visibles en tablets */
-    #unified-single-bottom-menu .mode-toggle-always-visible,
-    #unified-single-bottom-menu .squad-btn-always-visible,
-    #unified-single-bottom-menu .custom-players-btn-always-visible,
-    #unified-single-bottom-menu .configuration-btn-always-visible,
-    #unified-single-bottom-menu .fullscreen-btn-always-visible {
-        flex: 0 0 auto !important;
-        min-width: 42px !important;
-        max-width: 42px !important;
-        height: 42px !important;
-        font-size: 16px !important;
-        padding: 3px !important;
-        background: rgba(13, 110, 253, 0.9) !important;
-        color: white !important;
-        border: 1px solid rgba(13, 110, 253, 0.8) !important;
-    }
-    
-    /* Inputs para tablets */
-    .color-input-compact {
-        width: 35px !important;
-        height: 35px !important;
-        padding: 0 !important;
-        border: 1px solid var(--color-primary) !important;
-        border-radius: var(--radius-sm) !important;
-        flex-shrink: 0 !important;
-        margin: 0 2px !important;
-    }
-    
-    .width-compact {
-        width: 60px !important;
-        height: 35px !important;
-        font-size: 11px !important;
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-primary) !important;
-        border-radius: var(--radius-sm) !important;
-        flex-shrink: 0 !important;
-        margin: 0 2px !important;
-    }
-}
-
-/* === MOBILE PEQUEÑO (480px y menor) === */
-@media (max-width: 480px) {
-    
-    /* === MENÚ MÓVIL PEQUEÑO === */
-    #unified-single-bottom-menu {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        z-index: var(--z-ui) !important;
-        background: var(--bg-overlay) !important;
-        backdrop-filter: blur(8px) !important;
-        border-top: 2px solid var(--color-primary) !important;
-        box-shadow: var(--shadow-medium) !important;
-        height: auto !important;
-        min-height: 45px !important;
-        max-height: 60px !important;
-        padding: 4px !important;
-        gap: 2px !important;
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        scrollbar-width: none !important; /* Firefox */
-        -ms-overflow-style: none !important; /* IE and Edge */
-        box-sizing: border-box !important;
-    }
-    
-    /* Ocultar scrollbar en webkit */
-    #unified-single-bottom-menu::-webkit-scrollbar {
-        display: none !important;
-    }
-    
-    /* Contenedor principal del menú */
-    #unified-single-bottom-menu > * {
-        flex-shrink: 0 !important;
-    }
-    
-    /* Botones móvil pequeño */
-    #unified-single-bottom-menu .btn {
-        background: rgba(255, 255, 255, 0.95) !important;
-        color: var(--text-inverse) !important;
-        border: 1px solid rgba(255, 255, 255, 0.7) !important;
-        font-size: 9px !important;
-        padding: 3px 6px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        max-width: 80px !important;
-        border-radius: var(--radius-sm) !important;
-        transition: all var(--transition-normal) !important;
-        flex: 0 0 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        white-space: nowrap !important;
-        font-weight: 500 !important;
-        text-overflow: ellipsis !important;
-        overflow: hidden !important;
-        margin: 0 1px !important;
-    }
-    
-    /* Botones siempre visibles en móvil */
-    #unified-single-bottom-menu .mode-toggle-always-visible,
-    #unified-single-bottom-menu .squad-btn-always-visible,
-    #unified-single-bottom-menu .custom-players-btn-always-visible,
-    #unified-single-bottom-menu .configuration-btn-always-visible,
-    #unified-single-bottom-menu .fullscreen-btn-always-visible {
-        flex: 0 0 auto !important;
-        min-width: 36px !important;
-        max-width: 36px !important;
-        height: 36px !important;
-        font-size: 14px !important;
-        padding: 2px !important;
-        background: rgba(13, 110, 253, 0.9) !important;
-        color: white !important;
-        border: 1px solid rgba(13, 110, 253, 0.8) !important;
-    }
-    
-    /* Mode controls en móvil */
-    #unified-single-bottom-menu .mode-controls {
-        display: flex !important;
-        flex: 1 1 auto !important;
-        gap: 1px !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-        min-width: 0 !important;
-        height: 100% !important;
-    }
-    
-    #unified-single-bottom-menu .mode-controls::-webkit-scrollbar {
-        display: none !important;
-    }
-    
-    /* Inputs móvil pequeño */
-    .color-input-compact {
-        width: 30px !important;
-        height: 30px !important;
-        padding: 0 !important;
-        border: 1px solid var(--color-primary) !important;
-        border-radius: var(--radius-sm) !important;
-        flex-shrink: 0 !important;
-        cursor: pointer !important;
-        margin: 0 1px !important;
-    }
-    
-    .width-compact {
-        width: 50px !important;
-        height: 30px !important;
-        font-size: 9px !important;
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-primary) !important;
-        border-radius: var(--radius-sm) !important;
-        flex-shrink: 0 !important;
-        margin: 0 1px !important;
-        padding: 2px !important;
-    }
-    
-    .vertical-separator {
-        height: 30px !important;
-        width: 1px !important;
-        background: rgba(255,255,255,0.3) !important;
-        margin: 0 2px !important;
-        flex-shrink: 0 !important;
-    }
-    
-    /* Frame counter en móvil */
-    .frame-counter {
-        font-size: 9px !important;
-        min-width: 25px !important;
-        height: 30px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: rgba(0,0,0,0.3) !important;
-        border-radius: var(--radius-sm) !important;
-        margin: 0 1px !important;
-    }
-    
-    /* Mejoras adicionales para dispositivos muy pequeños */
-    body {
-        overflow-x: hidden !important;
-    }
-    
-    #app-container {
-        width: 100vw !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-    }
-    
-    /* === CARDS MÓVIL PEQUEÑO === */
-    .player-token {
-        position: absolute;
-        width: 100px;
-        height: 115px;
-        background-image: url('../img/marco3.png');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        cursor: grab;
-        z-index: var(--z-tokens);
-        transition: all var(--transition-fast);
-        filter: drop-shadow(var(--shadow-small));
-        pointer-events: auto;
-    }
-    
-    .minicard-overall {
-        position: absolute;
-        top: 12px;
-        left: 8px;
-        font-size: 0.9em;
-        font-weight: bold;
-        color: var(--color-gold);
-        background-color: rgba(0, 0, 0, 0.6);
-        width: 20px;
-        height: 20px;
-        border-radius: var(--radius-round);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-position {
-        position: absolute;
-        top: 12px;
-        right: 8px;
-        font-size: 0.65em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 1px 3px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-player-image {
-        position: absolute;
-        top: 35px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 40px;
-        border-radius: var(--radius-round);
-        object-fit: cover;
-        border: 1px solid var(--text-primary);
-        box-shadow: var(--shadow-small);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-    }
-    
-    .minicard-name {
-        position: absolute;
-        bottom: 20px;
-        left: 8px;
-        right: 8px;
-        text-align: center;
-        font-size: 0.55em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.7);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 0 2px;
-        box-sizing: border-box;
-        cursor: pointer;
-        user-select: none;
-        border-radius: var(--radius-sm);
-    }
-    
-    .minicard-jersey-number {
-        position: absolute;
-        bottom: 32px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.75em;
-        font-weight: bold;
-        color: var(--text-primary);
-        cursor: pointer;
-        user-select: none;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: var(--radius-round);
-        width: 16px;
-        height: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* === BOTONES FLOTANTES MÓVIL === */
-    .tutorial-btn {
-        position: fixed !important;
-        top: var(--spacing-sm) !important;
-        right: var(--spacing-sm) !important;
-        z-index: var(--z-modal) !important;
-        border: none !important;
-        border-radius: 20px !important;
-        padding: var(--spacing-xs) var(--spacing-sm) !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: var(--text-inverse) !important;
-        cursor: pointer !important;
-        transition: all var(--transition-normal) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: var(--spacing-sm) !important;
-        box-shadow: var(--shadow-medium);
-    }
-    
-    .tutorial-animation {
-        right: 80px !important;
-    }
-    
-    /* === MODALES MÓVIL === */
-    .fifa-card {
-        max-width: 250px;
-        padding: var(--spacing-md);
-        border-radius: var(--radius-sm);
-    }
-    
-    .fifa-card img {
-        width: 70px;
-        height: 70px;
-        border: 1px solid var(--color-primary);
-    }
-    
-    .fifa-card .display-4 {
-        font-size: 2.4rem;
-    }
-    
-    /* === TOGGLE DE TEMA MÓVIL === */
-    .theme-toggle {
-        position: fixed;
-        top: var(--spacing-sm);
-        left: var(--spacing-sm);
-        z-index: var(--z-modal);
-        background: var(--gradient-primary);
-        border: none;
-        border-radius: var(--radius-round);
-        width: 36px;
-        height: 36px;
-        color: var(--text-inverse);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--size-sm);
-        box-shadow: var(--shadow-medium);
-    }
-}
-
-/* === TABLET (481px - 1024px) === */
-@media (min-width: 481px) and (max-width: 1024px) {
-    
-    /* === MENÚ TABLET === */
-    #unified-single-bottom-menu {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        z-index: var(--z-ui) !important;
-        background: var(--bg-overlay) !important;
-        backdrop-filter: blur(8px) !important;
-        border-top: 2px solid var(--color-primary) !important;
-        box-shadow: var(--shadow-medium) !important;
-        height: 44px !important;
-        padding: var(--spacing-sm) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: var(--spacing-xs) !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-    }
-    
-    /* Botones tablet */
-    #unified-single-bottom-menu .btn {
-        background: rgba(255, 255, 255, 0.9) !important;
-        color: var(--text-inverse) !important;
-        border: 1px solid rgba(255, 255, 255, 0.6) !important;
-        font-size: 0.7rem !important;
-        padding: 3px 5px !important;
-        height: 30px !important;
-        min-width: 30px !important;
-        border-radius: var(--radius-sm) !important;
-        transition: all var(--transition-normal) !important;
-        flex: 1 1 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        white-space: nowrap !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Inputs tablet */
-    .color-input-compact {
-        width: 30px !important;
-        height: 30px !important;
-        padding: 0 !important;
-        border: 1px solid var(--color-primary);
-        border-radius: var(--radius-sm);
-        flex-shrink: 0;
-        cursor: pointer;
-    }
-    
-    .width-compact {
-        width: 55px !important;
-        height: 30px !important;
-        font-size: 0.7rem !important;
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-primary);
-        border-radius: var(--radius-sm);
-        flex-shrink: 0;
-    }
-    
-    /* === CARDS TABLET === */
-    .player-token {
-        position: absolute;
-        width: 110px;
-        height: 130px;
-        background-image: url('../img/marco3.png');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        cursor: grab;
-        z-index: var(--z-tokens);
-        transition: all var(--transition-fast);
-        filter: drop-shadow(var(--shadow-small));
-        pointer-events: auto;
-    }
-    
-    .minicard-overall {
-        position: absolute;
-        top: 13px;
-        left: 9px;
-        font-size: 1.0em;
-        font-weight: bold;
-        color: var(--color-gold);
-        background-color: rgba(0, 0, 0, 0.6);
-        width: 22px;
-        height: 22px;
-        border-radius: var(--radius-round);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-position {
-        position: absolute;
-        top: 13px;
-        right: 9px;
-        font-size: 0.7em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 1px 4px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .minicard-player-image {
-        position: absolute;
-        top: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 45px;
-        height: 45px;
-        border-radius: var(--radius-round);
-        object-fit: cover;
-        border: 2px solid var(--text-primary);
-        box-shadow: var(--shadow-small);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-    }
-    
-    .minicard-name {
-        position: absolute;
-        bottom: 22px;
-        left: 10px;
-        right: 10px;
-        text-align: center;
-        font-size: 0.6em;
-        font-weight: bold;
-        color: var(--text-primary);
-        background-color: rgba(0, 0, 0, 0.7);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 0 3px;
-        box-sizing: border-box;
-        cursor: pointer;
-        user-select: none;
-        border-radius: var(--radius-sm);
-    }
-    
-    .minicard-jersey-number {
-        position: absolute;
-        bottom: 36px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.8em;
-        font-weight: bold;
-        color: var(--text-primary);
-        cursor: pointer;
-        user-select: none;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: var(--radius-round);
-        width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* === BOTONES FLOTANTES TABLET === */
-    .tutorial-btn {
-        position: fixed !important;
-        top: var(--spacing-md) !important;
-        right: var(--spacing-md) !important;
-        z-index: var(--z-modal) !important;
-        border: none !important;
-        border-radius: 30px !important;
-        padding: var(--spacing-sm) var(--spacing-md) !important;
-        font-size: 0.75rem !important;
-        font-weight: 600 !important;
-        color: var(--text-inverse) !important;
-        cursor: pointer !important;
-        transition: all var(--transition-normal) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: var(--spacing-sm) !important;
-        box-shadow: var(--shadow-medium);
-    }
-    
-    .tutorial-animation {
-        right: 120px !important;
-    }
-    
-    /* === MODALES TABLET === */
-    .fifa-card {
-        max-width: 280px;
-        padding: var(--spacing-lg);
-    }
-    
-    .fifa-card img {
-        width: 80px;
-        height: 80px;
-        border: 2px solid var(--color-primary);
-    }
-    
-    /* === TOGGLE DE TEMA TABLET === */
-    .theme-toggle {
-        position: fixed;
-        top: var(--spacing-md);
-        left: var(--spacing-md);
-        z-index: var(--z-modal);
-        background: var(--gradient-primary);
-        border: none;
-        border-radius: var(--radius-round);
-        width: 42px;
-        height: 42px;
-        color: var(--text-inverse);
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: var(--size-base);
-        box-shadow: var(--shadow-medium);
-    }
-}
-
-/* ============================================
-   🎨 ELEMENTOS COMUNES Y EFECTOS
-   ============================================ */
-
-/* === CLASE BASE PARA CARDS === */
-.player-card-element {
-    transition: all var(--transition-normal);
-    position: relative;
-}
-
-.player-card-element:hover {
-    filter: brightness(1.1);
-}
-
-/* === ESTADOS DE INTERACCIÓN === */
-.minicard-overall:hover,
-.squad-player-item .minicard-overall:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-    transform: scale(1.1);
-    box-shadow: var(--shadow-glow) var(--color-gold);
-}
-
-.minicard-position:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-    transform: scale(1.05);
-}
-
-.minicard-player-image:hover,
-.squad-player-item img:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--shadow-glow) var(--color-primary);
-    transform: translateX(-50%) scale(1.1);
-}
-
-.minicard-name:hover,
-.squad-player-item .player-name:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-    transform: scale(1.02);
-}
-
-.minicard-jersey-number:hover {
-    background-color: rgba(0, 0, 0, 0.6);
-    transform: translateX(-50%) scale(1.1);
-}
-
-/* En tablet, ajustar los hovers */
-@media (min-width: 481px) and (max-width: 1024px) {
-    .squad-player-item .player-name:hover {
-        transform: translateX(-50%) scale(1.05);
-    }
-}
-
-/* === INDICADORES DE ESTADO === */
-.player-card-element[data-editable="true"] {
-    outline: 2px dashed var(--color-primary);
-    outline-offset: 2px;
-}
-
-.player-card-element.editing {
-    background-color: rgba(23, 162, 184, 0.2) !important;
-    outline: 2px solid var(--color-primary) !important;
-    outline-offset: 1px;
-}
-
-/* === TOOLTIPS === */
-.player-card-element[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-overlay);
-    color: var(--text-primary);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    white-space: nowrap;
-    z-index: var(--z-tooltip);
-    pointer-events: none;
-    opacity: 0;
-    animation: fadeInTooltip 0.3s ease forwards;
-}
-
-/* === EFECTOS ESPECIALES === */
-.player-token.ball-token {
-    width: 32px !important;
-    height: 32px !important;
-    background: none !important;
-    z-index: var(--z-ui) !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-/* === BOTONES CON ESTADOS === */
-#unified-single-bottom-menu .btn:hover {
-    background: rgba(255, 255, 255, 1) !important;
-    transform: scale(1.02) !important;
-    box-shadow: var(--shadow-small) !important;
-}
-
-#unified-single-bottom-menu .btn-primary {
-    background: rgba(23, 162, 184, 0.9) !important;
-    color: var(--text-inverse) !important;
-    border-color: rgba(23, 162, 184, 0.8) !important;
-}
-
-#unified-single-bottom-menu .btn-danger {
-    background: rgba(220, 53, 69, 0.9) !important;
-    color: var(--text-inverse) !important;
-}
-
-#unified-single-bottom-menu .btn-success {
-    background: rgba(40, 167, 69, 0.9) !important;
-    color: var(--text-inverse) !important;
-}
-
-#unified-single-bottom-menu .btn-warning {
-    background: rgba(255, 193, 7, 0.9) !important;
-    color: var(--text-inverse) !important;
-}
-
-#unified-single-bottom-menu .btn-info {
-    background: rgba(23, 162, 184, 0.9) !important;
-    color: var(--text-inverse) !important;
-}
-
-#unified-single-bottom-menu .btn-secondary {
-    background: rgba(108, 117, 125, 0.9) !important;
-    color: var(--text-inverse) !important;
-}
-
-/* === ESTADOS DE BOTONES ESPECIALES === */
-#audio-record-btn.recording {
-    background: var(--color-danger) !important;
-    color: var(--text-inverse) !important;
-    animation: pulseRecord 1s ease-in-out infinite;
-}
-
-#audio-play-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-#delete-line-mode.active {
-    background: var(--color-danger) !important;
-    color: var(--text-inverse) !important;
-    border: 2px solid var(--text-inverse);
-    box-shadow: var(--shadow-glow) var(--color-danger);
-}
-
-.tutorial-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: var(--shadow-glow) var(--color-success) !important;
-}
-
-.theme-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-glow) var(--color-primary);
-}
-
-/* === FRAME COUNTER === */
-.frame-counter {
-    font-size: var(--size-xs);
-    font-weight: bold;
-    color: var(--text-inverse);
-    background: rgba(0, 0, 0, 0.8);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-primary);
-    min-width: 32px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-/* === CURSORES === */
-.scissors-cursor-simple {
-    cursor: crosshair !important;
-}
-
-/* === ANIMACIONES === */
-@keyframes pulseRecord {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-@keyframes rotateAnimation {
-    0% { transform: rotate(0deg); }
-    50% { transform: rotate(15deg); }
-    100% { transform: rotate(0deg); }
-}
-
-@keyframes fadeInTooltip {
-    to { opacity: 1; }
-}
-
-#audio-indicator::before {
-    content: "🎤";
-    font-size: 1.2rem;
-    animation: pulseRecord 1s ease-in-out infinite;
-}
-
-/* === COMPATIBILIDAD BOOTSTRAP === */
-.btn:not(.btn-unified) {
-    border-radius: var(--radius-md) !important;
-    transition: all var(--transition-normal) !important;
-}
-
-.modal:not(.modal-unified) .modal-content {
-    background: var(--gradient-modal) !important;
-    border: 1px solid var(--border-primary) !important;
-    color: var(--text-primary) !important;
-}
-
-.modal:not(.modal-unified) .modal-header,
-.modal:not(.modal-unified) .modal-footer {
-    background: var(--bg-secondary) !important;
-    border-color: var(--border-primary) !important;
-}
-
-.form-control {
-    background: var(--bg-tertiary) !important;
-    border: 1px solid var(--border-primary) !important;
-    color: var(--text-primary) !important;
-}
-
-.form-control:focus {
-    background: var(--bg-tertiary) !important;
-    border-color: var(--color-primary) !important;
-    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
-    color: var(--text-primary) !important;
-}
-
-.form-select {
-    background: var(--bg-tertiary) !important;
-    border: 1px solid var(--border-primary) !important;
-    color: var(--text-primary) !important;
-}
-
-/* === INTRO.JS CUSTOMIZATION === */
-.introjs-tooltip {
-    background: var(--bg-overlay) !important;
-    border: 2px solid var(--color-primary) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: var(--shadow-large) !important;
-    backdrop-filter: blur(10px) !important;
-    max-width: 350px !important;
-}
-
-.introjs-tooltip-header {
-    background: var(--gradient-primary) !important;
-    color: var(--text-inverse) !important;
-    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
-}
-
-.introjs-tooltiptext {
-    color: var(--text-primary) !important;
-    font-size: var(--size-sm) !important;
-    line-height: 1.5 !important;
-}
-
-.introjs-button {
-    background: var(--gradient-primary) !important;
-    border: none !important;
-    border-radius: var(--radius-sm) !important;
-    color: var(--text-inverse) !important;
-    padding: var(--spacing-sm) var(--spacing-md) !important;
-    font-size: var(--size-sm) !important;
-    font-weight: 600 !important;
-    margin: 0 var(--spacing-xs) !important;
-    cursor: pointer !important;
-    transition: all var(--transition-normal) !important;
-}
-
-.introjs-button:hover {
-    background: linear-gradient(135deg, #0056b3, #004085) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: var(--shadow-small) !important;
-}
-
-/* === SCROLLBARS === */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-primary);
-    border-radius: var(--radius-sm);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--color-primary) 85%, black);
-}
-
-/* === TEMA CLARO - OVERRIDES ESPECÍFICOS === */
-[data-theme="light"] #unified-single-bottom-menu {
-    background: rgba(248, 249, 250, 0.95) !important;
-    border-top-color: var(--color-primary) !important;
-}
-
-[data-theme="light"] .tutorial-btn {
-    box-shadow: var(--shadow-medium) !important;
-}
-
-/* === CONTROLES DE MODO === */
-.mode-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    flex: 1;
-    height: 100%;
-    transition: all var(--transition-normal);
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-.mode-controls.visible { display: flex !important; }
-.mode-controls.hidden { display: none !important; }
-
-/* === LEGACY COMPATIBILITY === */
-#animation-controls button {
-    padding: 2px 7px;
-    font-size: 1.1em;
-}
-
-#frame-indicator {
-    color: var(--color-primary);
-    font-size: 1.1em;
-    background: rgba(0,0,0,0.12);
-    border-radius: var(--radius-sm);
-    padding: 0 6px;
-}
-
-.basic-controls-row {
-    display: none;
-}
-
-/* === ESTILOS PARA JUGADORES PERSONALIZADOS === */
-
-.custom-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 20px;
-    height: 20px;
-    background: #28a745;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    border: 2px solid white;
-}
-
-.custom-badge i {
-    color: white;
-    font-size: 10px;
-}
-
-/* Formulario de jugadores personalizados */
-#custom-player-form .form-control:focus,
-#custom-player-form .form-select:focus {
-    border-color: #28a745;
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-#calculated-overall {
-    font-size: 1.2rem;
-    color: #28a745;
-}
-
-/* Preview de foto del jugador - Optimizado para 120x140px */
-#player-photo-preview {
-    width: 120px !important;
-    height: 140px !important;
-    object-fit: cover !important;
-    border-radius: 6px !important;
-    transition: all 0.3s ease;
-    border: 3px solid #dee2e6 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background: #f8f9fa;
-}
-
-#player-photo-preview:hover {
-    transform: scale(1.05);
-    border-color: #28a745 !important;
-    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
-}
-
-/* Tarjetas de jugadores personalizados en gestión */
-.custom-player-card {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 12px;
-    background: rgba(40, 167, 69, 0.05);
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.custom-player-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transform: translateY(-2px);
-}
-
-.custom-player-card .player-photo {
-    width: 60px;
-    height: 70px;  /* Mantener ratio 6:7 */
-    border-radius: 4px; /* Esquinas menos redondeadas para fotos rectangulares */
-    object-fit: cover;
-    border: 2px solid #28a745;
-    background: #f8f9fa;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.custom-player-card .player-photo:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-}
-
-.custom-player-card .player-stats {
-    font-size: 0.8rem;
-}
-
-.custom-player-card .overall-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #28a745;
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-/* Botones de acción en tarjetas */
-.custom-player-card .action-buttons {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.custom-player-card:hover .action-buttons {
-    opacity: 1;
-}
-
-/* Info de almacenamiento */
-.storage-info {
-    background: rgba(13, 202, 240, 0.1);
-    border: 1px solid rgba(13, 202, 240, 0.3);
-    border-radius: 8px;
-    padding: 12px;
-}
-
-/* Drag and drop para importar */
-.file-drop-area {
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-    background: rgba(248, 249, 250, 0.5);
-}
-
-.file-drop-area.dragover {
-    border-color: #28a745;
-    background: rgba(40, 167, 69, 0.1);
-}
-
-.file-drop-area:hover {
-    border-color: #6c757d;
-    background: rgba(248, 249, 250, 0.8);
-}
-
-/* === ESTILOS DEL MÓDULO DE CONFIGURACIÓN === */
-
-/* Botón de configuración */
-#configuration-btn {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #212529;
-    transition: all 0.3s ease;
-}
-
-#configuration-btn:hover {
-    background-color: #ffca2c;
-    border-color: #ffca2c;
-    color: #212529;
-    transform: scale(1.05);
-}
-
-/* Modal de configuración */
-#configuration-modal .modal-content {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-#configuration-modal .modal-header {
-    background: var(--primary-gradient);
-    color: white;
-    border-radius: 12px 12px 0 0;
-    border-bottom: none;
-    padding: 1rem 1.5rem;
-}
-
-#configuration-modal .modal-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-#configuration-modal .modal-body {
-    padding: 1.5rem;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-}
-
-/* Tabs de configuración */
-#configuration-modal .nav-tabs {
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: 2rem;
-}
-
-#configuration-modal .nav-tabs .nav-link {
-    color: var(--text-muted);
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 0.75rem 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-#configuration-modal .nav-tabs .nav-link.active {
-    color: var(--primary-color);
-    background: transparent;
-    border-bottom-color: var(--primary-color);
-}
-
-#configuration-modal .nav-tabs .nav-link:hover:not(.active) {
-    color: var(--text-color);
-    border-bottom-color: var(--border-color);
-}
-
-/* Cards dentro del modal */
-#configuration-modal .card {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--card-bg);
-    transition: all 0.3s ease;
-}
-
-#configuration-modal .card:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-#configuration-modal .card-header {
-    background: var(--light-bg);
-    border-bottom: 1px solid var(--border-color);
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-}
-
-#configuration-modal .card-body {
-    padding: 1rem;
-}
-
-/* Controles de formulario */
-#configuration-modal .form-control,
-#configuration-modal .form-select {
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    background: var(--card-bg);
-    color: var(--text-color);
-    transition: all 0.3s ease;
-}
-
-#configuration-modal .form-control:focus,
-#configuration-modal .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-/* Switches y checkboxes */
-#configuration-modal .form-check-input:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-#configuration-modal .form-check-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-/* Rangos */
-#configuration-modal .form-range {
-    background: transparent;
-}
-
-#configuration-modal .form-range::-webkit-slider-track {
-    background: var(--border-color);
-    border-radius: 4px;
-    height: 6px;
-}
-
-#configuration-modal .form-range::-webkit-slider-thumb {
-    background: var(--primary-color);
-    border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Estadísticas de vista previa */
-.stat-box {
-    text-align: center;
-    padding: 1rem;
-    background: var(--light-bg);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    min-width: 100px;
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.25rem;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-/* Cards de equipo */
-.team-card {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--card-bg);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.team-card:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    transform: translateY(-3px);
-}
-
-.team-card .team-color-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-}
-
-.team-card .card-body {
-    padding-left: 1.5rem;
-}
-
-.team-card .team-name {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-}
-
-.team-card .team-description {
-    color: var(--text-muted);
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
-}
-
-.team-card .team-stats {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-}
-
-.team-card .team-stat {
-    color: var(--text-muted);
-}
-
-.team-card .team-stat strong {
-    color: var(--primary-color);
-}
-
-/* Botones del modal */
-#configuration-modal .btn {
-    border-radius: 6px;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
-}
-
-#configuration-modal .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* Mensajes vacíos */
-#configuration-modal .text-center i.fa-3x {
-    opacity: 0.5;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #configuration-modal .modal-dialog {
-        margin: 0.5rem;
-    }
-    
-    #configuration-modal .modal-body {
-        padding: 1rem;
-    }
-    
-    #configuration-modal .nav-tabs .nav-link {
-        padding: 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .stat-box {
-        min-width: 80px;
-        padding: 0.75rem;
-    }
-    
-    .stat-number {
-        font-size: 1.25rem;
-    }
-}
-
-/* === ELEMENTOS DE INFORMACIÓN DEL SISTEMA === */
-
-.progress-sm {
-    height: 8px;
-    border-radius: 4px;
-    background-color: #f1f3f4;
-    overflow: hidden;
-}
-
-.progress-sm .progress-bar {
-    transition: width 0.6s ease;
-}
-
-/* Cards de información técnica */
-.card.border-primary {
-    border-color: #007bff !important;
-}
-
-.card.border-success {
-    border-color: #28a745 !important;
-}
-
-.card.border-info {
-    border-color: #17a2b8 !important;
-}
-
-.card.border-warning {
-    border-color: #ffc107 !important;
-}
-
-/* Texto técnico pequeño */
-.small {
-    font-size: 0.875rem;
-    line-height: 1.4;
-}
-
-.small strong {
-    font-weight: 600;
-}
-
-/* Indicadores de estado */
-.status-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-}
-
-.status-indicator.success {
-    background-color: #28a745;
-}
-
-.status-indicator.warning {
-    background-color: #ffc107;
-}
-
-.status-indicator.error {
-    background-color: #dc3545;
-}
-
-/* === ESTILOS OPTIMIZADOS PARA IMÁGENES DE JUGADORES === */
-
-/* Clase base para todas las imágenes de jugadores */
-.player-image-optimized {
-    background: #f8f9fa;
-    border: 2px solid #dee2e6;
-    border-radius: 4px;
-    object-fit: cover;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.player-image-optimized:hover {
-    transform: scale(1.05);
-    border-color: #28a745;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-/* Tamaño estándar para vista de lista */
-.player-image-standard {
-    width: 60px;
-    height: 70px;
-}
-
-/* Tamaño mediano para previews */
-.player-image-medium {
-    width: 90px;
-    height: 105px;
-}
-
-/* Tamaño grande para previews principales */
-.player-image-large {
-    width: 120px;
-    height: 140px;
-}
-
-/* Placeholder cuando no hay imagen */
-.player-image-placeholder {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6c757d;
-    font-size: 1.5rem;
-    border: 2px dashed #dee2e6;
-}
-
-.player-image-placeholder:hover {
-    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-    border-color: #28a745;
-}
-
-/* Estados de carga */
-.player-image-loading {
-    position: relative;
-    overflow: hidden;
-}
-
-.player-image-loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: loading-shimmer 1.5s infinite;
-}
-
-@keyframes loading-shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-}
-
-/* Optimización para dispositivos móviles */
-@media (max-width: 576px) {
-    .player-image-large {
-        width: 100px;
-        height: 120px;
-    }
-    
-    .player-image-medium {
-        width: 75px;
-        height: 90px;
-    }
-    
-    .player-image-standard {
-        width: 50px;
-        height: 60px;
-    }
-}
-
-/* ============================================
-   🔐 SISTEMA DE AUTENTICACIÓN TEMPORAL
-   ============================================ */
-
-/* Overlay de autenticación */
-.auth-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
-}
-
-.auth-overlay-content {
-    text-align: center;
-    color: var(--text-primary);
-}
-
-.auth-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Modal de autenticación */
-#auth-modal .modal-content {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-}
-
-#auth-modal .modal-header {
-    border-bottom: none;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-info));
-}
-
-#auth-modal .modal-body {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    padding: 2rem;
-}
-
-#auth-modal #access-password {
-    background: var(--bg-tertiary);
-    border: 2px solid var(--border-primary);
-    color: var(--text-primary);
-    border-radius: 10px;
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    transition: all 0.3s ease;
-}
-
-#auth-modal #access-password:focus {
-    background: var(--bg-tertiary);
-    border-color: var(--color-primary);
-    color: var(--text-primary);
-    box-shadow: 0 0 20px rgba(23, 162, 184, 0.3);
-}
-
-#auth-modal #access-password::placeholder {
-    color: var(--text-secondary);
-    letter-spacing: normal;
-}
-
-#auth-modal .modal-footer {
-    background: var(--bg-secondary);
-    border-top: none;
-    padding: 1.5rem 2rem 2rem 2rem;
-}
-
-#auth-modal #auth-submit {
-    border-radius: 10px;
-    padding: 12px 30px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-info));
-    border: none;
-}
-
-#auth-modal #auth-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(23, 162, 184, 0.4);
-}
-
-#auth-modal #auth-error {
-    background: rgba(220, 53, 69, 0.1);
-    border: 1px solid var(--color-danger);
-    color: var(--color-danger);
-    border-radius: 8px;
-    animation: shake 0.5s ease-in-out;
-}
-
-@keyframes shake {
-    0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-}
-
-/* Ocultar contenido principal hasta autenticación */
-body.auth-pending > *:not(#auth-modal):not(#auth-overlay):not(.modal-backdrop) {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Animación de entrada después de autenticación */
-body.auth-success > *:not(#auth-modal):not(#auth-overlay):not(.modal-backdrop) {
-    opacity: 1;
-    pointer-events: auto;
-    animation: fadeInContent 0.8s ease-out;
-}
-
-@keyframes fadeInContent {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Tema claro para autenticación */
-[data-bs-theme="light"] #auth-modal .modal-body {
-    background: #ffffff;
-    color: #333333;
-}
-
-[data-bs-theme="light"] #auth-modal #access-password {
-    background: #f8f9fa;
-    border-color: #dee2e6;
-    color: #333333;
-}
-
-[data-bs-theme="light"] #auth-modal #access-password:focus {
-    background: #ffffff;
-    border-color: var(--color-primary);
-    color: #333333;
-}
-
-[data-bs-theme="light"] #auth-modal #access-password::placeholder {
-    color: #6c757d;
-}
-
-[data-bs-theme="light"] #auth-modal .modal-footer {
-    background: #ffffff;
-}
-}
+/* Eliminada la media query desktop para el menú inferior. El menú es siempre visible y responsivo con la definición global. */

@@ -154,6 +154,11 @@ export default class ModeManager {
             // Desactivar dibujo para evitar conflictos
             if (this.drawingManager) {
                 this.drawingManager.setEnabled(false);
+                // Limpiar todas las líneas automáticamente al cambiar a animación
+                if (typeof this.drawingManager.clearAllLines === 'function') {
+                    this.drawingManager.clearAllLines();
+                    console.log('[ModeManager] Líneas borradas automáticamente al cambiar a modo animación');
+                }
             }
 
             if (this.ballDrawingManager) {
@@ -164,10 +169,6 @@ export default class ModeManager {
             if (this.uiManager) {
                 this.uiManager.renderPlayersOnPitch();
             }
-            
-            // NO limpiar líneas automáticamente - el usuario puede querer conservarlas
-            // El usuario puede usar el botón "Limpiar" manualmente si lo desea
-            console.log('[ModeManager] Modo animación activado - líneas conservadas');
         }
     }
     

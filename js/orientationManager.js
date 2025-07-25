@@ -81,26 +81,24 @@ export default class OrientationManager {
         return window.innerHeight > window.innerWidth;
     }
     
+
     showMessage() {
         if (!this.orientationMessage) return;
-        
         this.orientationMessage.style.display = 'flex';
         this.isVisible = true;
-        
+        document.body.classList.add('orientation-locked');
         // Opcional: Vibrar el dispositivo si es compatible
         if (navigator.vibrate) {
             navigator.vibrate([200, 100, 200]);
         }
-        
         console.log('[OrientationManager] Mensaje de orientación mostrado');
     }
-    
+
     hideMessage() {
         if (!this.orientationMessage) return;
-        
         this.orientationMessage.style.display = 'none';
         this.isVisible = false;
-        
+        document.body.classList.remove('orientation-locked');
         console.log('[OrientationManager] Mensaje de orientación oculto');
     }
     
