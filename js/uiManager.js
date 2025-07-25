@@ -283,7 +283,7 @@ export default class UIManager {
                 
                 // Dibuja el balón como una imagen especial (solo en modo animación)
                 const ball = document.createElement('img');
-                ball.className = 'player-token ball-token';
+                ball.className = 'ball-token';
                 ball.dataset.playerId = player.id;
                 ball.src = 'img/ball.png';
                 

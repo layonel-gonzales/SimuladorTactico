@@ -1,3 +1,29 @@
+</body>
+<script>
+// Mostrar el modal de orientación solo en modo vertical
+function handleOrientationModal() {
+  const modal = document.getElementById('orientation-message');
+  if (!modal) return;
+  // Detectar orientación de forma robusta
+  let isPortrait = false;
+  if (window.screen && window.screen.orientation && window.screen.orientation.type) {
+    isPortrait = window.screen.orientation.type.startsWith('portrait');
+  } else if (window.orientation !== undefined) {
+    isPortrait = Math.abs(window.orientation) !== 90;
+  } else {
+    // Fallback: comparar dimensiones
+    isPortrait = window.innerHeight > window.innerWidth;
+  }
+  if (isPortrait) {
+    modal.style.display = 'flex';
+  } else {
+    modal.style.display = 'none';
+  }
+}
+window.addEventListener('orientationchange', handleOrientationModal);
+window.addEventListener('resize', handleOrientationModal);
+window.addEventListener('DOMContentLoaded', handleOrientationModal);
+</script>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,6 +35,7 @@
     <title>Fifa Soccer Tactics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilo.css">
+    <link rel="stylesheet" href="css/orientation-modal.css">
     <!-- Intro.js Tutorial Library -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
     <link rel="icon" href="img/favicon.png" type="image/png"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -35,10 +62,11 @@
         <i class="fas fa-sun" id="theme-icon"></i>
     </button>
 
-    <div id="orientation-message">
+    <!-- Modal de orientación, único y con clase aislada -->
+    <div id="orientation-message" class="orientation-modal-unique" style="display:none;">
         <img src="img/rotate-device.png" alt="Girar dispositivo">
-        <h2>Por favor, gira tu dispositivo</h2>
-        <p>Esta aplicación funciona mejor en orientación horizontal para una experiencia completa.</p>
+        <h2>Por favor, gira tu dispositivo a modo horizontal</h2>
+        <p>Para usar el simulador, pon tu pantalla en horizontal (apaisado).</p>
     </div>
 
     <!-- Indicador de grabación de audio -->

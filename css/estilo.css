@@ -71,28 +71,10 @@ html, body {
     transition: transform 0.2s, filter 0.2s;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
     pointer-events: auto;
-    border: 2px solid red !important; /* DEBUG: Borde temporal para depuración visual */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-}
-
-.player-token .minicard-overall {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 1em;
-    font-weight: bold;
-    color: var(--color-gold, gold);
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
 }
 
 .player-token .minicard-position {
@@ -110,7 +92,7 @@ html, body {
 
 .player-token .minicard-player-image {
     position: absolute;
-    top: 32px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: clamp(32px, 40%, 48px);
@@ -211,9 +193,9 @@ html, body {
 
 .player-token .minicard-overall {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 1em;
+    top: 15px;
+    left: 1px;
+    font-size: 0.7em;
     font-weight: bold;
     color: var(--color-gold, gold);
     background-color: rgba(0, 0, 0, 0.6);
@@ -239,7 +221,7 @@ html, body {
     user-select: none;
 }
 
-.player-token .minicard-player-image {
+.player-tokenSeleccion .minicard-player-image {
     position: absolute;
     top: 32px;
     left: 50%;
@@ -252,13 +234,13 @@ html, body {
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-.player-token .minicard-name {
+.player-tokenSeleccion .minicard-name {
     position: absolute;
     bottom: 18px;
     left: 8px;
     right: 8px;
     text-align: center;
-    font-size: 0.7em;
+    font-size: 0.55em;
     font-weight: bold;
     color: var(--text-primary, #fff);
     background-color: rgba(0, 0, 0, 0.7);
@@ -819,9 +801,27 @@ canvas {
 /* Estilos de las "minicards" generales (usadas por player-token y squad-player-item) */
 .minicard-overall {
     position: absolute;
-    top: 15px;
-    left: 10px;
-    font-size: 1.2em;
+    top: 14px;
+    left: 1px;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: var(--gold-color); /* Usando variable */
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1; /* Asegura que el texto se centre verticalmente */
+}
+
+.minicard-overallSeleccion {
+    position: absolute;
+    top: 27px;
+    left: 9px;
+    font-size: 0.9em;
     font-weight: bold;
     color: var(--gold-color); /* Usando variable */
     background-color: rgba(0, 0, 0, 0.6);
@@ -946,12 +946,8 @@ canvas {
 
 /* Elementos dentro de squad-player-item, ajustados para el marco */
 .squad-player-item img {
-    width: 90px;
-    height: 120px;
-    background-image: url('../img/marco3.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    background-position: center;
+    width: 85px;
+    height: 90px;
     cursor: grab;
     z-index: 15; /* Por encima del drawing-canvas (10) */
     transition: transform 0.2s, filter 0.2s; /* Animación para hover/dragging */
@@ -970,18 +966,9 @@ canvas {
     z-index: 100; /* Asegura que el jugador arrastrado esté por encima de todo lo demás en el campo */
 }
 
-/* Elementos dentro de player-token, ajustados para el marco del campo */
-.player-token .minicard-overall {
-    top: 21px; /* Ajuste para este marco */
-}
-
 .player-token .minicard-position {
     top: 21px; /* Ajuste para este marco */
     border-radius: 25px; /* Más redondo */
-}
-
-.player-token .minicard-player-image {
-    top: 37px; /* Ajuste para este marco */
 }
 
 .player-token .minicard-jersey-number {

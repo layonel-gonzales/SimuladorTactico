@@ -148,7 +148,7 @@ class PlayerCardManager {
         } else {
             // Card de selección (plantilla)
             return `
-                <div class="minicard-overall player-card-element" 
+                <div class="minicard-overallSeleccion player-card-element" 
                      data-element="overall" 
                      data-card-id="${cardId}"
                      data-player-id="${player.id}"
