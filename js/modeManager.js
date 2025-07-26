@@ -135,9 +135,15 @@ export default class ModeManager {
     
     activateCurrentMode() {
         if (this.currentMode === 'drawing') {
+            // LIMPIAR CANCHA al pasar a modo dibujo
+            this.clearPitch();
+            
             // Activar dibujo de líneas
             if (this.drawingManager) {
                 this.drawingManager.setEnabled(true);
+                
+                // Restaurar estado visual del modo eliminar si estaba activo
+                this.restoreDeleteLineMode();
             }
             
             // Activar dibujo de estelas de balón
@@ -147,28 +153,38 @@ export default class ModeManager {
             
             // Re-renderizar para ocultar el balón en modo dibujo
             if (this.uiManager) {
+                // Forzar limpieza adicional antes del re-renderizado
+                const pitch = document.getElementById('pitch-container');
+                if (pitch) {
+                    pitch.querySelectorAll('.ball-token').forEach(el => el.remove());
+                }
                 this.uiManager.renderPlayersOnPitch();
             }
             
+            console.log('[ModeManager] ✅ Modo DIBUJO activado - Cancha limpia, balón oculto');
+            
         } else if (this.currentMode === 'animation') {
+            // LIMPIAR CANCHA al pasar a modo animación
+            this.clearPitch();
+            
             // Desactivar dibujo para evitar conflictos
             if (this.drawingManager) {
                 this.drawingManager.setEnabled(false);
-                // Limpiar todas las líneas automáticamente al cambiar a animación
-                if (typeof this.drawingManager.clearAllLines === 'function') {
-                    this.drawingManager.clearAllLines();
-                    console.log('[ModeManager] Líneas borradas automáticamente al cambiar a modo animación');
-                }
             }
 
             if (this.ballDrawingManager) {
                 this.ballDrawingManager.setEnabled(false);
             }
             
+            // Asegurar que el balón esté en el centro para modo animación
+            this.ensureBallAtCenter();
+            
             // Re-renderizar para mostrar el balón en modo animación
             if (this.uiManager) {
                 this.uiManager.renderPlayersOnPitch();
             }
+            
+            console.log('[ModeManager] ✅ Modo ANIMACIÓN activado - Cancha limpia, balón visible en centro');
         }
     }
     
@@ -239,12 +255,6 @@ export default class ModeManager {
                 this.animationModeControls.classList.add('visible');
                 this.drawingModeControls.classList.remove('visible');
                 this.drawingModeControls.classList.add('hidden');
-                
-                // ⚡ LIMPIAR LÍNEAS automáticamente al cambiar a animación
-                if (this.drawingManager && typeof this.drawingManager.clearCanvas === 'function') {
-                    this.drawingManager.clearCanvas();
-                    console.log(`[ModeManager] 🧹 Líneas limpiadas automáticamente al cambiar a modo animación`);
-                }
             }
             
             // DEBUG: Verificar los estilos aplicados
@@ -350,6 +360,92 @@ export default class ModeManager {
     forceMode(mode) {
         if (mode === 'drawing' || mode === 'animation') {
             this.switchToMode(mode);
+        }
+    }
+    
+    // NUEVA: Función para limpiar completamente la cancha
+    clearPitch() {
+        console.log('[ModeManager] 🧹 Limpiando cancha...');
+        
+        // Limpiar todas las líneas dibujadas
+        if (this.drawingManager && typeof this.drawingManager.clearAllLines === 'function') {
+            this.drawingManager.clearAllLines();
+        }
+        
+        // Limpiar estelas del balón
+        if (this.ballDrawingManager && typeof this.ballDrawingManager.clearTrail === 'function') {
+            this.ballDrawingManager.clearTrail();
+        }
+        
+        // Limpiar canvas de dibujo directamente si existe
+        const drawingCanvas = document.getElementById('drawing-canvas');
+        if (drawingCanvas) {
+            const ctx = drawingCanvas.getContext('2d');
+            ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        }
+        
+        // NUEVO: Eliminar todos los tokens de jugadores y balones del DOM
+        const pitch = document.getElementById('pitch-container');
+        if (pitch) {
+            pitch.querySelectorAll('.player-token, .ball-token').forEach(el => el.remove());
+            console.log('[ModeManager] 🧹 Tokens de jugadores y balones eliminados del DOM');
+        }
+        
+        console.log('[ModeManager] ✅ Cancha limpiada completamente');
+    }
+    
+    // NUEVA: Función para asegurar que el balón esté en el centro
+    ensureBallAtCenter() {
+        console.log('[ModeManager] ⚽ Posicionando balón en el centro...');
+        
+        // Acceder al estado global de jugadores activos desde main.js
+        if (window.main && window.main.state && window.main.state.activePlayers) {
+            const ballPlayer = window.main.state.activePlayers.find(p => 
+                p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'
+            );
+            
+            if (ballPlayer) {
+                ballPlayer.x = 50; // centro horizontal (50%)
+                ballPlayer.y = 50; // centro vertical (50%)
+                console.log('[ModeManager] ✅ Balón posicionado en el centro (50%, 50%)');
+            } else {
+                console.log('[ModeManager] ⚠️ No se encontró el balón en activePlayers');
+            }
+        } else {
+            console.log('[ModeManager] ⚠️ No se pudo acceder al estado global para posicionar el balón');
+        }
+    }
+    
+    // NUEVA: Función para restaurar el estado visual del modo eliminar líneas
+    restoreDeleteLineMode() {
+        if (!this.drawingManager || !this.drawingManager.deleteLineMode) return;
+        
+        console.log('[ModeManager] 🔧 Restaurando estado visual del modo eliminar líneas...');
+        
+        // Buscar el botón de eliminar líneas
+        const deleteLineBtn = document.getElementById('delete-line-mode');
+        const drawingCanvas = document.getElementById('drawing-canvas');
+        
+        if (deleteLineBtn) {
+            // Restaurar clase activa
+            deleteLineBtn.classList.add('active');
+            
+            // Restaurar animación del ícono
+            const icon = deleteLineBtn.querySelector('i');
+            if (icon) {
+                icon.classList.add('fa-beat');
+            }
+            
+            // Restaurar título del botón
+            deleteLineBtn.title = 'Salir del modo borrar líneas';
+            
+            console.log('[ModeManager] ✅ Botón de eliminar líneas restaurado');
+        }
+        
+        if (drawingCanvas) {
+            // Restaurar cursor de tijeras
+            drawingCanvas.classList.add('scissors-cursor-simple');
+            console.log('[ModeManager] ✅ Cursor de tijeras restaurado');
         }
     }
 }

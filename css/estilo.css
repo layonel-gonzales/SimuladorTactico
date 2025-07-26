@@ -2,10 +2,6 @@
    🎨 SIMULADOR TÁCTICO - SISTEMA DE DISEÑO UNIFICADO 
    🌙 MODO OSCURO Y CLARO + PALETA DE COLORES
    📱 RESPONSIVE FIRST + COMPONENTES ESTANDARIZADOS
-   
-   ESTRUCTURA:
-   1. Variables Globales y Reset
-   2. 🖥️ ESTILOS PARA DESKTOP (1025px+)
    ============================================ */
 
 /* ============================================
@@ -35,6 +31,7 @@
     --bg-primary: #1a1a1a;
     --bg-secondary: #2a2a2a;
     --bg-tertiary: #333333;
+    --text-primary: #ffffff;
 }
 
 /* Reset y prevención de zoom/scroll no deseado */
@@ -47,6 +44,7 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
+
 html, body {
     width: 100vw;
     height: 100vh;
@@ -55,6 +53,47 @@ html, body {
     overflow-x: hidden;
     overflow-y: hidden;
     position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-tertiary);
+}
+
+/* === CAMPO DE FÚTBOL Y CANVAS === */
+#pitch-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--pitch-green-primary);
+    background-image:
+        linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
+        linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
+    background-size: 100px 100px;
+    z-index: var(--z-field);
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+#football-field, #drawing-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    object-fit: contain;
+    box-sizing: border-box;
+    touch-action: none;
+}
+
+#football-field { 
+    z-index: var(--z-field); 
+}
+
+#drawing-canvas { 
+    z-index: var(--z-canvas); 
+    cursor: crosshair; 
+    pointer-events: auto !important;
 }
 
 /* === PLAYER TOKEN UNIFICADO Y RESPONSIVO === */
@@ -75,6 +114,17 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
+}
+
+.player-token:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+
+.player-token.dragging {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+    z-index: 100;
 }
 
 .player-token .minicard-position {
@@ -138,58 +188,6 @@ html, body {
     justify-content: center;
     user-select: none;
 }
-    touch-action: manipulation;
-}
-
-/* === CAMPO DE FÚTBOL Y CANVAS (COMÚN) === */
-/* Cancha ocupa toda la pantalla, debajo del menú */
-#pitch-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--pitch-green-primary);
-    background-image:
-        linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
-        linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
-    background-size: 100px 100px;
-    z-index: var(--z-field);
-    overflow: hidden;
-    pointer-events: auto;
-}
-
-/* Canchas y canvas siempre debajo del menú */
-/* Canvas de la cancha SIEMPRE ocupa toda la pantalla */
-#football-field, #drawing-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    min-width: 100vw;
-    min-height: 100vh;
-
-/* === PLAYER TOKEN UNIFICADO Y RESPONSIVO === */
-.player-token {
-    position: absolute;
-    width: clamp(60px, 8vw, 110px);
-    height: clamp(80px, 11vw, 150px);
-    background-image: url('../img/marco3.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: grab;
-    z-index: var(--z-tokens);
-    transition: transform 0.2s, filter 0.2s;
-    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
-    pointer-events: auto;
-    border: 2px solid red !important; /* DEBUG: Borde temporal para depuración visual */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-}
 
 .player-token .minicard-overall {
     position: absolute;
@@ -208,474 +206,147 @@ html, body {
     user-select: none;
 }
 
-.player-token .minicard-position {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 2px 6px;
-    border-radius: 8px;
-    user-select: none;
-}
-
-.player-tokenSeleccion .minicard-player-image {
-    position: absolute;
-    top: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: clamp(32px, 40%, 48px);
-    height: clamp(32px, 40%, 48px);
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--text-primary, #fff);
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-
-.player-tokenSeleccion .minicard-name {
-    position: absolute;
-    bottom: 18px;
-    left: 8px;
-    right: 8px;
-    text-align: center;
-    font-size: 0.55em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.7);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 0 4px;
-    border-radius: 6px;
-    user-select: none;
-}
-
-.player-token .minicard-jersey-number {
-    position: absolute;
-    bottom: 38px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.9em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-}
-    }
-    body.orientation-locked #pitch-container,
-    body.orientation-locked #football-field,
-    body.orientation-locked #drawing-canvas,
-    body.orientation-locked #unified-single-bottom-menu,
-    body.orientation-locked #app-container {
-        filter: blur(2px) grayscale(0.7) brightness(0.7);
-        pointer-events: none !important;
-        user-select: none !important;
-    }
-    body.orientation-locked #drawing-canvas {
-        outline: 4px solid red !important;
-    }
-    }
-}
-}
-
-/* Separadores visuales */
-.vertical-separator {
-    width: 1px;
-    height: 32px; /* Aumentar altura para coincidir con botones */
-    background: rgba(255,255,255,0.2);
-    margin: 0 4px;
-    flex-shrink: 0;
-}
-
-/* Frame counter compacto */
-.frame-counter {
-    font-size: 0.75rem;
-    font-weight: bold;
-    color: white;
-
+/* === MENÚ INFERIOR UNIFICADO - SIEMPRE VISIBLE === */
 #unified-single-bottom-menu {
-    /* Estilos responsivos generales para todas las resoluciones */
-    min-height: clamp(45px, 6vh, 60px);
-    max-height: clamp(50px, 8vh, 70px);
-    padding: clamp(3px, 0.8vw, 10px) clamp(6px, 2vw, 20px);
-    gap: clamp(2px, 0.5vw, 8px);
-    font-size: clamp(0.75rem, 1vw, 1rem);
-}
-#unified-single-bottom-menu .btn {
-    font-size: clamp(0.75rem, 1vw, 1rem);
-    height: clamp(32px, 5vh, 40px);
-    min-width: clamp(32px, 5vw, 40px);
-    max-width: clamp(60px, 10vw, 100px);
-    padding: clamp(3px, 0.5vw, 8px) clamp(6px, 1vw, 12px);
-}
-#unified-single-bottom-menu .mode-toggle-always-visible,
-#unified-single-bottom-menu .squad-btn-always-visible,
-#unified-single-bottom-menu .custom-players-btn-always-visible,
-#unified-single-bottom-menu .configuration-btn-always-visible,
-#unified-single-bottom-menu .fullscreen-btn-always-visible {
-    font-size: clamp(0.85rem, 1vw, 1.1rem);
-    min-width: clamp(32px, 5vw, 40px);
-    max-width: clamp(40px, 7vw, 50px);
-    height: clamp(32px, 5vh, 40px);
-}
-.color-input-compact {
-    width: clamp(28px, 4vw, 36px);
-    height: clamp(28px, 4vw, 36px);
-}
-.width-compact {
-    width: clamp(40px, 7vw, 60px);
-    height: clamp(28px, 4vw, 36px);
-    font-size: clamp(0.75rem, 1vw, 1rem);
-}
-.vertical-separator {
-    height: clamp(28px, 4vw, 36px);
-}
-.frame-counter {
-    min-width: clamp(25px, 4vw, 32px);
-    height: clamp(28px, 4vw, 36px);
-    font-size: clamp(0.75rem, 1vw, 1rem);
-}
-}
-
-/* Estados específicos por ID con MÁXIMA especificidad */
-#unified-single-bottom-menu #drawing-mode-controls.hidden {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-#unified-single-bottom-menu #animation-mode-controls.hidden {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-#unified-single-bottom-menu #drawing-mode-controls.visible {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    z-index: var(--z-menu) !important;
+    background: rgba(40, 40, 40, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 2px solid var(--color-primary) !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3) !important;
     display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-behavior: smooth !important;
+    padding: 8px 16px !important;
+    gap: 8px !important;
+    min-height: 50px !important;
+    max-height: 60px !important;
+    box-sizing: border-box !important;
+    pointer-events: auto !important;
     visibility: visible !important;
+    opacity: 1 !important;
 }
 
-#unified-single-bottom-menu #animation-mode-controls.visible {
-    display: flex !important;
-    visibility: visible !important;
-}
-
-.mobile-controls-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.2rem;
-    background: rgba(40,40,40,0.85);
-    border-radius: 8px;
-    padding: 2px 3px;
-    flex: 1 1 0;
-    justify-content: center;
-    margin: 0 2px;
-    min-width: 0;
-}
-
-/* Estilos para controles del menú unificado - BOTONES FLEXIBLES Y UNIFORMES */
+/* Controles dentro del menú unificado */
 #unified-single-bottom-menu .btn,
 #unified-single-bottom-menu .form-select {
-    font-size: 0.75rem !important;
-    padding: 4px 6px !important;
-    height: 32px !important; /* Aumentar altura para mejor uniformidad */
-    min-height: 32px !important;
-    border-radius: 4px !important;
-    margin: 0 !important; /* Sin margen para maximizar espacio */
-    flex: 1 1 auto !important; /* Los botones se expanden igualmente para llenar el espacio */
-    min-width: 32px !important; /* Ancho mínimo para iconos */
-    width: auto !important; /* Ancho automático basado en flex */
+    font-size: 0.8rem !important;
+    padding: 6px 10px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border-radius: 6px !important;
+    margin: 0 2px !important;
+    min-width: 36px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
     box-sizing: border-box !important;
-}
-
-/* Botones siempre visibles - SOLO el espacio que necesitan */
-#unified-single-bottom-menu .mode-toggle-always-visible,
-#unified-single-bottom-menu .squad-btn-always-visible,
-#unified-single-bottom-menu .custom-players-btn-always-visible,
-#unified-single-bottom-menu .configuration-btn-always-visible,
-#unified-single-bottom-menu .fullscreen-btn-always-visible {
-    flex: 0 0 auto !important; /* NO se expanden, solo ocupan el espacio necesario */
-    min-width: 32px !important;
-    width: auto !important; /* Ancho automático según contenido */
-    height: 32px !important;
-    font-size: 0.75rem !important;
-    padding: 4px 8px !important; /* Padding un poco mayor para mejor apariencia */
-    margin: 0 2px !important; /* Pequeño margen para separación */
-}
-
-/* Los botones DENTRO de los mode-controls sí se expanden para llenar el espacio restante */
-/* Los botones e inputs dentro de los mode-controls ocupan equitativamente el ancho */
-#unified-single-bottom-menu #drawing-mode-controls,
-#unified-single-bottom-menu #animation-mode-controls {
-    display: flex;
-    flex: 1 1 0%;
-    gap: clamp(2px, 0.5vw, 8px);
-    width: 100%;
-}
-#unified-single-bottom-menu #drawing-mode-controls > .btn,
-#unified-single-bottom-menu #drawing-mode-controls > .form-select,
-#unified-single-bottom-menu #animation-mode-controls > .btn,
-#unified-single-bottom-menu #animation-mode-controls > .form-select {
-    flex: 1 1 0%;
-    min-width: 0;
-    margin: 0 !important;
-}
-
-/* Asegurar que los inputs también participen en la distribución flex */
-#unified-single-bottom-menu .color-input-compact,
-#unified-single-bottom-menu .width-compact {
-    flex: 0 0 auto !important; /* No se expanden, mantienen su tamaño fijo */
-    margin: 0 !important;
-}
-
-/* Mejores contrastes para botones sobre fondo transparente */
-#unified-single-bottom-menu .btn {
     background: rgba(255, 255, 255, 0.9) !important;
     color: #333 !important;
     border: 1px solid rgba(255, 255, 255, 0.6) !important;
     font-weight: 500 !important;
-    text-shadow: none !important;
 }
 
 #unified-single-bottom-menu .btn:hover {
     background: rgba(255, 255, 255, 1) !important;
     color: #000 !important;
-    transform: scale(1.02) !important;
+    transform: scale(1.05) !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
 /* Botones específicos con colores preservados */
 #unified-single-bottom-menu .btn-primary {
-    background: rgba(13, 110, 253, 0.9) !important;
+    background: #007bff !important;
     color: white !important;
-    border-color: rgba(13, 110, 253, 0.8) !important;
-}
-
-#unified-single-bottom-menu .btn-primary:hover {
-    background: rgba(13, 110, 253, 1) !important;
+    border-color: #007bff !important;
 }
 
 #unified-single-bottom-menu .btn-danger {
-    background: rgba(220, 53, 69, 0.9) !important;
+    background: #dc3545 !important;
     color: white !important;
-    border-color: rgba(220, 53, 69, 0.8) !important;
-}
-
-#unified-single-bottom-menu .btn-danger:hover {
-    background: rgba(220, 53, 69, 1) !important;
+    border-color: #dc3545 !important;
 }
 
 #unified-single-bottom-menu .btn-warning {
-    background: rgba(255, 193, 7, 0.9) !important;
+    background: #ffc107 !important;
     color: #000 !important;
-    border-color: rgba(255, 193, 7, 0.8) !important;
-}
-
-#unified-single-bottom-menu .btn-warning:hover {
-    background: rgba(255, 193, 7, 1) !important;
+    border-color: #ffc107 !important;
 }
 
 #unified-single-bottom-menu .btn-success {
-    background: rgba(25, 135, 84, 0.9) !important;
+    background: #28a745 !important;
     color: white !important;
-    border-color: rgba(25, 135, 84, 0.8) !important;
+    border-color: #28a745 !important;
 }
 
-#unified-single-bottom-menu .btn-success:hover {
-    background: rgba(25, 135, 84, 1) !important;
+/* Controles de modo - ocultos por defecto */
+#unified-single-bottom-menu #drawing-mode-controls.hidden,
+#unified-single-bottom-menu #animation-mode-controls.hidden {
+    display: none !important;
 }
 
-#unified-single-bottom-menu .btn-info {
-    background: rgba(13, 202, 240, 0.9) !important;
-    color: #000 !important;
-    border-color: rgba(13, 202, 240, 0.8) !important;
+#unified-single-bottom-menu #drawing-mode-controls.visible,
+#unified-single-bottom-menu #animation-mode-controls.visible {
+    display: flex !important;
+    gap: 4px !important;
 }
 
-#unified-single-bottom-menu .btn-info:hover {
-    background: rgba(13, 202, 240, 1) !important;
-}
-
-/* Select elements con mejor contraste */
-#unified-single-bottom-menu .form-select {
-    background: rgba(255, 255, 255, 0.9) !important;
-    color: #333 !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-}
-
-#unified-single-bottom-menu .form-select:focus {
-    background: rgba(255, 255, 255, 1) !important;
-    border-color: rgba(13, 110, 253, 0.8) !important;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
-}
-
-/* Frame counter con mejor contraste */
-#unified-single-bottom-menu .frame-counter {
-    background: rgba(0, 0, 0, 0.8) !important;
-    color: #fff !important;
-    padding: 2px 6px !important;
-    border-radius: 3px !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-/* ...existing code... */
-/* Menú inferior siempre visible y sobre la cancha y tokens */
-#unified-single-bottom-menu {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
-    z-index: var(--z-menu);
-    background: rgba(40, 40, 40, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 2px solid var(--color-primary);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    padding: clamp(2px, 0.5vw, 8px) clamp(4px, 1vw, 16px);
-    gap: clamp(2px, 0.5vw, 8px);
-    min-height: clamp(40px, 6vh, 60px);
-    max-height: clamp(45px, 8vh, 70px);
-    box-sizing: border-box;
-    pointer-events: auto;
-    visibility: visible;
-    opacity: 1;
-    transition: min-height 0.2s, max-height 0.2s, padding 0.2s;
-}
-
-/* Modal de selección de jugadores por encima de todo y fullscreen */
-/* Todos los modales principales siempre por encima del menú */
-#squad-selection-modal.modal,
-#custom-players-modal.modal,
-#player-modal.modal {
-    z-index: var(--z-modal) !important;
-}
-#squad-selection-modal .modal-dialog {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    margin: 0 !important;
+/* Inputs compactos */
+.color-input-compact {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 4px !important;
+    border: 1px solid #ccc !important;
     padding: 0 !important;
 }
-#squad-selection-modal .modal-content {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    overflow: auto !important;
+
+.width-compact {
+    width: 50px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+    text-align: center !important;
 }
 
-/* Eliminada media query que podía ocultar o modificar el menú inferior en pantallas grandes. El menú será visible y responsivo en todos los tamaños. */
-
-#football-field { z-index: var(--z-field); }
-#drawing-canvas { z-index: var(--z-canvas); cursor: crosshair; pointer-events: auto; }
-
-/* Watermark del logo */
-.center-logo-watermark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
+/* Frame counter */
+.frame-counter {
+    min-width: 30px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+    font-weight: bold !important;
+    color: white !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-
-:root {
-    --primary-color: #00ff80; /* Un verde vibrante, puedes probar #FFD700 (oro) o #00BFFF (azul cielo) */
-    --dark-bg: #1a1a1a;       /* Fondo oscuro principal, puedes probar #2c3e50 (gris azulado) */
-    --medium-bg: #2a2a2a;     /* Fondo oscuro secundario, puedes probar #34495e */
-    --light-bg: #333;        /* Fondo más claro, puedes probar #ecf0f1 (casi blanco) */
-    --text-color: #f0f0f0;    /* Color de texto principal (blanco), puedes probar #2c3e50 (oscuro) */
-    --pitch-green: #2d8a2d;   /* Verde del campo, puedes probar #4CAF50 (verde más claro) */
-    --pitch-line: #ffffff;   /* Líneas del campo (blanco), puedes probar #CCCCCC (gris claro) */
-    --gold-color: gold;       /* Color dorado para ratings */
-    --info-color: #17a2b8;    /* Color para botones de info (Bootstrap info) */
-    --warning-color: #ffc107; /* Color para botones de warning (Bootstrap warning) */
-    --light-color: #f8f9fa;   /* Color para botones light (Bootstrap light) */
-    --secondary-color: #6c757d; /* Color para botones secondary (Bootstrap secondary) */
-    --success-color: #28a745; /* Color para insignias de éxito (Bootstrap success) */
-    --danger-color: #dc3545;  /* Color para insignias de peligro (Bootstrap danger) */
-    --border-color-medium: var(--medium-bg); /* Un color de borde basado en el bg */
-    --border-color-secondary: var(--secondary-color); /* Otro color de borde */
+/* Separadores visuales */
+.vertical-separator {
+    width: 1px !important;
+    height: 32px !important;
+    background: rgba(255,255,255,0.2) !important;
+    margin: 0 4px !important;
+    flex-shrink: 0 !important;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--light-bg); /* Usando variable */
-    overflow: hidden; /* Esto es importante para evitar el scroll del body */
-    height: 100vh;
-    margin: 0; /* Asegúrate de que no haya margen por defecto en el body */
-    /* display: flex;  Usamos flexbox para el layout principal */
-    /* flex-direction: column;  Apila el contenido verticalmente si es necesario */
-}
-
-html, body {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    /* overflow: hidden;  Eliminado para evitar que el menú se corte en desktop */
-}
-
-/* Contenedor principal para la aplicación */
-#app-container {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    /* display: block; */
-    flex-grow: unset;
-    overflow: visible;
-}
-
-/* Estilos para el campo de juego */
-#pitch-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    min-width: 0;
-    min-height: 0;
-    overflow: visible;
-    background-color: var(--pitch-green);
-    background-image:
-        linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
-        linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
-    background-size: 100px 100px;
-    z-index: 1;
-}
-
-/* Estilos para el contenedor de controles (sidebar) */
+/* === ESTILOS PARA EL SIDEBAR (CONTROLES) === */
 #controls-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 326px;
-    background-color: var(--dark-bg);
+    width: 320px;
+    background-color: var(--bg-primary);
     z-index: 2000;
     transform: translateX(-100%);
     transition: transform 0.3s ease-out;
@@ -696,14 +367,34 @@ html, body {
     }
 }
 
-/* Estilo para el botón de toggle de controles en móviles */
+/* Botón de menú flotante */
+.menu-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2101;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 40px;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
 #mobile-controls-toggle-btn {
     position: fixed;
     top: 4px;
     left: 4px;
-    z-index: 2100; /* Refuerzo para estar por encima de todo */
-    background-color: var(--primary-color); /* Usando variable */
-    color: var(--dark-bg); /* Usando variable */
+    z-index: 2100;
+    background-color: var(--color-primary);
+    color: white;
     border: none;
     border-radius: 5px;
     padding: 7px 10px;
@@ -712,43 +403,7 @@ html, body {
     pointer-events: auto;
 }
 
-/* Botón de menú flotante, siempre visible y por encima de la cancha y el menú */
-.menu-toggle-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 2101;
-    background: var(--primary-color);
-    color: var(--dark-bg);
-    border: none;
-    border-radius: 0 8px 8px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: left 0.3s;
-}
-
-.menu-toggle-btn:active {
-    background: var(--medium-bg);
-}
-
-/* El botón de menú siempre fijo en la esquina, nunca se mueve */
-/* Ya está cubierto por .menu-toggle-btn { position: fixed; left: 20px; ... } */
-
-@media (max-width: 400px) {
-    #controls-wrapper {
-        width: 230px;
-    }
-}
-@media (min-width: 916px) {
-    #controls-wrapper {
-        width: 350px;
-    }
-}
-
-/* Overlay cuando el menú está abierto */
+/* Overlay */
 .overlay {
     position: fixed;
     top: 0;
@@ -756,7 +411,7 @@ html, body {
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1999; /* Debajo del menú pero por encima del campo */
+    z-index: 1999;
     display: none;
     pointer-events: none;
 }
@@ -766,46 +421,81 @@ html, body {
     pointer-events: auto;
 }
 
-/* Estilos para el canvas */
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    max-width: 100vw;
-    max-height: 100vh;
-    /* MEJORA: Asegurar responsividad total */
-    object-fit: contain;
-    box-sizing: border-box;
+/* === MODALES === */
+#squad-selection-modal.modal,
+#custom-players-modal.modal,
+#player-modal.modal {
+    z-index: var(--z-modal) !important;
 }
 
-#football-field {
-    z-index: 1;
-    /* MEJORA: Asegurar que el canvas del campo sea completamente responsivo */
-    touch-action: none;
+#squad-selection-modal .modal-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-#drawing-canvas {
-    z-index: 10; /* Por encima del campo */
-    cursor: crosshair;
-    pointer-events: auto !important; /* Crucial: Asegura que el canvas reciba eventos del ratón/touch SIEMPRE */
-    touch-action: none;
-    /* El color de la línea se define en drawingManager.js, pero puedes poner un default aquí */
-    /* stroke-color: var(--pitch-line);  Esto no funciona aquí, el color de línea se establece en JS */
+#squad-selection-modal .modal-content {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    overflow: auto !important;
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-secondary);
+    color: var(--text-primary);
 }
 
-/* NUEVA: Mejoras específicas para móviles */
+/* Lista de jugadores en el modal */
+#squad-player-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 10px;
+}
 
-/* Estilos de las "minicards" generales (usadas por player-token y squad-player-item) */
+/* Elementos de jugador en el modal */
+.squad-player-item {
+    position: relative;
+    width: 130px;
+    height: 168px;
+    background-image: url('../img/marco3.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.squad-player-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.squad-player-item.selected {
+    filter: brightness(0.7) saturate(1.1);
+    transform: scale(0.95);
+}
+
+/* === ESTILOS DE MINICARDS === */
 .minicard-overall {
     position: absolute;
     top: 14px;
     left: 1px;
     font-size: 0.7em;
     font-weight: bold;
-    color: var(--gold-color); /* Usando variable */
+    color: var(--color-gold);
     background-color: rgba(0, 0, 0, 0.6);
     width: 25px;
     height: 25px;
@@ -814,25 +504,7 @@ canvas {
     align-items: center;
     justify-content: center;
     text-align: center;
-    line-height: 1; /* Asegura que el texto se centre verticalmente */
-}
-
-.minicard-overallSeleccion {
-    position: absolute;
-    top: 27px;
-    left: 9px;
-    font-size: 0.9em;
-    font-weight: bold;
-    color: var(--gold-color); /* Usando variable */
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1; /* Asegura que el texto se centre verticalmente */
+    line-height: 1;
 }
 
 .minicard-position {
@@ -841,7 +513,7 @@ canvas {
     right: 10px;
     font-size: 0.8em;
     font-weight: bold;
-    color: var(--text-color); /* Usando variable */
+    color: var(--text-primary);
     background-color: rgba(0, 0, 0, 0.6);
     padding: 2px 5px;
     border-radius: 3px;
@@ -862,19 +534,19 @@ canvas {
 .minicard-name {
     position: absolute;
     bottom: 20px;
-    left: 8px; /* Ajuste para centrar visualmente */
-    right: 0;
+    left: 8px;
+    right: 8px;
     text-align: center;
     font-size: 0.55em;
     font-weight: bold;
-    color: var(--text-color); /* Usando variable */
-    background-color: black;
+    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 83%; /* Ajuste para ocupar el ancho del marco */
-    padding: 0 5px; /* Pequeño padding horizontal */
-    box-sizing: border-box; /* Incluir padding en el width */
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 3px;
 }
 
 .minicard-jersey-number {
@@ -884,149 +556,26 @@ canvas {
     transform: translateX(-50%);
     font-size: 1.2em;
     font-weight: bold;
-    color: var(--text-color); /* Usando variable */
+    color: var(--text-primary);
     text-shadow: 0 0 3px black;
 }
 
-
-/* Estilos para el modal de selección de jugadores */
-#squad-selection-modal .modal-content {
-    background: var(--dark-bg); /* Usando variable */
-    border: 1px solid var(--medium-bg); /* Usando variable */
-    color: var(--text-color); /* Usando variable */
-}
-
-#squad-selection-modal .modal-header,
-#squad-selection-modal .modal-footer {
-    border-color: var(--medium-bg); /* Usando variable */
-}
-
-#squad-selection-modal .modal-title {
-    color: var(--primary-color); /* Usando variable */
-}
-
-/* Lista de jugadores en el modal */
-#squad-player-list {
+/* === WATERMARK === */
+.center-logo-watermark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Centra los elementos */
-    gap: 10px; /* Espacio entre las tarjetas */
-    max-height: 70vh; /* Para que sea scrollable si hay muchos jugadores */
-    overflow-y: auto;
-    padding: 10px;
-}
-
-/* Estilo para cada ítem de jugador en el modal de selección */
-.squad-player-item {
-    position: relative;
-    width: 130px;
-    height: 168px;
-    background-image: url('../img/marco3.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center; /* Asegura el contenido centrado */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0; /* Evita que las tarjetas se achiquen si no hay espacio */
+    justify-content: center;
+    z-index: 2;
 }
 
-.squad-player-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-}
-
-.squad-player-item.selected {
-    filter: brightness(0.7) saturate(1.1);
-    transform: scale(0.95);
-}
-
-/* Elementos dentro de squad-player-item, ajustados para el marco */
-.squad-player-item img {
-    width: 85px;
-    height: 90px;
-    cursor: grab;
-    z-index: 15; /* Por encima del drawing-canvas (10) */
-    transition: transform 0.2s, filter 0.2s; /* Animación para hover/dragging */
-    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
-    pointer-events: auto; /* Asegura que el token sea clickeable/arrastrable */
-}
-
-.player-token:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
-}
-
-.player-token.dragging {
-    transform: scale(1.1);
-    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
-    z-index: 100; /* Asegura que el jugador arrastrado esté por encima de todo lo demás en el campo */
-}
-
-.player-token .minicard-position {
-    top: 21px; /* Ajuste para este marco */
-    border-radius: 25px; /* Más redondo */
-}
-
-.player-token .minicard-jersey-number {
-    bottom: 40px; /* Ajuste para este marco */
-}
-
-
-/* Estilos para el modal de visualización de jugador (player-modal) */
-#player-modal .modal-content {
-    background: var(--dark-bg); /* Usando variable */
-    border: 1px solid var(--medium-bg); /* Usando variable */
-    color: var(--text-color); /* Usando variable */
-}
-
-#player-modal .modal-header,
-#player-modal .modal-footer {
-    border-color: var(--medium-bg); /* Usando variable */
-}
-
-/* Estilos para la tarjeta de jugador detallada (usada en player-modal) */
-.fifa-card {
-    background-color: var(--dark-bg); /* Usando variable */
-    color: var(--text-color); /* Usando variable */
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    max-width: 350px; /* Ancho máximo para la tarjeta */
-    margin: auto; /* Centrar en el modal */
-}
-
-.fifa-card img {
-    border: 3px solid var(--primary-color); /* Usando variable */
-    box-shadow: 0 0 10px var(--primary-color); /* Usando variable con opacidad */
-}
-
-.fifa-card .display-4 {
-    color: var(--gold-color); /* Usando variable */
-}
-
-.fifa-card .badge {
-    background-color: var(--primary-color) !important; /* Usando variable */
-    color: var(--dark-bg) !important; /* Usando variable */
-}
-
-.fifa-card h5 {
-    color: var(--text-color); /* Usando variable */
-}
-
-.fifa-card small {
-    color: #bbb !important; /* Mantener este color específico si no quieres variable */
-}
-
-.fifa-card span, .fifa-card strong {
-    color: var(--text-color); /* Usando variable */
-    font-size: 0.95em;
-}
-
-/* Watermark */
 .center-logo-watermark::before {
     content: "";
     display: block;
@@ -1051,9 +600,725 @@ canvas {
 .text-center { text-align: center; }
 .text-bold { font-weight: bold; }
 .cursor-pointer { cursor: pointer; }
-.transition { transition: all var(--transition-normal); }
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 768px) {
+    #unified-single-bottom-menu {
+        padding: 6px 12px !important;
+        min-height: 45px !important;
+        max-height: 50px !important;
+    }
+    
+    #unified-single-bottom-menu .btn {
+        font-size: 0.75rem !important;
+        height: 32px !important;
+        padding: 4px 8px !important;
+    }
+    
+    .color-input-compact,
+    .width-compact {
+        height: 28px !important;
+    }
+}
 
 /* ============================================
-   🖥️ ESTILOS PARA DESKTOP (1025px y mayor)
+   🎨 ESTILOS PARA MODO ELIMINAR LÍNEAS
    ============================================ */
-/* Eliminada la media query desktop para el menú inferior. El menú es siempre visible y responsivo con la definición global. */
+
+/* Cursor de tijeras para el modo eliminar líneas */
+.scissors-cursor-simple {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm0 12c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3h-3z' fill='%23dc3545'/%3E%3C/svg%3E") 12 12, auto !important;
+}
+
+/* Botón activo en modo eliminar líneas */
+#delete-line-mode.active {
+    background-color: var(--color-danger) !important;
+    border-color: var(--color-danger) !important;
+    color: white !important;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.5) !important;
+}
+
+/* Animación de latido para el ícono de tijeras */
+@keyframes fa-beat {
+    0%, 90% { transform: scale(1); }
+    45% { transform: scale(1.25); }
+}
+
+.fa-beat {
+    animation: fa-beat 1s ease-in-out infinite;
+}
+
+/* ============================================
+   🎓 BOTONES DE TUTORIAL FLOTANTES
+   ============================================ */
+
+.tutorial-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1500;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.tutorial-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.tutorial-btn i {
+    font-size: 16px;
+    margin-right: 0;
+}
+
+.tutorial-text {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Botón específico de tutorial de dibujo */
+.tutorial-drawing {
+    background: linear-gradient(135deg, var(--color-success), #20c997);
+    color: white;
+    border-color: var(--color-success);
+}
+
+.tutorial-drawing:hover {
+    background: linear-gradient(135deg, #20c997, var(--color-success));
+    color: white;
+}
+
+/* Botón específico de tutorial de animación */
+.tutorial-animation {
+    background: linear-gradient(135deg, var(--color-info), #138496);
+    color: white;
+    border-color: var(--color-info);
+}
+
+.tutorial-animation:hover {
+    background: linear-gradient(135deg, #138496, var(--color-info));
+    color: white;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+    .tutorial-btn {
+        top: 15px;
+        right: 15px;
+        padding: 10px 16px;
+        font-size: 12px;
+        min-width: 140px;
+    }
+    
+    .tutorial-btn i {
+        font-size: 14px;
+    }
+    
+    .tutorial-text {
+        font-size: 11px;
+    }
+}
+
+/* Estado oculto */
+.tutorial-btn.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   🎓 ESTILOS DE TUTORIAL INTRO.JS - TEMAS MEJORADOS
+   ============================================ */
+
+/* Base común para todos los tooltips */
+.introjs-tooltip.customTooltip {
+    min-width: 350px !important;
+    max-width: 450px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    line-height: 1.6 !important;
+    font-size: 14px !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 3px solid transparent !important;
+    position: relative !important;
+}
+
+/* Asegurar contraste de texto */
+.introjs-tooltip.customTooltip * {
+    color: inherit !important;
+}
+
+.introjs-tooltip.customTooltip .introjs-tooltiptext {
+    color: inherit !important;
+    font-weight: 400 !important;
+}
+
+/* Tutorial Tema Oscuro */
+.introjs-tooltip.customTooltip.dark-theme {
+    background: linear-gradient(135deg, rgba(42, 42, 42, 0.95), rgba(52, 58, 64, 0.95)) !important;
+    color: #ffffff !important;
+    border-image: linear-gradient(135deg, #17a2b8, #20c997) 1 !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme strong {
+    color: #20c997 !important;
+    font-weight: 700 !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme em {
+    color: #ffc107 !important;
+    font-style: italic !important;
+}
+
+/* Tutorial Tema Claro */
+.introjs-tooltip.customTooltip.light-theme {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.98)) !important;
+    color: #1a1a1a !important;
+    border-image: linear-gradient(135deg, #0d8aa8, #1fc995) 1 !important;
+    box-shadow: 0 16px 48px rgba(13, 138, 168, 0.2), 0 4px 16px rgba(0,0,0,0.15) !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext {
+    color: #1a1a1a !important;
+    text-shadow: none !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme strong {
+    color: #0d8aa8 !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme em {
+    color: #1fc995 !important;
+    font-style: italic !important;
+    font-weight: 600 !important;
+}
+
+/* Forzar color de texto en todos los elementos del tooltip claro */
+.introjs-tooltip.customTooltip.light-theme,
+.introjs-tooltip.customTooltip.light-theme *,
+.introjs-tooltip.customTooltip.light-theme p,
+.introjs-tooltip.customTooltip.light-theme div,
+.introjs-tooltip.customTooltip.light-theme span,
+.introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext {
+    color: #1a1a1a !important;
+}
+
+/* Flechas de los tooltips - Tema Oscuro */
+.introjs-tooltip.customTooltip.dark-theme .introjs-arrow.top {
+    border-bottom-color: rgba(42, 42, 42, 0.95) !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme .introjs-arrow.bottom {
+    border-top-color: rgba(42, 42, 42, 0.95) !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme .introjs-arrow.left {
+    border-right-color: rgba(42, 42, 42, 0.95) !important;
+}
+
+.introjs-tooltip.customTooltip.dark-theme .introjs-arrow.right {
+    border-left-color: rgba(42, 42, 42, 0.95) !important;
+}
+
+/* Flechas de los tooltips - Tema Claro */
+.introjs-tooltip.customTooltip.light-theme .introjs-arrow.top {
+    border-bottom-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme .introjs-arrow.bottom {
+    border-top-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme .introjs-arrow.left {
+    border-right-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.introjs-tooltip.customTooltip.light-theme .introjs-arrow.right {
+    border-left-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+/* Botones de navegación del tutorial mejorados */
+.introjs-button {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease !important;
+    margin: 8px 4px !important;
+    box-shadow: 0 6px 16px rgba(13, 138, 168, 0.4) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.introjs-button:hover {
+    background: linear-gradient(135deg, #0a7691, #1bb587) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 24px rgba(13, 138, 168, 0.5) !important;
+    filter: brightness(1.15) saturate(1.1) !important;
+    color: #ffffff !important;
+}
+
+.introjs-button:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(13, 138, 168, 0.6) !important;
+    color: #ffffff !important;
+}
+
+/* Botón de saltar con mejor contraste */
+.introjs-skipbutton {
+    background: linear-gradient(135deg, #6c757d, #495057) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
+}
+
+.introjs-skipbutton:hover {
+    background: linear-gradient(135deg, #5a6268, #3d4142) !important;
+    filter: brightness(1.1) !important;
+    color: #ffffff !important;
+}
+
+/* Botones deshabilitados */
+.introjs-button:disabled {
+    background: #6c757d !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* Indicador de progreso mejorado */
+.introjs-progress {
+    background: rgba(13, 138, 168, 0.2) !important;
+    border-radius: 10px !important;
+    height: 8px !important;
+    margin: 15px 0 !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.15) !important;
+}
+
+.introjs-progressbar {
+    background: linear-gradient(90deg, #0d8aa8, #1fc995, #17d99f) !important;
+    border-radius: 10px !important;
+    height: 8px !important;
+    transition: width 0.5s ease !important;
+    box-shadow: 0 3px 6px rgba(13, 138, 168, 0.4) !important;
+}
+
+/* Números de paso mejorados */
+.introjs-tooltip .introjs-tooltipReferenceLayer .introjs-helperNumberLayer {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 35px !important;
+    height: 35px !important;
+    line-height: 35px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 6px 16px rgba(13, 138, 168, 0.5) !important;
+    border: 3px solid white !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+}
+
+/* Overlay del tutorial con mejor gradiente */
+.introjs-overlay {
+    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+/* Tema claro - overlay más suave */
+[data-theme="light"] .introjs-overlay {
+    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%) !important;
+}
+
+/* Highlight mejorado */
+.introjs-helperLayer {
+    border-radius: 8px !important;
+    box-shadow: 0 0 0 4px rgba(23, 162, 184, 0.3), 0 0 0 8px rgba(23, 162, 184, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .introjs-tooltip.customTooltip {
+        min-width: 280px !important;
+        max-width: 320px !important;
+        font-size: 13px !important;
+        padding: 16px !important;
+    }
+    
+    .introjs-button {
+        padding: 10px 16px !important;
+        font-size: 12px !important;
+        margin: 6px 2px !important;
+    }
+}
+
+/* SOBRESCRIBIR ESTILOS POR DEFECTO DE INTRO.JS */
+/* Estas reglas tienen máxima especificidad para evitar conflictos */
+.introjs-tooltip {
+    color: inherit !important;
+}
+
+.introjs-tooltip .introjs-tooltiptext {
+    color: inherit !important;
+}
+
+/* Asegurar contraste en tema claro - Máxima especificidad */
+.introjs-tooltip.customTooltip.light-theme,
+.introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext,
+.introjs-tooltip.customTooltip.light-theme .introjs-tooltip-title {
+    color: #1a1a1a !important;
+    text-shadow: none !important;
+}
+
+/* Asegurar contraste en tema oscuro - Máxima especificidad */
+.introjs-tooltip.customTooltip.dark-theme,
+.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
+.introjs-tooltip.customTooltip.dark-theme .introjs-tooltip-title {
+    color: #ffffff !important;
+}
+
+/* REGLAS EXTREMAS PARA SOBRESCRIBIR INTRO.JS CSS EXTERNO */
+/* Triple especificidad con más peso que el CSS externo */
+div.introjs-tooltip.customTooltip.light-theme div.introjs-tooltiptext,
+div.introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext,
+.introjs-tooltip.customTooltip.light-theme div.introjs-tooltiptext,
+.introjs-tooltip.customTooltip.light-theme {
+    color: #1a1a1a !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.98)) !important;
+}
+
+div.introjs-tooltip.customTooltip.dark-theme div.introjs-tooltiptext,
+div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
+.introjs-tooltip.customTooltip.dark-theme div.introjs-tooltiptext,
+.introjs-tooltip.customTooltip.dark-theme {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(42, 42, 42, 0.95), rgba(52, 58, 64, 0.95)) !important;
+}
+
+/* ============================================
+   🎓 ESTILOS DE TUTORIAL SHEPHERD.JS - DISEÑO PERSONALIZADO COMPLETO
+   ============================================ */
+
+/* Tema personalizado para Shepherd.js */
+.shepherd-element.shepherd-theme-custom {
+    max-width: 450px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 3px solid transparent !important;
+    overflow: hidden !important;
+}
+
+/* Header del tooltip */
+.shepherd-element.shepherd-theme-custom .shepherd-header {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    color: white !important;
+    padding: 16px 20px 12px 20px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.shepherd-element.shepherd-theme-custom .shepherd-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: white !important;
+    margin: 0 !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+/* Contenido del tooltip */
+.shepherd-element.shepherd-theme-custom .shepherd-text {
+    background: white !important;
+    color: #1a1a1a !important;
+    padding: 20px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+}
+
+.shepherd-element.shepherd-theme-custom .shepherd-text p {
+    color: #1a1a1a !important;
+    margin: 0 0 12px 0 !important;
+}
+
+.shepherd-element.shepherd-theme-custom .shepherd-text strong {
+    color: #0d8aa8 !important;
+    font-weight: 700 !important;
+}
+
+.shepherd-element.shepherd-theme-custom .shepherd-text em {
+    color: #1fc995 !important;
+    font-style: italic !important;
+    font-weight: 600 !important;
+}
+
+/* Botones personalizados */
+.shepherd-element.shepherd-theme-custom .shepherd-button {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(13, 138, 168, 0.3) !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.shepherd-element.shepherd-theme-custom .shepherd-button:hover {
+    background: linear-gradient(135deg, #0a7691, #1bb587) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(13, 138, 168, 0.4) !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .shepherd-element.shepherd-theme-custom {
+        max-width: 320px !important;
+        margin: 20px !important;
+    }
+    
+    .shepherd-element.shepherd-theme-custom .shepherd-text {
+        padding: 16px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* ============================================
+   🎓 MODAL DE BIENVENIDA - DISEÑO MODERNO
+   ============================================ */
+
+.tutorial-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 10000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    animation: modalFadeIn 0.3s ease-out !important;
+}
+
+.tutorial-modal-container {
+    background: white !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2) !important;
+    max-width: 480px !important;
+    width: 90vw !important;
+    max-height: 90vh !important;
+    overflow: hidden !important;
+    position: relative !important;
+    animation: modalSlideIn 0.4s ease-out !important;
+}
+
+.tutorial-modal-header {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    color: white !important;
+    padding: 24px 28px !important;
+    text-align: center !important;
+    position: relative !important;
+}
+
+.tutorial-modal-icon {
+    font-size: 48px !important;
+    margin-bottom: 12px !important;
+    display: block !important;
+    animation: iconBounce 0.6s ease-out 0.2s both !important;
+}
+
+.tutorial-modal-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+.tutorial-modal-close {
+    position: absolute !important;
+    top: 20px !important;
+    right: 24px !important;
+    background: rgba(255,255,255,0.2) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    color: white !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+.tutorial-modal-close:hover {
+    background: rgba(255,255,255,0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+.tutorial-modal-body {
+    padding: 32px 28px !important;
+    text-align: center !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    line-height: 1.6 !important;
+}
+
+.tutorial-modal-body p {
+    font-size: 16px !important;
+    color: #333 !important;
+    margin: 0 0 20px 0 !important;
+}
+
+.tutorial-modal-options {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+}
+
+.tutorial-modal-btn {
+    padding: 16px 24px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+}
+
+.tutorial-modal-btn-primary {
+    background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(13, 138, 168, 0.3) !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.tutorial-modal-btn-primary:hover {
+    background: linear-gradient(135deg, #0a7691, #1bb587) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(13, 138, 168, 0.4) !important;
+}
+
+.tutorial-modal-btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(108, 117, 125, 0.3) !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.tutorial-modal-btn-secondary:hover {
+    background: linear-gradient(135deg, #5a6268, #3d4142) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(108, 117, 125, 0.4) !important;
+}
+
+.tutorial-modal-btn-ghost {
+    background: transparent !important;
+    color: #6c757d !important;
+    border: 2px solid #dee2e6 !important;
+}
+
+.tutorial-modal-btn-ghost:hover {
+    background: #f8f9fa !important;
+    border-color: #adb5bd !important;
+    color: #495057 !important;
+}
+
+/* Animaciones */
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes iconBounce {
+    from {
+        opacity: 0;
+        transform: scale(0.3) translateY(-20px);
+    }
+    50% {
+        transform: scale(1.1) translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .tutorial-modal-container {
+        width: 95vw !important;
+        margin: 20px !important;
+    }
+    
+    .tutorial-modal-header {
+        padding: 20px 24px !important;
+    }
+    
+    .tutorial-modal-icon {
+        font-size: 40px !important;
+    }
+    
+    .tutorial-modal-title {
+        font-size: 24px !important;
+    }
+    
+    .tutorial-modal-body {
+        padding: 24px 20px !important;
+    }
+    
+    .tutorial-modal-btn {
+        padding: 14px 20px !important;
+        font-size: 14px !important;
+    }
+}

@@ -44,6 +44,8 @@ export default class BallDrawingManager {
     }
     
     setupEventListeners() {
+        console.log('[BallDrawingManager] Configurando event listeners en canvas:', this.canvas?.id);
+        
         // Eventos para dibujar estela con el balón
         this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -75,6 +77,8 @@ export default class BallDrawingManager {
             const mouseEvent = new MouseEvent('mouseup', {});
             this.handleMouseUp(mouseEvent);
         });
+        
+        console.log('[BallDrawingManager] Event listeners configurados exitosamente');
     }
     
     handleMouseDown(e) {
@@ -295,11 +299,15 @@ export default class BallDrawingManager {
         this.canvas.style.width = rect.width + 'px';
         this.canvas.style.height = rect.height + 'px';
         
+        // NUEVO: Restaurar pointer events después del redimensionado
+        this.canvas.style.pointerEvents = this.enabled !== false ? 'auto' : 'none';
+        
         // Redibujar estela si existe
         if (this.ballPath.length > 0) {
             this.drawTrail();
         }
         
         console.log(`[BallDrawingManager] Canvas redimensionado con DPR: ${dpr}:`, rect.width, 'x', rect.height);
+        console.log(`[BallDrawingManager] Estado después del resize - enabled: ${this.enabled !== false}`);
     }
 }

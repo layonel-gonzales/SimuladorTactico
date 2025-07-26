@@ -389,7 +389,7 @@ export default class DrawingManager {
         this.applyContextProperties();
         console.log(`DrawingManager: Canvas redimensionado con DPR: ${dpr} - líneas actuales:`, this.lines?.length || 0);
     }
-    
+
     // Método para habilitar/deshabilitar el dibujo de líneas
     setEnabled(enabled) {
         this.enabled = enabled;
@@ -397,14 +397,27 @@ export default class DrawingManager {
         if (!enabled) {
             // Si se deshabilita, detener cualquier dibujo en progreso
             this.isDrawing = false;
-            this.deleteLineMode = false;
+            // NO resetear deleteLineMode aquí - preservar el estado
+            // this.deleteLineMode = false; // ELIMINADO: Esto causaba que se perdiera el estado
+        } else {
+            // Cuando se reactiva, restaurar el cursor apropiado
+            if (this.deleteLineMode) {
+                // Si el modo eliminar está activo, asegurar que el canvas tenga el cursor correcto
+                this.canvas.classList.add('scissors-cursor-simple');
+            }
         }
         
-        // Actualizar cursor del canvas
+        // Actualizar pointer events del canvas
         this.canvas.style.pointerEvents = enabled ? 'auto' : 'none';
-        this.canvas.style.cursor = enabled ? 'default' : 'not-allowed';
         
-        console.log('DrawingManager: Habilitado:', enabled);
+        // Solo establecer cursor por defecto si no está en modo eliminar
+        if (enabled && !this.deleteLineMode) {
+            this.canvas.style.cursor = 'default';
+        } else if (!enabled) {
+            this.canvas.style.cursor = 'not-allowed';
+        }
+        
+        console.log('DrawingManager: Habilitado:', enabled, '- Delete mode preservado:', this.deleteLineMode);
     }
     
     // Verificar si está habilitado antes de procesar eventos

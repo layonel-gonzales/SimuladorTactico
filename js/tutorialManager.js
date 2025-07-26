@@ -1,24 +1,71 @@
 // tutorialManager.js
-// Gestor del tutorial interactivo usando Intro.js
+// Gestor del tutorial interactivo usando Shepherd.js (Mucho mejor que Intro.js)
 
 export default class TutorialManager {
     constructor() {
         this.isFirstVisit = this.checkFirstVisit();
-        this.init();
+        this.currentTour = null;
+        
+        // Esperar a que todo esté cargado antes de inicializar
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => this.init(), 1000); // Delay adicional para asegurar carga de CDN
+            });
+        } else {
+            setTimeout(() => this.init(), 1000);
+        }
     }
     
     init() {
+        // El sistema simple siempre está disponible
+        console.log('[TutorialManager] ✅ Sistema de tutorial simple cargado');
         this.setupTutorialButton();
-        this.configureTutorial();
         
-        // Auto-iniciar tutorial en primera visita
-        if (this.isFirstVisit) {
-            setTimeout(() => {
-                this.showWelcomeDialog();
-            }, 2000); // Esperar 2 segundos para que cargue todo
-        }
+        // NO auto-iniciar tutorial - remover modal de bienvenida
+        // El tutorial solo se iniciará cuando el usuario haga clic en los botones
+    }
+
+    // Método para esperar a que Shepherd esté disponible
+    waitForShepherd(timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now();
+            
+            const checkShepherd = () => {
+                if (typeof window.Shepherd !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                if (Date.now() - startTime > timeout) {
+                    reject(new Error('Shepherd.js no se cargó en el tiempo esperado'));
+                    return;
+                }
+                
+                setTimeout(checkShepherd, 100);
+            };
+            
+            checkShepherd();
+        });
+    }
+
+    // Cargar Shepherd.js manualmente si no está disponible
+    loadShepherdManually() {
+        console.log('[TutorialManager] 🔄 Intentando cargar Shepherd.js manualmente...');
         
-        console.log('[TutorialManager] Inicializado');
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/shepherd.js@12.0.6/dist/js/shepherd.min.js';
+        script.onload = () => {
+            console.log('[TutorialManager] ✅ Shepherd.js cargado manualmente');
+            this.setupTutorialButton();
+            if (this.isFirstVisit) {
+                setTimeout(() => this.showWelcomeDialog(), 1000);
+            }
+        };
+        script.onerror = () => {
+            console.error('[TutorialManager] ❌ Error al cargar Shepherd.js manualmente');
+        };
+        
+        document.head.appendChild(script);
     }
     
     checkFirstVisit() {
@@ -27,7 +74,8 @@ export default class TutorialManager {
             localStorage.setItem('fifa-tactics-visited', 'true');
             return true;
         }
-        return false;
+        // Para pruebas, forzar primera visita
+        return true; // Cambiar a false cuando funcione
     }
     
     setupTutorialButton() {
@@ -35,86 +83,637 @@ export default class TutorialManager {
         const tutorialAnimationBtn = document.getElementById('start-tutorial-animation-btn');
         
         console.log('[TutorialManager] Configurando botones de tutorial...');
-        console.log('[TutorialManager] tutorialDrawingBtn:', tutorialDrawingBtn);
-        console.log('[TutorialManager] tutorialAnimationBtn:', tutorialAnimationBtn);
         
         if (tutorialDrawingBtn) {
             tutorialDrawingBtn.addEventListener('click', (e) => {
-                console.log('[TutorialManager] Click en botón de tutorial de dibujo detectado');
+                console.log('[TutorialManager] Iniciando tutorial de dibujo');
                 e.preventDefault();
                 e.stopPropagation();
                 this.startTutorial('drawing');
             });
-            console.log('[TutorialManager] Botón de tutorial de dibujo configurado');
-        } else {
-            console.warn('[TutorialManager] Botón de tutorial de dibujo no encontrado');
         }
         
         if (tutorialAnimationBtn) {
             tutorialAnimationBtn.addEventListener('click', (e) => {
-                console.log('[TutorialManager] Click en botón de tutorial de animación detectado');
+                console.log('[TutorialManager] Iniciando tutorial de animación');
                 e.preventDefault();
                 e.stopPropagation();
                 this.startTutorial('animation');
             });
-            console.log('[TutorialManager] Botón de tutorial de animación configurado');
-        } else {
-            console.warn('[TutorialManager] Botón de tutorial de animación no encontrado');
         }
         
-        // Controlar visibilidad de botones según el modo
-        this.updateTutorialButtons();
-        
-        // Escuchar cambios de modo para actualizar botones
+        // Escuchar cambios de modo para mostrar/ocultar botones
         document.addEventListener('modeChanged', () => {
             this.updateTutorialButtons();
         });
     }
     
-    configureTutorial() {
-        // Configuración personalizada de Intro.js
-        if (typeof introJs !== 'undefined') {
-            introJs().setOptions({
-                nextLabel: 'Siguiente →',
-                prevLabel: '← Anterior',
-                skipLabel: 'Saltar',
-                doneLabel: '¡Terminado!',
-                hidePrev: false,
-                hideNext: false,
-                showStepNumbers: true,
-                showProgress: true,
-                showBullets: false,
-                scrollToElement: true,
-                overlayOpacity: 0.8,
-                disableInteraction: false,
-                tooltipClass: 'customTooltip',
-                highlightClass: 'customHighlight',
-                exitOnEsc: true,
-                exitOnOverlayClick: false,
-                keyboardNavigation: true
-            });
-            
-            // Eventos del tutorial
-            introJs().onchange((targetElement) => {
-                this.handleStepChange(targetElement);
-            });
-            
-            introJs().oncomplete(() => {
-                this.handleTutorialComplete();
-            });
-            
-            introJs().onexit(() => {
-                this.handleTutorialExit();
-            });
-            
-            console.log('[TutorialManager] Intro.js configurado');
-        } else {
-            console.error('[TutorialManager] Intro.js no está disponible');
+    getCurrentTheme() {
+        // Intentar obtener el tema del themeManager
+        if (window.themeManager && window.themeManager.currentTheme) {
+            return window.themeManager.currentTheme;
+        }
+        
+        // Fallback: obtener del localStorage
+        const savedTheme = localStorage.getItem('soccer-tactics-theme');
+        if (savedTheme) {
+            return savedTheme;
+        }
+        
+        // Fallback: detectar del atributo data-theme
+        const htmlElement = document.documentElement;
+        if (htmlElement.hasAttribute('data-theme')) {
+            return htmlElement.getAttribute('data-theme');
+        }
+        
+        // Default: modo claro
+        return 'light';
+    }
+    
+    startTutorial(mode = 'drawing') {
+        // El sistema simple siempre está disponible
+        console.log(`[TutorialManager] 🚀 Iniciando tutorial para modo: ${mode}`);
+        
+        // Limpiar tutorial anterior si existe
+        if (this.currentTour) {
+            this.currentTour.complete();
+        }
+        
+        // Crear nuevo tour con configuración personalizada
+        this.currentTour = new window.Shepherd.Tour({
+            defaultStepOptions: {
+                classes: 'shepherd-theme-custom',
+                scrollTo: true,
+                cancelIcon: {
+                    enabled: true
+                }
+            }
+        });
+        
+        console.log(`[TutorialManager] Iniciando tutorial de ${mode}`);
+        
+        if (mode === 'drawing') {
+            this.setupDrawingTutorial();
+        } else if (mode === 'animation') {
+            this.setupAnimationTutorial();
+        }
+        
+        // Iniciar el tour
+        this.currentTour.start();
+    }
+    
+    setupDrawingTutorial() {
+        const steps = this.getDrawingSteps();
+        steps.forEach(step => {
+            this.currentTour.addStep(step);
+        });
+    }
+    
+    setupAnimationTutorial() {
+        const steps = this.getAnimationSteps();
+        steps.forEach(step => {
+            this.currentTour.addStep(step);
+        });
+    }
+    
+    getDrawingSteps() {
+        return [
+            {
+                title: '↩️ Deshacer Línea',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Deshace la última línea dibujada</p>
+                        <p><em>Útil para:</em> Corregir errores al dibujar</p>
+                        <p>🎯 <strong>Tip:</strong> También puedes usar <kbd>Ctrl+Z</kbd></p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#undo-line',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: 'Saltar Tutorial',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.complete()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '↪️ Rehacer Línea',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Rehace una línea que hayas deshecho</p>
+                        <p><em>Útil para:</em> Recuperar líneas que deshiciste por error</p>
+                        <p>🎯 <strong>Tip:</strong> También puedes usar <kbd>Ctrl+Y</kbd></p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#redo-line',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🗑️ Limpiar Todo',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Borra todas las líneas del campo</p>
+                        <p><em>Útil para:</em> Empezar de nuevo con un campo limpio</p>
+                        <p>⚠️ <strong>Cuidado:</strong> Esta acción no se puede deshacer</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#clear-canvas',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🎨 Selector de Color',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Cambia el color de las líneas que dibujes</p>
+                        <p><em>Colores disponibles:</em> Rojo, azul, verde, amarillo, etc.</p>
+                        <p>🌈 <strong>Tip:</strong> Usa diferentes colores para distinguir tipos de jugadas</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#line-color-picker',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '📏 Grosor de Línea',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Ajusta el grosor de las líneas</p>
+                        <p><em>Opciones:</em> Fino, normal, grueso</p>
+                        <p>📝 <strong>Tip:</strong> Líneas gruesas para jugadas principales, finas para detalles</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#line-width-picker',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '✂️ Cortar Líneas',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Elimina líneas específicas haciendo clic en ellas</p>
+                        <p><em>Útil para:</em> Borrar solo una línea sin afectar las demás</p>
+                        <p>🎯 <strong>Tip:</strong> Más preciso que limpiar todo el campo</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#delete-line-mode',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '📸 Compartir Imagen',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Exporta y comparte tu táctica como imagen</p>
+                        <p><em>Útil para:</em> Enviar tu táctica al equipo o entrenador</p>
+                        <p>📱 <strong>Tip:</strong> Perfecto para WhatsApp, email o redes sociales</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#share-pitch-btn',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: '¡Terminar! 🎉',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.complete()
+                    }
+                ]
+            }
+        ];
+    }
+    
+    getAnimationSteps() {
+        return [
+            {
+                title: '🔴 Grabar Movimientos',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Activa el modo grabación para capturar movimientos</p>
+                        <p><em>Útil para:</em> Registrar automáticamente las posiciones de los jugadores</p>
+                        <p>🎯 <strong>Tip:</strong> Una vez activado, mueve jugadores y se grabarán automáticamente</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#record-mode-toggle',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: 'Saltar Tutorial',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.complete()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '➕ Nuevo Frame',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Crea un nuevo frame capturando las posiciones actuales</p>
+                        <p><em>Útil para:</em> Construir secuencias de animación paso a paso</p>
+                        <p>📹 <strong>Tip:</strong> Cada frame es como una foto de tu táctica en un momento específico</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-add',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '⏮️ Frame Anterior',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Navega al frame anterior en tu secuencia</p>
+                        <p><em>Útil para:</em> Revisar y editar frames previos de la animación</p>
+                        <p>🎬 <strong>Tip:</strong> Perfecto para revisar el flujo de tu táctica paso a paso</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-prev',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '📊 Indicador de Frame',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Muestra tu posición actual en la secuencia de animación</p>
+                        <p><em>Formato:</em> "Frame actual / Total de frames" (ej: 3/7)</p>
+                        <p>📍 <strong>Tip:</strong> Te ayuda a orientarte en animaciones largas y complejas</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-indicator',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '⏭️ Frame Siguiente',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Navega al siguiente frame en tu secuencia</p>
+                        <p><em>Útil para:</em> Avanzar manualmente frame por frame</p>
+                        <p>🎯 <strong>Tip:</strong> Ideal para verificar que la secuencia fluye correctamente</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-next',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🗑️ Eliminar Frame',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Elimina el frame actual de la animación</p>
+                        <p><em>Útil para:</em> Remover frames erróneos o innecesarios</p>
+                        <p>⚠️ <strong>Cuidado:</strong> Esta acción no se puede deshacer</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-delete',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '▶️ Reproducir Animación',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Reproduce toda la secuencia de animación</p>
+                        <p><em>Útil para:</em> Ver el resultado final de tu táctica en movimiento</p>
+                        <p>🎬 <strong>Tip:</strong> ¡Aquí es donde cobran vida tus movimientos tácticos!</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#frame-play',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🎤 Grabar Audio',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Graba una narración de audio para tu animación</p>
+                        <p><em>Útil para:</em> Explicar la táctica mientras se reproduce</p>
+                        <p>🎙️ <strong>Tip:</strong> Perfecto para crear tutoriales tácticos completos</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#audio-record-btn',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🔊 Reproducir Audio',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Reproduce el audio grabado para tu animación</p>
+                        <p><em>Útil para:</em> Escuchar tu narración antes de exportar</p>
+                        <p>🎧 <strong>Tip:</strong> Verifica que el audio sincroniza bien con la animación</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#audio-play-btn',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '💾 Exportar JSON',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Exporta tu animación como archivo JSON</p>
+                        <p><em>Útil para:</em> Guardar y compartir animaciones completas (incluye audio)</p>
+                        <p>📁 <strong>Tip:</strong> Formato perfecto para importar en otras sesiones</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#export-animation-json',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🎬 Exportar Video',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Exporta tu animación como video MP4</p>
+                        <p><em>Útil para:</em> Compartir en redes sociales, WhatsApp, etc.</p>
+                        <p>📱 <strong>Tip:</strong> Ideal para mostrar tácticas a jugadores y colegas</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#export-animation-video',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: 'Siguiente →',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.next()
+                    }
+                ]
+            },
+            {
+                title: '🔄 Reset Animación',
+                text: `
+                    <div class="tutorial-content">
+                        <p><strong>Función:</strong> Borra toda la animación y vuelve al frame inicial</p>
+                        <p><em>Útil para:</em> Empezar de nuevo con una animación limpia</p>
+                        <p>⚠️ <strong>Cuidado:</strong> Se perderán todos los frames y el audio grabado</p>
+                    </div>
+                `,
+                attachTo: {
+                    element: '#reset-animation',
+                    on: 'top'
+                },
+                buttons: [
+                    {
+                        text: '← Anterior',
+                        classes: 'shepherd-button-secondary',
+                        action: () => this.currentTour.back()
+                    },
+                    {
+                        text: '¡Terminar! 🎉',
+                        classes: 'shepherd-button-primary',
+                        action: () => this.currentTour.complete()
+                    }
+                ]
+            }
+        ];
+    }
+    
+    updateTutorialButtons() {
+        const currentMode = this.getCurrentMode();
+        const tutorialDrawingBtn = document.getElementById('start-tutorial-drawing-btn');
+        const tutorialAnimationBtn = document.getElementById('start-tutorial-animation-btn');
+        
+        if (tutorialDrawingBtn && tutorialAnimationBtn) {
+            if (currentMode === 'drawing') {
+                tutorialDrawingBtn.classList.remove('hidden');
+                tutorialAnimationBtn.classList.add('hidden');
+            } else if (currentMode === 'animation') {
+                tutorialDrawingBtn.classList.add('hidden');
+                tutorialAnimationBtn.classList.remove('hidden');
+            }
         }
     }
     
+    getCurrentMode() {
+        // Detectar el modo actual basado en los controles visibles
+        const drawingControls = document.getElementById('drawing-mode-controls');
+        const animationControls = document.getElementById('animation-mode-controls');
+        
+        if (drawingControls && !drawingControls.classList.contains('hidden')) {
+            return 'drawing';
+        } else if (animationControls && !animationControls.classList.contains('hidden')) {
+            return 'animation';
+        }
+        
+        return 'drawing'; // default
+    }
+    
     showWelcomeDialog() {
-        // Crear modal moderno con CSS avanzado y responsive design
+        console.log('[TutorialManager] 🎉 Mostrando modal de bienvenida');
+
+        // Modal de bienvenida (mantenemos el diseño anterior)
         const modalHTML = `
             <div id="modern-tutorial-modal" class="tutorial-modal-overlay">
                 <div class="tutorial-modal-container">
@@ -122,63 +721,21 @@ export default class TutorialManager {
                         <div class="tutorial-modal-icon">
                             <i class="fas fa-graduation-cap"></i>
                         </div>
-                        <h2 class="tutorial-modal-title">¡Bienvenido al Simulador Táctico!</h2>
-                        <button class="tutorial-modal-close" id="modal-close-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
+                        <h2 class="tutorial-modal-title">¡Bienvenido!</h2>
+                        <button class="tutorial-modal-close" onclick="document.getElementById('modern-tutorial-modal').remove()">&times;</button>
                     </div>
-                    
                     <div class="tutorial-modal-body">
-                        <div class="tutorial-modal-content">
-                            <div class="tutorial-feature-grid">
-                                <div class="tutorial-feature-card">
-                                    <div class="feature-icon">
-                                        <i class="fas fa-palette"></i>
-                                    </div>
-                                    <h3>Modo Dibujo</h3>
-                                    <p>Dibuja líneas, flechas y tácticas directamente en el campo</p>
-                                </div>
-                                
-                                <div class="tutorial-feature-card">
-                                    <div class="feature-icon">
-                                        <i class="fas fa-play-circle"></i>
-                                    </div>
-                                    <h3>Modo Animación</h3>
-                                    <p>Crea secuencias animadas moviendo jugadores frame por frame</p>
-                                </div>
-                                
-                                <div class="tutorial-feature-card">
-                                    <div class="feature-icon">
-                                        <i class="fas fa-microphone"></i>
-                                    </div>
-                                    <h3>Audio Narración</h3>
-                                    <p>Graba explicaciones de voz para tus jugadas tácticas</p>
-                                </div>
-                            </div>
-                            
-                            <div class="tutorial-mode-selector">
-                                <h3>¿Qué te gustaría aprender primero?</h3>
-                                <div class="tutorial-button-group">
-                                    <button class="tutorial-start-btn tutorial-drawing-btn" data-mode="drawing">
-                                        <i class="fas fa-palette"></i>
-                                        <span>Tutorial de Dibujo</span>
-                                        <small>Aprende a dibujar tácticas</small>
-                                    </button>
-                                    
-                                    <button class="tutorial-start-btn tutorial-animation-btn" data-mode="animation">
-                                        <i class="fas fa-play-circle"></i>
-                                        <span>Tutorial de Animación</span>
-                                        <small>Crea secuencias animadas</small>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tutorial-modal-footer">
-                        <div class="tutorial-skip-section">
-                            <button class="tutorial-skip-btn" id="skip-tutorial-btn">
-                                Saltar y explorar por mi cuenta
+                        <p><strong>🎉 ¡Primera vez aquí!</strong></p>
+                        <p>¿Te gustaría hacer un tutorial para conocer todas las funciones?</p>
+                        <div class="tutorial-modal-options">
+                            <button class="tutorial-modal-btn tutorial-modal-btn-primary" onclick="window.tutorialManager.startTutorial('drawing'); document.getElementById('modern-tutorial-modal').remove();">
+                                🎨 Tutorial de Dibujo
+                            </button>
+                            <button class="tutorial-modal-btn tutorial-modal-btn-secondary" onclick="window.tutorialManager.startTutorial('animation'); document.getElementById('modern-tutorial-modal').remove();">
+                                🎬 Tutorial de Animación
+                            </button>
+                            <button class="tutorial-modal-btn tutorial-modal-btn-ghost" onclick="document.getElementById('modern-tutorial-modal').remove();">
+                                Saltar por ahora
                             </button>
                         </div>
                     </div>
@@ -186,387 +743,16 @@ export default class TutorialManager {
             </div>
         `;
         
-        // Agregar el modal al DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        // Configurar event listeners
-        this.setupModalEventListeners();
-        
-        // Animar entrada del modal
-        requestAnimationFrame(() => {
-            const modal = document.getElementById('modern-tutorial-modal');
-            if (modal) {
-                modal.classList.add('show');
-            }
-        });
     }
-    
-    setupModalEventListeners() {
-        const modal = document.getElementById('modern-tutorial-modal');
-        if (!modal) return;
-        
-        const closeBtn = document.getElementById('modal-close-btn');
-        const skipBtn = document.getElementById('skip-tutorial-btn');
-        const drawingBtn = modal.querySelector('.tutorial-drawing-btn');
-        const animationBtn = modal.querySelector('.tutorial-animation-btn');
-        
-        // Cerrar modal
-        const closeModal = () => {
-            modal.classList.remove('show');
-            modal.classList.add('hide');
-            setTimeout(() => {
-                if (modal.parentNode) {
-                    modal.remove();
-                }
-            }, 300);
-        };
-        
-        // Event listeners
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
-        }
-        
-        if (skipBtn) {
-            skipBtn.addEventListener('click', closeModal);
-        }
-        
-        // Click fuera del modal para cerrar
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-        
-        // Botones de inicio de tutorial
-        if (drawingBtn) {
-            drawingBtn.addEventListener('click', () => {
-                closeModal();
-                setTimeout(() => {
-                    this.startTutorial('drawing');
-                }, 350);
-            });
-        }
-        
-        if (animationBtn) {
-            animationBtn.addEventListener('click', () => {
-                closeModal();
-                setTimeout(() => {
-                    this.startTutorial('animation');
-                }, 350);
-            });
-        }
-        
-        // Atajos de teclado
-        const handleKeydown = (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-                document.removeEventListener('keydown', handleKeydown);
-            }
-        };
-        
-        document.addEventListener('keydown', handleKeydown);
+
+    // Método para testing - permite forzar el modal
+    testModal() {
+        this.showWelcomeDialog();
     }
-    
-    startTutorial(mode = 'drawing') {
-        console.log(`[TutorialManager] Iniciando tutorial de: ${mode}`);
-        
-        // Aplicar los pasos de tutorial específicos del modo
-        if (window.applyTutorialSteps) {
-            window.applyTutorialSteps(mode);
-        }
-        
-        // Cambiar al modo correspondiente
-        const modeManager = window.modeManager;
-        if (modeManager) {
-            if (mode === 'drawing') {
-                modeManager.switchToMode('drawing');
-            } else if (mode === 'animation') {
-                modeManager.switchToMode('animation');
-            }
-        }
-        
-        // Guardar el modo del tutorial actual
-        this.currentTutorialMode = mode;
-        
-        // Iniciar Intro.js
-        if (typeof introJs !== 'undefined') {
-            introJs().start();
-        } else {
-            alert('Error: La librería de tutorial no está disponible.');
-        }
-    }
-    
-    handleStepChange(targetElement) {
-        const step = targetElement.getAttribute('data-step');
-        console.log(`[TutorialManager] Paso ${step}: ${targetElement.id} - Modo: ${this.currentTutorialMode}`);
 
-        // Helper para deshabilitar/rehabilitar el botón siguiente
-        function setNextEnabled(enabled) {
-            const nextBtn = document.querySelector('.introjs-nextbutton');
-            if (nextBtn) {
-                nextBtn.disabled = !enabled;
-                nextBtn.classList.toggle('disabled', !enabled);
-                
-                if (!enabled) {
-                    nextBtn.innerHTML = '🔒 Realiza la acción primero';
-                } else {
-                    nextBtn.innerHTML = 'Siguiente →';
-                }
-            }
-        }
-
-        // Verificar si el elemento está visible
-        function isElementVisible(element) {
-            if (!element) return false;
-            const style = window.getComputedStyle(element);
-            return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-        }
-
-        // Manejar pasos interactivos según el modo del tutorial
-        if (this.currentTutorialMode === 'drawing') {
-            this.handleDrawingTutorialStep(step, targetElement, setNextEnabled, isElementVisible);
-        } else if (this.currentTutorialMode === 'animation') {
-            this.handleAnimationTutorialStep(step, targetElement, setNextEnabled, isElementVisible);
-        }
-    }
-    
-    handleDrawingTutorialStep(step, targetElement, setNextEnabled, isElementVisible) {
-        switch (step) {
-            case '2': // Selección de jugadores
-                setNextEnabled(false);
-                const playerList = document.getElementById('player-selection-list');
-                if (playerList) {
-                    const handler = () => {
-                        if (window.state && window.state.activePlayers && window.state.activePlayers.length > 0) {
-                            setNextEnabled(true);
-                            playerList.removeEventListener('click', handler);
-                        }
-                    };
-                    playerList.addEventListener('click', handler);
-                }
-                break;
-
-            case '12': // Dibujar línea
-                setNextEnabled(false);
-                const drawingCanvas = document.getElementById('drawing-canvas');
-                if (drawingCanvas) {
-                    const handler = () => {
-                        setNextEnabled(true);
-                        drawingCanvas.removeEventListener('mousedown', handler);
-                        drawingCanvas.removeEventListener('touchstart', handler);
-                    };
-                    drawingCanvas.addEventListener('mousedown', handler);
-                    drawingCanvas.addEventListener('touchstart', handler);
-                }
-                break;
-        }
-    }
-    
-    handleAnimationTutorialStep(step, targetElement, setNextEnabled, isElementVisible) {
-        switch (step) {
-            case '2': // Selección de jugadores
-                setNextEnabled(false);
-                const playerList = document.getElementById('player-selection-list');
-                if (playerList) {
-                    const handler = () => {
-                        if (window.state && window.state.activePlayers && window.state.activePlayers.length > 0) {
-                            setNextEnabled(true);
-                            playerList.removeEventListener('click', handler);
-                        }
-                    };
-                    playerList.addEventListener('click', handler);
-                }
-                break;
-
-            case '8': // Agregar frame
-                setNextEnabled(false);
-                const addFrameBtn = document.getElementById('frame-add');
-                if (addFrameBtn && isElementVisible(addFrameBtn)) {
-                    const handler = () => {
-                        setTimeout(() => setNextEnabled(true), 500);
-                        addFrameBtn.removeEventListener('click', handler);
-                    };
-                    addFrameBtn.addEventListener('click', handler);
-                } else {
-                    setNextEnabled(true);
-                }
-                break;
-
-            case '9': // Reproducir animación
-                setNextEnabled(false);
-                const playBtn = document.getElementById('frame-play');
-                if (playBtn && isElementVisible(playBtn)) {
-                    const handler = () => {
-                        setTimeout(() => setNextEnabled(true), 1000);
-                        playBtn.removeEventListener('click', handler);
-                    };
-                    playBtn.addEventListener('click', handler);
-                } else {
-                    setNextEnabled(true);
-                }
-                break;
-
-            case '10': // Activar grabación
-                setNextEnabled(false);
-                const recordBtn = document.getElementById('record-mode-toggle');
-                if (recordBtn && isElementVisible(recordBtn)) {
-                    const handler = () => {
-                        setTimeout(() => setNextEnabled(true), 300);
-                        recordBtn.removeEventListener('click', handler);
-                    };
-                    recordBtn.addEventListener('click', handler);
-                } else {
-                    setNextEnabled(true);
-                }
-                break;
-
-            case '11': // Exportar animación
-                setNextEnabled(false);
-                const exportBtn = document.getElementById('export-animation-json');
-                if (exportBtn && isElementVisible(exportBtn)) {
-                    const handler = () => {
-                        setTimeout(() => setNextEnabled(true), 500);
-                        exportBtn.removeEventListener('click', handler);
-                    };
-                    exportBtn.addEventListener('click', handler);
-                } else {
-                    setNextEnabled(true);
-                }
-                break;
-        }
-    }
-    
-    handleTutorialComplete() {
-        console.log(`[TutorialManager] Tutorial completado: ${this.currentTutorialMode}`);
-        
-        // Mensaje de felicitación específico del modo
-        setTimeout(() => {
-            let message = "🎉 ¡Felicitaciones! Has completado el tutorial";
-            
-            if (this.currentTutorialMode === 'drawing') {
-                message += " de DIBUJO.\n\n" +
-                    "Ahora ya sabes cómo:\n" +
-                    "✅ Seleccionar jugadores y formaciones\n" +
-                    "✅ Dibujar líneas tácticas\n" +
-                    "✅ Usar herramientas de dibujo\n" +
-                    "✅ Exportar y compartir tácticas\n\n" +
-                    "💡 Consejo: Prueba también el Tutorial de Animación para crear jugadas en movimiento.";
-            } else if (this.currentTutorialMode === 'animation') {
-                message += " de ANIMACIÓN.\n\n" +
-                    "Ahora ya sabes cómo:\n" +
-                    "✅ Crear frames de animación\n" +
-                    "✅ Reproducir secuencias de movimiento\n" +
-                    "✅ Usar el modo de grabación\n" +
-                    "✅ Exportar animaciones\n\n" +
-                    "💡 Consejo: Combina el modo Dibujo con Animación para crear tácticas completas.";
-            }
-            
-            message += "\n\n¡Empieza a crear tus propias jugadas!";
-            
-            alert(message);
-        }, 500);
-        
-        // Marcar tutorial como completado
-        localStorage.setItem(`fifa-tactics-tutorial-${this.currentTutorialMode}-completed`, 'true');
-    }
-    
-    handleTutorialExit() {
-        console.log(`[TutorialManager] Tutorial salido/cancelado: ${this.currentTutorialMode}`);
-        
-        // Limpiar atributos de tutorial
-        document.querySelectorAll('[data-intro]').forEach(element => {
-            element.removeAttribute('data-intro');
-            element.removeAttribute('data-step');
-        });
-        
-        this.currentTutorialMode = null;
-    }
-    
-    // Método para reiniciar el tutorial manualmente
-    resetTutorial() {
+    // Método para testing - limpiar localStorage
+    resetFirstVisit() {
         localStorage.removeItem('fifa-tactics-visited');
-        localStorage.removeItem('fifa-tactics-tutorial-completed');
-        console.log('[TutorialManager] Tutorial reiniciado');
-    }
-    
-    // Método para mostrar ayuda contextual
-    showQuickHelp(mode = 'drawing') {
-        let helpText = '';
-        
-        if (mode === 'drawing') {
-            helpText = `
-📝 MODO DIBUJO - Ayuda Rápida:
-
-🎨 DIBUJAR: Haz clic y arrastra en el campo para dibujar líneas
-👥 JUGADORES: Usa el botón de usuarios para seleccionar tu plantilla
-⚽ FORMACIÓN: Elige una táctica predefinida del selector
-🎨 COLOR: Cambia el color de las líneas con el selector
-📏 GROSOR: Ajusta el grosor de las líneas
-↩️ DESHACER: Usa los botones de deshacer/rehacer
-🗑️ LIMPIAR: Borra todas las líneas con el botón amarillo
-✂️ BORRAR: Activa modo borrador para eliminar líneas específicas
-📤 COMPARTIR: Exporta tu táctica como imagen
-            `;
-        } else {
-            helpText = `
-🎬 MODO ANIMACIÓN - Ayuda Rápida:
-
-🎞️ FRAMES: Cada frame captura las posiciones de los jugadores
-➕ CREAR: Añade nuevos frames con el botón +
-⏮️⏭️ NAVEGAR: Usa los botones de anterior/siguiente
-▶️ REPRODUCIR: Ve tu animación en movimiento
-🔴 GRABAR: Activa grabación para capturar movimientos automáticamente
-📊 CONTADOR: Muestra frame actual (ej: 3/5)
-💾 EXPORTAR: Guarda tu animación como archivo JSON
-🗑️ RESET: Borra toda la animación
-            `;
-        }
-        
-        alert(helpText);
-    }
-    
-    updateTutorialButtons() {
-        const modeManager = window.modeManager;
-        const currentMode = modeManager ? modeManager.currentMode : 'drawing';
-        
-        const drawingBtn = document.getElementById('start-tutorial-drawing-btn');
-        const animationBtn = document.getElementById('start-tutorial-animation-btn');
-        
-        if (drawingBtn && animationBtn) {
-            if (currentMode === 'drawing') {
-                drawingBtn.classList.remove('hidden');
-                animationBtn.classList.add('hidden');
-            } else if (currentMode === 'animation') {
-                drawingBtn.classList.add('hidden');
-                animationBtn.classList.remove('hidden');
-            }
-        }
-        
-        console.log(`[TutorialManager] Botones actualizados para modo: ${currentMode}`);
     }
 }
-
-// Funciones globales para acceso desde consola (debugging)
-window.startTutorial = function(mode = 'drawing') {
-    if (window.tutorialManager) {
-        window.tutorialManager.startTutorial(mode);
-    }
-};
-
-window.startDrawingTutorial = function() {
-    if (window.tutorialManager) {
-        window.tutorialManager.startTutorial('drawing');
-    }
-};
-
-window.startAnimationTutorial = function() {
-    if (window.tutorialManager) {
-        window.tutorialManager.startTutorial('animation');
-    }
-};
-
-window.resetTutorial = function() {
-    if (window.tutorialManager) {
-        window.tutorialManager.resetTutorial();
-    }
-};

@@ -3,377 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Seguro - Simulador Táctico</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+    <title>Simulador Táctico - Login</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: url('img/fondoLogin.jpg') center center fixed;
-            background-size: cover;
-            background-repeat: no-repeat;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Overlay semitransparente para mejorar legibilidad */
-            position: relative;
+            padding: 20px;
         }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: -1;
-        }
-        
+
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            padding: 3rem;
-            max-width: 450px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             width: 100%;
+            max-width: 400px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            position: relative;
-            z-index: 1;
         }
-        
-        .login-icon {
-            font-size: 4rem;
-            color: #667eea;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .form-control {
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 1rem;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 15px;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-        
-        .btn-login:disabled {
-            opacity: 0.7;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .alert {
-            border-radius: 15px;
-            border: none;
-        }
-        
-        .loading-spinner {
-            display: none;
-        }
-        
-        .success-message {
-            color: #28a745;
-            font-weight: 600;
-            margin-top: 1rem;
-        }
-        
-        .app-title {
+
+        .premium-badge {
+            background: #FFD700;
             color: #333;
-            margin-bottom: 0.5rem;
-            font-weight: 300;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
-        
-        .app-subtitle {
+
+        .crown-icon {
+            font-size: 16px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="password"] {
+            letter-spacing: 2px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .no-account {
             color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
+            margin: 30px 0 20px 0;
+            font-size: 14px;
         }
-        
-        .security-badge {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            margin-bottom: 1.5rem;
-            display: inline-block;
+
+        .create-account-btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        
-        /* Estilos responsivos */
-        @media (max-width: 768px) {
-            .login-container {
-                margin: 1rem;
-                padding: 2rem;
-                max-width: 90%;
-            }
-            
-            body {
-                background-attachment: scroll;
-            }
+
+        .create-account-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
         }
-        
+
+        .security-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 480px) {
             .login-container {
-                padding: 1.5rem;
+                padding: 30px 20px;
+                margin: 10px;
             }
             
-            .login-icon {
-                font-size: 3rem;
-            }
-            
-            .app-title {
-                font-size: 1.5rem;
+            h1 {
+                font-size: 24px;
             }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-icon">
-            <i class="fas fa-shield-alt"></i>
+        <div class="premium-badge">
+            <span class="crown-icon">👑</span>
+            Premium: $9.99/mes - Hasta 3 dispositivos
         </div>
         
-        <h2 class="app-title">Simulador Táctico</h2>
-        <p class="app-subtitle">Sistema de Acceso Seguro</p>
-        
-        <div class="security-badge">
-            <i class="fas fa-lock me-1"></i>
-            Autenticación Encriptada
-        </div>
+        <h1>Iniciar Sesión</h1>
         
         <form id="loginForm">
-            <div class="mb-3">
-                <input type="email" class="form-control" id="email" placeholder="Ingresa tu email" autocomplete="username" required>
+            <div class="form-group">
+                <input 
+                    type="email" 
+                    id="email" 
+                    placeholder="test@simulador.com" 
+                    value="test@simulador.com"
+                    required
+                >
             </div>
-            <div class="mb-4">
-                <input type="password" class="form-control" id="password" placeholder="Ingresa tu clave de acceso" autocomplete="current-password" required>
+            
+            <div class="form-group">
+                <input 
+                    type="password" 
+                    id="password" 
+                    placeholder="••••••••••"
+                    value="password123"
+                    required
+                >
             </div>
-            <div id="error-message" class="alert alert-danger d-none" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span id="error-text">Clave incorrecta. Inténtalo de nuevo.</span>
-            </div>
-            <div id="premium-warning-row" class="alert alert-danger d-none" role="alert" style="font-weight:bold;">
-                <i class="fas fa-ban me-2"></i>
-                Límite de dispositivos alcanzado para este usuario (máx. 3)
-            </div>
-            <button type="submit" class="btn btn-login" id="loginBtn">
-                <span class="login-text">
-                    <i class="fas fa-sign-in-alt me-2"></i>
-                    Acceder al Sistema
-                </span>
-                <span class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin me-2"></i>
-                    Verificando...
-                </span>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                🔑 Acceder
             </button>
-            <div id="success-message" class="success-message d-none">
-                <i class="fas fa-check-circle me-2"></i>
-                Acceso autorizado. Redirigiendo...
-            </div>
         </form>
         
-        <div class="mt-4">
-            <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i>
-                Acceso protegido con encriptación SHA-256
-            </small>
+        <div id="message"></div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <p class="no-account">¿No tienes cuenta?</p>
+        
+        <button class="create-account-btn" onclick="createAccount()">
+            👤 Crear Cuenta Premium
+        </button>
+        
+        <div class="security-note">
+            🛡️ Sistema seguro con autenticación JWT
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    
-    <script type="module">
-        // --- Lógica de autenticación y límite de dispositivos ---
-        import { getOrCreateDeviceId } from './js/deviceIdManager.js';
-
-        async function getValidPasswordHash() {
-            const expectedPassword = "Anibal2023";
-            const encoder = new TextEncoder();
-            const data = encoder.encode(expectedPassword);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        let attemptCount = 0;
-        const maxAttempts = 5;
+    <script src="js/freemiumAuthSystem-simple.js"></script>
+    <script>
+        const auth = new UltraSimpleAuth();
         let isProcessing = false;
-
-        async function generateHash(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
-            errorText.textContent = message;
-            errorDiv.classList.remove('d-none');
-            setTimeout(() => { errorDiv.classList.add('d-none'); }, 4000);
-        }
-        function showSuccess() {
-            const successDiv = document.getElementById('success-message');
-            successDiv.classList.remove('d-none');
-        }
-        function setLoading(loading) {
-            const btn = document.getElementById('loginBtn');
-            const loginText = btn.querySelector('.login-text');
-            const loadingSpinner = btn.querySelector('.loading-spinner');
-            if (loading) {
-                loginText.style.display = 'none';
-                loadingSpinner.style.display = 'inline';
-                btn.disabled = true;
-            } else {
-                loginText.style.display = 'inline';
-                loadingSpinner.style.display = 'none';
-                btn.disabled = false;
+        
+        // Elementos del DOM
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const messageDiv = document.getElementById('message');
+        const loadingDiv = document.getElementById('loading');
+        
+        // Función para mostrar mensajes
+        function showMessage(text, type = 'error') {
+            if (messageDiv) {
+                messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 5000);
             }
         }
-
-        // Lógica de límite de dispositivos por email
-        function canLoginWithDevice(email) {
-            const dbKey = 'simuladorTactico_mockUsers';
-            const db = JSON.parse(localStorage.getItem(dbKey) || '{}');
-            const deviceId = getOrCreateDeviceId();
-            let user = db[email] || { id: 'user123', email, premium: true, devices: [] };
-            if (!user.devices.includes(deviceId)) {
-                if (user.devices.length >= 3) {
-                    return false;
+        
+        // Función para mostrar/ocultar loading
+        function setLoading(show) {
+            if (loadingDiv && loginBtn) {
+                if (show) {
+                    loadingDiv.style.display = 'flex';
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '🔄 Conectando...';
+                } else {
+                    loadingDiv.style.display = 'none';
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '🔑 Acceder';
                 }
             }
-            return true;
         }
-        function registerDeviceForUser(email) {
-            const dbKey = 'simuladorTactico_mockUsers';
-            const db = JSON.parse(localStorage.getItem(dbKey) || '{}');
-            const deviceId = getOrCreateDeviceId();
-            let user = db[email] || { id: 'user123', email, premium: true, devices: [] };
-            if (!user.devices.includes(deviceId)) {
-                user.devices.push(deviceId);
-            }
-            db[email] = user;
-            localStorage.setItem(dbKey, JSON.stringify(db));
-        }
-
-        async function validateLogin(email, password) {
-            if (isProcessing) return false;
-            if (attemptCount >= maxAttempts) {
-                showError('Demasiados intentos fallidos. Recarga la página.');
-                return false;
-            }
+        
+        // Función de login
+        async function doLogin(email, password) {
+            if (isProcessing) return;
+            
             isProcessing = true;
             setLoading(true);
+            
             try {
-                // Límite de dispositivos
-                if (!canLoginWithDevice(email)) {
-                    document.getElementById('premium-warning-row').classList.remove('d-none');
-                    setLoading(false);
-                    isProcessing = false;
-                    return false;
+                const result = await auth.login(email, password);
+                
+                if (result.success) {
+                    showMessage('✅ Login exitoso! Redirigiendo...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
                 } else {
-                    document.getElementById('premium-warning-row').classList.add('d-none');
+                    showMessage('❌ ' + (result.error || 'Error en el login'), 'error');
                 }
-                // Validar contraseña
-                const [validHash, inputHash] = await Promise.all([
-                    getValidPasswordHash(),
-                    generateHash(password)
-                ]);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                if (inputHash === validHash) {
-                    showSuccess();
-                    registerDeviceForUser(email);
-                    sessionStorage.setItem('app_authenticated', 'true');
-                    sessionStorage.setItem('auth_timestamp', Date.now().toString());
-                    setTimeout(() => { window.location.href = 'index.html'; }, 1200);
-                    return true;
-                } else {
-                    attemptCount++;
-                    const remaining = maxAttempts - attemptCount;
-                    if (remaining > 0) {
-                        showError(`Clave incorrecta. Intentos restantes: ${remaining}`);
-                    } else {
-                        showError('Demasiados intentos fallidos. Recarga la página.');
-                        document.getElementById('loginBtn').disabled = true;
-                    }
-                    return false;
-                }
+                
             } catch (error) {
-                showError('Error en la validación. Inténtalo de nuevo.');
-                return false;
+                console.error('Error en login:', error);
+                showMessage('❌ Error de conexión: ' + error.message, 'error');
             } finally {
                 isProcessing = false;
                 setLoading(false);
             }
         }
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            if (!email || !password) {
-                showError('Por favor ingresa email y contraseña');
-                return;
-            }
-            await validateLogin(email, password);
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('email').focus();
-            // Verificar si ya está autenticado
-            const isAuthenticated = sessionStorage.getItem('app_authenticated');
-            const authTime = sessionStorage.getItem('auth_timestamp');
-            if (isAuthenticated === 'true' && authTime) {
-                const timeDiff = Date.now() - parseInt(authTime);
-                const hourInMs = 60 * 60 * 1000;
-                if (timeDiff < hourInMs) {
-                    window.location.href = 'index.html';
-                } else {
-                    sessionStorage.removeItem('app_authenticated');
-                    sessionStorage.removeItem('auth_timestamp');
+        
+        // Función para crear cuenta
+        function createAccount() {
+            showMessage('ℹ️ Funcionalidad de registro en desarrollo', 'success');
+        }
+        
+        // Event listener para el formulario
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = emailInput ? emailInput.value.trim() : '';
+                const password = passwordInput ? passwordInput.value.trim() : '';
+                
+                if (!email || !password) {
+                    showMessage('Por favor completa todos los campos', 'error');
+                    return;
                 }
+                
+                if (!email.includes('@')) {
+                    showMessage('Por favor ingresa un email válido', 'error');
+                    return;
+                }
+                
+                doLogin(email, password);
+            });
+        }
+        
+        // Verificar si ya está autenticado
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                showMessage('Ya tienes una sesión activa', 'success');
+                setTimeout(() => {
+                    if (confirm('¿Continuar con la sesión existente?')) {
+                        window.location.href = 'index.html';
+                    } else {
+                        auth.logout();
+                        location.reload();
+                    }
+                }, 1000);
+            }
+        });
+        
+        // Limpiar mensajes al escribir
+        [emailInput, passwordInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', () => {
+                    if (messageDiv) messageDiv.innerHTML = '';
+                });
             }
         });
     </script>

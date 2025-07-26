@@ -93,6 +93,10 @@ export default class UIManager {
                 console.log('UIManager: Click en Confirmar Plantilla.');
                 const selectedPlayers = this.getSelectedPlayers();
 
+                // NUEVA LÓGICA: Mantener persistencia en lugar de reemplazar
+                console.log('UIManager: Jugadores seleccionados en modal:', selectedPlayers);
+                console.log('UIManager: Jugadores actualmente en campo:', this.state.activePlayers.map(p => p.id));
+
                 // Filtrar para no más de 11 jugadores
                 const playersToActivate = selectedPlayers.slice(0, 11);
 
@@ -100,6 +104,8 @@ export default class UIManager {
                 this.state.activePlayers = playersToActivate.map(id =>
                     this.playerManager.getPlayerById(id)
                 ).filter(player => player !== null); // Filtrar nulls
+
+                console.log('UIManager: Nuevos jugadores activos:', this.state.activePlayers.map(p => p.name));
 
                 // Verificar si hay una animación pendiente de importar
                 if (window.pendingAnimationData) {
@@ -198,6 +204,9 @@ export default class UIManager {
                 // Actualizar la lista de jugadores con filtros aplicados
                 if (this.playerManager && typeof this.playerManager.renderPlayerSelectionList === 'function') {
                     this.playerManager.renderPlayerSelectionList();
+                    
+                    // NUEVA LÓGICA: Marcar jugadores que ya están en el campo
+                    this.preselectActivePlayersInModal();
                 } else {
                     console.warn('UIManager: playerManager o renderPlayerSelectionList no disponible');
                 }
@@ -257,14 +266,53 @@ export default class UIManager {
         return selected;
     }
 
+    // NUEVA FUNCIÓN: Preseleccionar jugadores que ya están en el campo
+    preselectActivePlayersInModal() {
+        console.log('UIManager: Preseleccionando jugadores activos en el modal...');
+        
+        // Primero, desseleccionar todos los jugadores
+        document.querySelectorAll('.squad-player-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        
+        // Obtener IDs de jugadores actualmente en el campo
+        const activePlayerIds = this.state.activePlayers
+            .filter(player => player && !player.isBall && player.id !== 'ball') // Excluir el balón
+            .map(player => player.id);
+            
+        console.log('UIManager: Jugadores activos a preseleccionar:', activePlayerIds);
+        
+        // Marcar como seleccionados los jugadores que están en el campo
+        activePlayerIds.forEach(playerId => {
+            const playerItem = document.querySelector(`.squad-player-item[data-player-id="${playerId}"]`);
+            if (playerItem) {
+                playerItem.classList.add('selected');
+                console.log(`UIManager: Jugador ${playerId} marcado como seleccionado`);
+            } else {
+                console.warn(`UIManager: No se encontró el item para el jugador ${playerId}`);
+            }
+        });
+        
+        // Actualizar contador visual
+        this.updateSelectedCount();
+        
+        console.log(`UIManager: ${activePlayerIds.length} jugadores preseleccionados en el modal`);
+    }
+
+    // FUNCIÓN ACTUALIZADA: Actualizar contador de jugadores seleccionados  
+    updateSelectedCountBadge(count) {
+        // Esta función ahora delega a updateSelectedCount() que ya existe
+        this.updateSelectedCount();
+    }
+
     renderPlayersOnPitch() {
         const pitch = document.getElementById('pitch-container');
         if (!pitch) {
             console.error('UIManager: pitch-container no encontrado para renderPlayersOnPitch.');
             return;
         }
-        // Eliminar jugadores existentes antes de volver a renderizar
-        pitch.querySelectorAll('.player-token').forEach(el => el.remove());
+        // Eliminar jugadores y balones existentes antes de volver a renderizar
+        pitch.querySelectorAll('.player-token, .ball-token').forEach(el => el.remove());
 
         const pitchRect = pitch.getBoundingClientRect();
 

@@ -1,257 +1,275 @@
-// PWA Registration Script
-// Este script registra el Service Worker y maneja la instalación de la PWA
+/**
+ * ==========================================
+ * 📱 PWA MANAGER - PROGRESSIVE WEB APP
+ * ==========================================
+ * Gestiona funcionalidades de PWA: instalación, service worker, notificaciones
+ */
 
 class PWAManager {
     constructor() {
         this.deferredPrompt = null;
         this.isInstalled = false;
+        this.isStandalone = false;
+        this.serviceWorkerRegistration = null;
+        
         this.init();
     }
-
+    
     async init() {
-        console.log('[PWA] Inicializando PWA Manager...');
+        console.log('📱 PWAManager iniciado');
         
-        // Registrar Service Worker
-        await this.registerServiceWorker();
-        
-        // Configurar eventos PWA
-        this.setupPWAEvents();
-        
-        // Verificar si ya está instalado
-        this.checkInstallStatus();
-        
-        console.log('[PWA] PWA Manager inicializado correctamente');
+        this.checkInstallation();
+        this.setupInstallPrompt();
+        this.registerServiceWorker();
+        this.setupUpdateListener();
+        this.createInstallButton();
     }
-
+    
+    /**
+     * Verifica si la app está instalada
+     */
+    checkInstallation() {
+        // Verificar si está en modo standalone
+        this.isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.navigator.standalone ||
+                           document.referrer.includes('android-app://');
+        
+        // Verificar si está instalada
+        this.isInstalled = this.isStandalone || 
+                          localStorage.getItem('pwa-installed') === 'true';
+        
+        console.log(`📱 PWA instalada: ${this.isInstalled}, Standalone: ${this.isStandalone}`);
+    }
+    
+    /**
+     * Configura el prompt de instalación
+     */
+    setupInstallPrompt() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('📱 Prompt de instalación disponible');
+            e.preventDefault();
+            this.deferredPrompt = e;
+            this.showInstallButton();
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('📱 PWA instalada exitosamente');
+            this.isInstalled = true;
+            localStorage.setItem('pwa-installed', 'true');
+            this.hideInstallButton();
+            this.showInstallSuccess();
+        });
+    }
+    
+    /**
+     * Registra el service worker
+     */
     async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                console.log('[PWA] Registrando Service Worker...');
+                this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
+                console.log('📱 Service Worker registrado:', this.serviceWorkerRegistration);
                 
-                const registration = await navigator.serviceWorker.register('./sw.js', {
-                    scope: './'
+                // Verificar actualizaciones
+                this.serviceWorkerRegistration.addEventListener('updatefound', () => {
+                    console.log('📱 Actualización del Service Worker encontrada');
                 });
                 
-                console.log('[PWA] Service Worker registrado:', registration.scope);
-                
-                // Manejar actualizaciones del SW
-                registration.addEventListener('updatefound', () => {
-                    console.log('[PWA] Nueva versión del Service Worker disponible');
-                    const newWorker = registration.installing;
-                    
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Nueva versión disponible
-                            this.showUpdateAvailable();
-                        }
-                    });
-                });
-                
-                return registration;
             } catch (error) {
-                console.error('[PWA] Error registrando Service Worker:', error);
+                console.error('📱 Error registrando Service Worker:', error);
             }
-        } else {
-            console.warn('[PWA] Service Workers no soportados en este navegador');
         }
     }
-
-    setupPWAEvents() {
-        // Capturar evento de instalación
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('[PWA] Evento beforeinstallprompt capturado');
-            
-            // Prevenir mostrar automáticamente
-            e.preventDefault();
-            
-            // Guardar el evento para usarlo después
-            this.deferredPrompt = e;
-            
-            // Mostrar botón de instalación personalizado
-            this.showInstallButton();
-        });
-
-        // Detectar cuando se instala
-        window.addEventListener('appinstalled', (e) => {
-            console.log('[PWA] App instalada exitosamente');
-            this.isInstalled = true;
-            this.hideInstallButton();
-            this.showInstalledMessage();
-        });
-
-        // Detectar cuando se ejecuta como PWA
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log('[PWA] Ejecutándose como PWA instalada');
-            this.isInstalled = true;
+    
+    /**
+     * Configura listener para actualizaciones
+     */
+    setupUpdateListener() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('📱 Service Worker actualizado');
+                this.showUpdateNotification();
+            });
         }
     }
-
-    checkInstallStatus() {
-        // Verificar si está ejecutándose como PWA
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isIOSStandalone = isIOS && (window.navigator.standalone === true);
+    
+    /**
+     * Crea el botón de instalación
+     */
+    createInstallButton() {
+        if (this.isInstalled) return;
         
-        if (isStandalone || isIOSStandalone) {
-            this.isInstalled = true;
-            console.log('[PWA] App ya está instalada');
-        }
+        const installBtn = document.createElement('button');
+        installBtn.id = 'pwa-install-btn';
+        installBtn.className = 'btn btn-primary btn-sm position-fixed';
+        installBtn.style.cssText = `
+            top: 70px;
+            right: 20px;
+            z-index: 1050;
+            display: none;
+        `;
+        installBtn.innerHTML = `
+            <i class="fas fa-download me-1"></i>
+            Instalar App
+        `;
+        
+        installBtn.addEventListener('click', () => this.promptInstall());
+        
+        document.body.appendChild(installBtn);
     }
-
+    
+    /**
+     * Muestra el botón de instalación
+     */
     showInstallButton() {
-        // Crear botón de instalación si no existe
-        let installBtn = document.getElementById('pwa-install-btn');
-        
-        if (!installBtn) {
-            installBtn = document.createElement('button');
-            installBtn.id = 'pwa-install-btn';
-            installBtn.innerHTML = '<i class="fas fa-download"></i> Instalar App';
-            installBtn.className = 'btn btn-primary position-fixed';
-            installBtn.style.cssText = `
-                bottom: 20px;
-                right: 20px;
-                z-index: 1000;
-                border-radius: 25px;
-                padding: 10px 20px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                background: linear-gradient(45deg, #3caa3c, #2d8a2d);
-                border: none;
-            `;
-            
-            installBtn.addEventListener('click', () => this.installPWA());
-            document.body.appendChild(installBtn);
+        const btn = document.getElementById('pwa-install-btn');
+        if (btn && !this.isInstalled) {
+            btn.style.display = 'block';
         }
-        
-        installBtn.style.display = 'block';
-        
-        // Auto-hide después de 10 segundos
-        setTimeout(() => {
-            if (installBtn && !this.isInstalled) {
-                installBtn.style.opacity = '0.7';
-            }
-        }, 10000);
     }
-
+    
+    /**
+     * Oculta el botón de instalación
+     */
     hideInstallButton() {
-        const installBtn = document.getElementById('pwa-install-btn');
-        if (installBtn) {
-            installBtn.style.display = 'none';
+        const btn = document.getElementById('pwa-install-btn');
+        if (btn) {
+            btn.style.display = 'none';
         }
     }
-
-    async installPWA() {
+    
+    /**
+     * Ejecuta el prompt de instalación
+     */
+    async promptInstall() {
         if (!this.deferredPrompt) {
-            console.log('[PWA] No se puede instalar en este momento');
+            console.log('📱 Prompt de instalación no disponible');
             return;
         }
-
-        console.log('[PWA] Iniciando instalación...');
         
-        // Mostrar prompt de instalación
-        this.deferredPrompt.prompt();
-        
-        // Esperar respuesta del usuario
-        const { outcome } = await this.deferredPrompt.userChoice;
-        
-        console.log('[PWA] Resultado de instalación:', outcome);
-        
-        if (outcome === 'accepted') {
-            console.log('[PWA] Usuario aceptó la instalación');
-        } else {
-            console.log('[PWA] Usuario rechazó la instalación');
-        }
-        
-        // Limpiar el prompt
-        this.deferredPrompt = null;
-        this.hideInstallButton();
-    }
-
-    showUpdateAvailable() {
-        // Crear notificación de actualización
-        const updateNotification = document.createElement('div');
-        updateNotification.id = 'pwa-update-notification';
-        updateNotification.innerHTML = `
-            <div class="alert alert-info alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1001; max-width: 300px;">
-                <i class="fas fa-sync-alt"></i> <strong>Actualización disponible</strong>
-                <br>
-                <small>Nueva versión de la app disponible</small>
-                <br>
-                <button class="btn btn-sm btn-primary mt-2" onclick="pwaManager.reloadApp()">Actualizar</button>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(updateNotification);
-        
-        // Auto-remove después de 30 segundos
-        setTimeout(() => {
-            if (updateNotification.parentNode) {
-                updateNotification.remove();
+        try {
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            
+            console.log(`📱 Usuario eligió: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                this.hideInstallButton();
             }
-        }, 30000);
+            
+            this.deferredPrompt = null;
+        } catch (error) {
+            console.error('📱 Error en prompt de instalación:', error);
+        }
     }
-
-    showInstalledMessage() {
-        // Mostrar mensaje de éxito
-        const successMessage = document.createElement('div');
-        successMessage.innerHTML = `
-            <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1001; max-width: 300px;">
-                <i class="fas fa-check-circle"></i> <strong>¡App instalada!</strong>
-                <br>
-                <small>Ya puedes usar FIFA Soccer Tactics como app nativa</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    
+    /**
+     * Muestra notificación de instalación exitosa
+     */
+    showInstallSuccess() {
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0';
+        toast.setAttribute('role', 'alert');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        `;
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ¡App instalada correctamente!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
             </div>
         `;
         
-        document.body.appendChild(successMessage);
+        document.body.appendChild(toast);
         
-        // Auto-remove después de 5 segundos
+        // Auto remover después de 5 segundos
         setTimeout(() => {
-            if (successMessage.parentNode) {
-                successMessage.remove();
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
             }
         }, 5000);
     }
-
-    reloadApp() {
-        // Enviar mensaje al service worker para que se active
-        if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-        }
+    
+    /**
+     * Muestra notificación de actualización
+     */
+    showUpdateNotification() {
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-info border-0';
+        toast.setAttribute('role', 'alert');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        `;
         
-        // Recargar la página
-        window.location.reload();
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    App actualizada. Recarga para ver cambios.
+                </div>
+                <button type="button" class="btn btn-light btn-sm me-2" onclick="window.location.reload()">
+                    Recargar
+                </button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
     }
-
-    // Método público para obtener estado
-    getInstallStatus() {
+    
+    /**
+     * Obtiene información del estado de la PWA
+     * @returns {Object} Estado actual de la PWA
+     */
+    getStatus() {
         return {
             isInstalled: this.isInstalled,
+            isStandalone: this.isStandalone,
             canInstall: !!this.deferredPrompt,
-            isStandalone: window.matchMedia('(display-mode: standalone)').matches
+            serviceWorkerRegistered: !!this.serviceWorkerRegistration,
+            hasServiceWorker: 'serviceWorker' in navigator
         };
+    }
+    
+    /**
+     * Fuerza la verificación de actualizaciones
+     */
+    async checkForUpdates() {
+        if (this.serviceWorkerRegistration) {
+            try {
+                await this.serviceWorkerRegistration.update();
+                console.log('📱 Verificación de actualizaciones completada');
+            } catch (error) {
+                console.error('📱 Error verificando actualizaciones:', error);
+            }
+        }
+    }
+    
+    /**
+     * Debug: Muestra información del PWA Manager
+     */
+    debug() {
+        console.group('📱 PWAManager Debug');
+        console.log('📊 Estado:', this.getStatus());
+        console.log('🔧 Service Worker:', this.serviceWorkerRegistration);
+        console.groupEnd();
     }
 }
 
-// Inicializar PWA Manager cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    // Verificar soporte PWA
-    if ('serviceWorker' in navigator && 'manifest' in document.head) {
-        window.pwaManager = new PWAManager();
-    } else {
-        console.warn('[PWA] PWA no soportada en este navegador');
-    }
-});
+// Instancia global
+window.pwaManager = new PWAManager();
 
-// Detectar conexión offline/online
-window.addEventListener('online', () => {
-    console.log('[PWA] Conexión restaurada');
-    // Aquí podrías sincronizar datos pendientes
-});
-
-window.addEventListener('offline', () => {
-    console.log('[PWA] Sin conexión - funcionando offline');
-    // Mostrar indicador offline si deseas
-});
-
-console.log('[PWA] PWA Registration Script cargado');
+// Exportar para uso en módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PWAManager;
+}

@@ -400,6 +400,15 @@ export default class ConfigurationUI {
                 this.updateTutorialButtonsVisibility();
             });
         }
+        
+        // Escuchar cambios de modo para actualizar estilos de botones
+        document.addEventListener('modeChanged', () => {
+            // Reaplicar estilos cuando cambie el modo
+            const showTutorialButtons = document.getElementById('show-tutorial-buttons');
+            if (showTutorialButtons && showTutorialButtons.checked) {
+                this.applyTutorialButtonsStyles(true);
+            }
+        });
     }
 
     setupDrawingListeners() {
@@ -549,7 +558,11 @@ export default class ConfigurationUI {
         const showTutorialButtons = localStorage.getItem('showTutorialButtons');
         const showButtonsElement = document.getElementById('show-tutorial-buttons');
         if (showButtonsElement) {
-            showButtonsElement.checked = showTutorialButtons === 'true' || showTutorialButtons === null; // Por defecto true
+            const shouldShow = showTutorialButtons === 'true' || showTutorialButtons === null; // Por defecto true
+            showButtonsElement.checked = shouldShow;
+            
+            // Aplicar estilos inmediatamente
+            this.applyTutorialButtonsStyles(shouldShow);
         }
     }
 
@@ -845,7 +858,7 @@ export default class ConfigurationUI {
                 styles = `
                     /* Mostrar solo botón de tutorial de dibujo */
                     #start-tutorial-drawing-btn {
-                        display: block !important;
+                        display: flex !important;
                         visibility: visible !important;
                     }
                     
@@ -856,7 +869,11 @@ export default class ConfigurationUI {
                     }
                     
                     /* Otros elementos de tutorial */
-                    .tutorial-btn:not(#start-tutorial-animation-btn),
+                    .tutorial-btn {
+                        display: flex !important;
+                        visibility: visible !important;
+                    }
+                    
                     .tutorial-text {
                         display: block !important;
                         visibility: visible !important;
@@ -866,7 +883,7 @@ export default class ConfigurationUI {
                 styles = `
                     /* Mostrar solo botón de tutorial de animación */
                     #start-tutorial-animation-btn {
-                        display: block !important;
+                        display: flex !important;
                         visibility: visible !important;
                     }
                     
@@ -877,7 +894,11 @@ export default class ConfigurationUI {
                     }
                     
                     /* Otros elementos de tutorial */
-                    .tutorial-btn:not(#start-tutorial-drawing-btn),
+                    .tutorial-btn {
+                        display: flex !important;
+                        visibility: visible !important;
+                    }
+                    
                     .tutorial-text {
                         display: block !important;
                         visibility: visible !important;

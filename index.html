@@ -1,44 +1,246 @@
 </body>
 <script>
-// Mostrar el modal de orientación solo en modo vertical
+// Mostrar el modal de orientación solo en modo vertical en dispositivos móviles
 function handleOrientationModal() {
   const modal = document.getElementById('orientation-message');
   if (!modal) return;
+  
+  // Verificar si el usuario ya eligió continuar en vertical
+  const userDismissedModal = sessionStorage.getItem('orientation-modal-dismissed');
+  if (userDismissedModal === 'true') {
+    modal.style.display = 'none';
+    return;
+  }
+  
+  // Solo aplicar en dispositivos móviles/tablets pequeños
+  const isMobileDevice = window.innerWidth <= 768;
+  if (!isMobileDevice) {
+    modal.style.display = 'none';
+    return;
+  }
+  
   // Detectar orientación de forma robusta
   let isPortrait = false;
+  
+  // Método 1: Screen Orientation API (más moderno)
   if (window.screen && window.screen.orientation && window.screen.orientation.type) {
     isPortrait = window.screen.orientation.type.startsWith('portrait');
-  } else if (window.orientation !== undefined) {
+  } 
+  // Método 2: window.orientation (legacy pero ampliamente soportado)
+  else if (window.orientation !== undefined) {
     isPortrait = Math.abs(window.orientation) !== 90;
-  } else {
-    // Fallback: comparar dimensiones
+  } 
+  // Método 3: Comparar dimensiones (fallback universal)
+  else {
     isPortrait = window.innerHeight > window.innerWidth;
   }
-  if (isPortrait) {
+  
+  // Mostrar modal solo en vertical y en dispositivos móviles
+  if (isPortrait && isMobileDevice) {
     modal.style.display = 'flex';
+    console.log('🔄 Modal de orientación mostrado - Dispositivo en vertical');
   } else {
     modal.style.display = 'none';
+    // Limpiar el estado de dismissal cuando se rota a horizontal
+    if (!isPortrait) {
+      sessionStorage.removeItem('orientation-modal-dismissed');
+    }
+    console.log('✅ Modal de orientación oculto - Dispositivo en horizontal o desktop');
   }
 }
-window.addEventListener('orientationchange', handleOrientationModal);
-window.addEventListener('resize', handleOrientationModal);
+
+// Función para cuando el usuario decide continuar en vertical
+function dismissOrientationModal() {
+  const modal = document.getElementById('orientation-message');
+  if (modal) {
+    modal.style.display = 'none';
+    sessionStorage.setItem('orientation-modal-dismissed', 'true');
+    console.log('ℹ️ Usuario eligió continuar en vertical');
+  }
+}
+
+// Event listeners con throttling para mejor rendimiento
+let orientationTimeout;
+const throttledOrientationHandler = () => {
+  clearTimeout(orientationTimeout);
+  orientationTimeout = setTimeout(handleOrientationModal, 100);
+};
+
+window.addEventListener('orientationchange', throttledOrientationHandler);
+window.addEventListener('resize', throttledOrientationHandler);
 window.addEventListener('DOMContentLoaded', handleOrientationModal);
 </script>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- PROTECCIÓN DE ACCESO SIMPLE Y EFECTIVA -->
-    <script src="js/simpleAuth.js"></script>
+    <!-- SISTEMA FREEMIUM DE AUTENTICACIÓN - VERSION LIMPIA -->
+    <script src="js/freemiumAuthSystem-simple.js"></script>
+    
+    <!-- VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR -->
+    <script>
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Verificando autenticación...');
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                console.log('❌ Usuario no autenticado, redirigiendo a login...');
+                window.location.href = 'login.html';
+                return;
+            } else {
+                console.log('✅ Usuario autenticado, configurando UI...');
+                setupUserInterface();
+            }
+        });
+        
+        function setupUserInterface() {
+            const userEmail = localStorage.getItem('user_email');
+            const userStatus = document.getElementById('user-status');
+            const userInfo = document.getElementById('user-info');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            if (userEmail && userStatus && userInfo) {
+                userInfo.textContent = `${userEmail} (👑 Premium)`;
+                userStatus.style.display = 'block';
+                
+                // Configurar botón de logout
+                if (logoutBtn) {
+                    logoutBtn.onclick = function() {
+                        if (confirm('¿Cerrar sesión?')) {
+                            localStorage.clear();
+                            window.location.href = 'login.html';
+                        }
+                    };
+                }
+            }
+            
+            console.log('🎯 Interfaz configurada para usuario:', userEmail);
+        }
+    </script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fifa Soccer Tactics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilo.css">
-    <link rel="stylesheet" href="css/orientation-modal.css">
-    <!-- Intro.js Tutorial Library -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
+    <!-- Shepherd.js Tutorial Library - Mejor que Intro.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@12.0.6/dist/css/shepherd.css">
     <link rel="icon" href="img/favicon.png" type="image/png"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Estilos para modal de orientación -->
+    <style>
+        /* Modal de orientación - Estilos aislados para evitar conflictos */
+        .orientation-modal-unique {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            z-index: 99999 !important;
+            text-align: center !important;
+            color: white !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+        
+        .orientation-modal-unique img {
+            width: 120px !important;
+            height: 120px !important;
+            margin-bottom: 20px !important;
+            opacity: 0.9 !important;
+            animation: rotate-pulse 2s ease-in-out infinite !important;
+            filter: brightness(0.9) !important;
+        }
+        
+        /* Fallback si la imagen no carga */
+        .orientation-modal-unique .rotate-icon-fallback {
+            font-size: 80px !important;
+            margin-bottom: 20px !important;
+            animation: rotate-pulse 2s ease-in-out infinite !important;
+            display: none !important;
+        }
+        
+        .orientation-modal-unique img[alt]:after {
+            content: "📱" !important;
+            font-size: 80px !important;
+            display: block !important;
+        }
+        
+        .orientation-modal-unique h2 {
+            font-size: 24px !important;
+            font-weight: 600 !important;
+            margin-bottom: 15px !important;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+        }
+        
+        .orientation-modal-unique p {
+            font-size: 16px !important;
+            font-weight: 400 !important;
+            margin: 0 !important;
+            color: #cccccc !important;
+            max-width: 280px !important;
+            line-height: 1.4 !important;
+        }
+        
+        /* Animación de rotación para el ícono */
+        @keyframes rotate-pulse {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: rotate(15deg) scale(1.1);
+                opacity: 1;
+            }
+        }
+        
+        /* Solo mostrar en orientación vertical en dispositivos móviles */
+        @media (orientation: landscape) and (max-width: 768px) {
+            .orientation-modal-unique {
+                display: none !important;
+            }
+        }
+        
+        /* Para tablets más grandes, solo mostrar si la altura es mayor que el ancho */
+        @media (min-width: 769px) {
+            .orientation-modal-unique {
+                display: none !important;
+            }
+        }
+        
+        /* Responsivo para diferentes tamaños de pantalla móvil */
+        @media (max-width: 480px) {
+            .orientation-modal-unique h2 {
+                font-size: 20px !important;
+            }
+            
+            .orientation-modal-unique p {
+                font-size: 14px !important;
+                max-width: 250px !important;
+            }
+            
+            .orientation-modal-unique img {
+                width: 100px !important;
+                height: 100px !important;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .orientation-modal-unique h2 {
+                font-size: 18px !important;
+            }
+            
+            .orientation-modal-unique img {
+                width: 80px !important;
+                height: 80px !important;
+            }
+        }
+    </style>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -62,11 +264,18 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         <i class="fas fa-sun" id="theme-icon"></i>
     </button>
 
-    <!-- Modal de orientación, único y con clase aislada -->
+    <!-- Modal de orientación responsivo -->
     <div id="orientation-message" class="orientation-modal-unique" style="display:none;">
-        <img src="img/rotate-device.png" alt="Girar dispositivo">
-        <h2>Por favor, gira tu dispositivo a modo horizontal</h2>
-        <p>Para usar el simulador, pon tu pantalla en horizontal (apaisado).</p>
+        <img src="img/rotate-device.png" alt="Girar dispositivo" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="rotate-icon-fallback">📱</div>
+        <h2>🔄 Gira tu dispositivo</h2>
+        <p>Para usar el simulador táctico, pon tu pantalla en <strong>modo horizontal</strong> (apaisado).</p>
+        <div style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
+            📱 Mejor experiencia en horizontal
+        </div>
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.6; cursor: pointer;" onclick="dismissOrientationModal();">
+            Toca aquí para continuar en vertical (no recomendado)
+        </div>
     </div>
 
     <!-- Indicador de grabación de audio -->
@@ -533,8 +742,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Intro.js Tutorial Library -->
-    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
+    
+    <!-- Simple Tutorial System - Reemplazo local de Shepherd.js -->
+    <script src="js/libs/simple-tutorial.js"></script>
     
     <!-- Theme Manager para modo claro/oscuro -->
     <script src="js/themeManager.js"></script>
@@ -542,92 +752,56 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <!-- Player Card Manager para gestión unificada de cards -->
     <script src="js/playerCardManager.js"></script>
     
-    <!-- Validador de IDs únicos -->
-    <script src="js/uniqueIdValidator.js"></script>
-    
-    <!-- PWA Manager (cargar antes que los módulos) -->
-    <script src="js/pwaManager.js"></script>
-    
-    <!-- Payment Manager para funcionalidades premium -->
-    <script src="js/paymentManager.js"></script>
-    
-    <!-- HTML Updater para tutoriales -->
-    <script src="js/htmlUpdater.js"></script>
-    <!-- Script de validación de funcionalidades -->
-    <script src="js/validation-script.js"></script>
-    <!-- Script de prueba específico para bug de borrado -->
-    <script src="js/test-drawing-bug.js"></script>
-    <!-- Script de prueba para bug de líneas que desaparecen -->
-    <script src="js/test-line-disappearing-bug.js"></script>
-    <!-- Redirección si no hay sesión iniciada -->
-    <script>
-      // Si no está autenticado, redirige a login.html
-      const isAuthenticated = sessionStorage.getItem('app_authenticated');
-      const authTime = sessionStorage.getItem('auth_timestamp');
-      const hourInMs = 60 * 60 * 1000;
-      if (!(isAuthenticated === 'true' && authTime && (Date.now() - parseInt(authTime) < hourInMs))) {
-        window.location.href = 'login.html';
-      }
-    </script>
-    
     <script type="module" src="js/main.js"></script>
-
-    <!-- Controles de login/logout y deviceId para pruebas -->
-    <div id="freemium-controls" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 8px #0002;font-size:14px;max-width:320px;">
-      <div style="margin-bottom:6px;">
-        <b>Freemium (Mock):</b>
-      </div>
-      <div id="device-id-row" style="margin-bottom:6px;word-break:break-all;">
-        <span style="color:#888;">DeviceId:</span> <span id="device-id-value">(cargando...)</span>
-      </div>
-      <div id="auth-row" style="margin-bottom:6px;">
-        <input id="mock-email" type="email" placeholder="Email" style="width:120px;font-size:13px;" value="test@demo.com">
-        <input id="mock-pass" type="password" placeholder="Password" style="width:80px;font-size:13px;">
-        <button id="mock-login-btn" style="font-size:13px;">Login</button>
-        <button id="mock-logout-btn" style="font-size:13px;display:none;">Logout</button>
-      </div>
-      <div id="auth-status-row" style="color:#0a0;font-weight:bold;display:none;">Login exitoso</div>
+    
+    <!-- Indicador de estado de usuario -->
+    <div id="user-status" style="position:fixed;top:10px;right:10px;z-index:9999;background:rgba(255,255,255,0.9);padding:8px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:13px;display:none;">
+        <i class="fas fa-user me-1"></i>
+        <span id="user-info">Cargando...</span>
+        <button id="logout-btn" class="btn btn-sm btn-outline-danger ms-2" style="font-size:11px;padding:2px 8px;">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
     </div>
     <script>
-      // Mostrar deviceId
-      function updateDeviceIdUI() {
-        const el = document.getElementById('device-id-value');
-        if (window.deviceId) el.textContent = window.deviceId;
-      }
-      document.addEventListener('DOMContentLoaded', updateDeviceIdUI);
-      setTimeout(updateDeviceIdUI, 500);
-
-      // Login/logout mock
-      const loginBtn = document.getElementById('mock-login-btn');
-      const logoutBtn = document.getElementById('mock-logout-btn');
-      const emailInput = document.getElementById('mock-email');
-      const passInput = document.getElementById('mock-pass');
-      const statusRow = document.getElementById('auth-status-row');
-      function updateAuthUI() {
-        if (window.authSystem && window.authSystem.isAuthenticated) {
-          loginBtn.style.display = 'none';
-          logoutBtn.style.display = '';
-          statusRow.style.display = '';
-          statusRow.textContent = 'Login exitoso (' + (window.authSystem.user?.email || '') + ')';
-        } else {
-          loginBtn.style.display = '';
-          logoutBtn.style.display = 'none';
-          statusRow.style.display = 'none';
+      // 🔒 FUNCIÓN GLOBAL PARA PROTEGER FUNCIONES PREMIUM
+      window.requirePremium = function(featureName = 'esta función') {
+        if (!window.freemiumAuth || !window.freemiumAuth.isAuthenticated()) {
+          alert('⚠️ Necesitas iniciar sesión para usar ' + featureName);
+          return false;
         }
-      }
-      loginBtn.onclick = function() {
-        if (window.authSystem) {
-          window.authSystem.login(emailInput.value, passInput.value);
-          updateAuthUI();
+        
+        const user = window.freemiumAuth.getCurrentUser();
+        if (!user?.isPremium) {
+          // Mostrar modal de upgrade
+          if (window.premiumUI) {
+            window.premiumUI.showUpgradeModal();
+          } else {
+            alert('⭐ ' + featureName + ' es una función Premium.\n\n🔥 Actualiza tu cuenta para acceder a todas las funciones avanzadas.');
+          }
+          return false;
         }
+        
+        return true;
       };
-      logoutBtn.onclick = function() {
-        if (window.authSystem) {
-          window.authSystem.logout();
-          updateAuthUI();
-        }
+      
+      // 🎯 FUNCIONES DE EJEMPLO PARA PROTEGER CARACTERÍSTICAS PREMIUM
+      window.enableAdvancedAnimation = function() {
+        if (!window.requirePremium('animaciones avanzadas')) return;
+        console.log('✅ Función premium habilitada: Animaciones avanzadas');
+        // Aquí iría la lógica de animaciones avanzadas
       };
-      setTimeout(updateAuthUI, 500);
+      
+      window.enableAdvancedSharing = function() {
+        if (!window.requirePremium('compartir avanzado')) return;
+        console.log('✅ Función premium habilitada: Compartir avanzado');
+        // Aquí iría la lógica de compartir avanzado
+      };
+      
+      window.enableAdvancedTactics = function() {
+        if (!window.requirePremium('tácticas avanzadas')) return;
+        console.log('✅ Función premium habilitada: Tácticas avanzadas');
+        // Aquí iría la lógica de tácticas avanzadas
+      };
     </script>
     <script type="module">
         import ShareManager from './js/shareManager.js';

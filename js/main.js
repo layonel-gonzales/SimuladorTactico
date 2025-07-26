@@ -90,10 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Función global para comunicación con UIManager y BallDrawingManager
     window.main = {
         setBallDragStarted: function(isDragging) {
-            // Notificar al gestor de dibujo de estelas
-            if (ballDrawingManager) {
-                ballDrawingManager.setBallDragStarted(isDragging);
-            }
+            // Esta función se sobrescribirá después de que ballDrawingManager esté inicializado
+            console.warn('setBallDragStarted llamado antes de inicializar ballDrawingManager');
         }
     };
 
@@ -160,6 +158,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         isDrawingMode: false
     };
     
+    // EXPONER el estado globalmente para que otros módulos puedan acceder
+    window.main = window.main || {};
+    window.main.state = state;
+    
     // Solo asegurar el balón, no cargar jugadores por defecto
     ensureBallInPlayers();
     
@@ -177,6 +179,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // NUEVO: Gestores especializados para las dos funcionalidades principales
     const ballDrawingManager = new BallDrawingManager('drawing-canvas', () => state.activePlayers);
+    
+    // EXPONER ballDrawingManager después de su inicialización
+    window.main.ballDrawingManager = ballDrawingManager;
+    
+    // SOBRESCRIBIR la función setBallDragStarted con la implementación correcta
+    window.main.setBallDragStarted = function(isDragging) {
+        // Notificar al gestor de dibujo de estelas
+        if (ballDrawingManager) {
+            ballDrawingManager.setBallDragStarted(isDragging);
+        }
+    };
     
     // CRÍTICO: Conectar ambos managers para coordinación mutua
     ballDrawingManager.drawingManager = drawingManager;
@@ -673,6 +686,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.fullscreenManager = fullscreenManager;
     window.modeManager = modeManager; // También hacer disponible el modeManager
     
+    // NUEVA: Función de debugging simplificada
+    window.debugCanvasState = function() {
+        console.log('=== DEBUGGING CANVAS STATE ===');
+        console.log('Drawing Manager:', {
+            enabled: drawingManager.enabled,
+            deleteLineMode: drawingManager.deleteLineMode,
+            lines: drawingManager.lines?.length || 0,
+            canvasSize: `${drawingManager.canvas.width}x${drawingManager.canvas.height}`,
+            canvasStyle: `${drawingManager.canvas.style.width} x ${drawingManager.canvas.style.height}`,
+            pointerEvents: drawingManager.canvas.style.pointerEvents
+        });
+        console.log('Ball Drawing Manager:', {
+            enabled: ballDrawingManager.enabled,
+            ballPath: ballDrawingManager.ballPath?.length || 0,
+            canvasSize: `${ballDrawingManager.canvas.width}x${ballDrawingManager.canvas.height}`,
+            canvasStyle: `${ballDrawingManager.canvas.style.width} x ${ballDrawingManager.canvas.style.height}`,
+            pointerEvents: ballDrawingManager.canvas.style.pointerEvents
+        });
+        console.log('Mode Manager:', {
+            currentMode: modeManager.currentMode
+        });
+        console.log('===============================');
+    };
+    
     console.log('[Main] 🖥️ Fullscreen Manager inicializado');
+    console.log('[Main] 🐛 Debug function available: window.debugCanvasState()');
 // Fin del bloque DOMContentLoaded
 });

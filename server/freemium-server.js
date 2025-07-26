@@ -26,7 +26,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'simulador_tactico_secret_2025';
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('./')); // Servir desde el directorio raíz del proyecto
 
 // Rate limiting
 const limiter = rateLimit({

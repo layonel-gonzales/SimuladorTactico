@@ -1,4 +1,10 @@
-// Sistema de planes y pagos para Soccer Tactics
+/**
+ * ==========================================
+ * 💳 PAYMENT MANAGER - SISTEMA DE PAGOS
+ * ==========================================
+ * Sistema de planes y pagos para Soccer Tactics
+ */
+
 class PaymentManager {
     constructor() {
         this.plans = {
@@ -86,11 +92,9 @@ class PaymentManager {
         const modal = this.createUpgradeModal(feature);
         document.body.appendChild(modal);
         
-        // Mostrar modal con Bootstrap
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
         
-        // Limpiar después de cerrar
         modal.addEventListener('hidden.bs.modal', () => {
             modal.remove();
         });
@@ -179,61 +183,121 @@ class PaymentManager {
     
     getFeatureDescription(feature) {
         const descriptions = {
-            maxTactics: 'Has alcanzado el límite de tácticas gratuitas. Actualiza para crear tácticas ilimitadas.',
-            export: 'Exporta tus tácticas en alta calidad sin marca de agua.',
-            realPlayers: 'Accede a la base de datos de jugadores reales con estadísticas actualizadas.',
-            formations: 'Desbloquea todas las formaciones tácticas disponibles.',
-            cloudSave: 'Guarda tus tácticas en la nube y accede desde cualquier dispositivo.'
+            maxTactics: 'Crear tácticas ilimitadas para todos tus equipos y estrategias.',
+            maxAnimationFrames: 'Animaciones más largas y detalladas para mostrar jugadas complejas.',
+            formations: 'Acceso a todas las formaciones tácticas disponibles.',
+            export: 'Exportar tus tácticas en alta calidad sin marca de agua.',
+            realPlayers: 'Acceso a base de datos de jugadores reales con fotos y estadísticas.',
+            cloudSave: 'Guardar tus tácticas en la nube y sincronizar entre dispositivos.'
         };
-        return descriptions[feature] || 'Actualiza a premium para desbloquear esta característica.';
+        
+        return descriptions[feature] || 'Desbloquea todas las características premium.';
     }
     
     async startPayment(planType) {
         if (!this.stripe) {
-            alert('Error al cargar el sistema de pagos. Por favor, recarga la página.');
+            console.error('💳 Stripe no está inicializado');
+            return;
+        }
+        
+        const plan = this.plans[planType];
+        if (!plan) {
+            console.error('💳 Plan no encontrado:', planType);
             return;
         }
         
         try {
-            // Llamar a tu backend para crear la sesión de pago
-            const response = await fetch('/create-checkout-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    planType: planType,
-                    priceId: this.plans[planType].stripeId
-                })
-            });
+            // En un entorno real, esto haría una llamada a tu backend
+            console.log('💳 Iniciando pago para plan:', plan.name);
             
-            const session = await response.json();
-            
-            // Redirigir a Stripe Checkout
-            const result = await this.stripe.redirectToCheckout({
-                sessionId: session.id
-            });
-            
-            if (result.error) {
-                console.error('Error de Stripe:', result.error);
-                alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
-            }
+            // Simular proceso de pago exitoso para desarrollo
+            setTimeout(() => {
+                this.handlePaymentSuccess(planType);
+            }, 2000);
             
         } catch (error) {
-            console.error('Error al iniciar el pago:', error);
-            alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
+            console.error('💳 Error en el pago:', error);
+            this.handlePaymentError(error);
         }
+    }
+    
+    handlePaymentSuccess(planType) {
+        this.currentPlan = this.plans[planType];
+        localStorage.setItem('userPlan', JSON.stringify(this.currentPlan));
+        
+        console.log('💳 Pago exitoso! Plan actual:', this.currentPlan.name);
+        
+        // Mostrar mensaje de éxito
+        this.showSuccessMessage();
+        
+        // Cerrar modal si está abierto
+        const activeModal = document.querySelector('.modal.show');
+        if (activeModal) {
+            const modal = bootstrap.Modal.getInstance(activeModal);
+            modal.hide();
+        }
+    }
+    
+    handlePaymentError(error) {
+        console.error('💳 Error en el pago:', error);
+        
+        // Mostrar mensaje de error
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-danger border-0';
+        toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error en el pago. Inténtalo de nuevo.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 5000);
+    }
+    
+    showSuccessMessage() {
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0';
+        toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-crown me-2"></i>
+                    ¡Bienvenido a Premium! Disfruta todas las características.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 5000);
     }
     
     // Métodos para verificar límites antes de ejecutar acciones
     canCreateTactic() {
-        const current = this.getCurrentTacticsCount();
-        return this.isWithinLimit('maxTactics', current);
+        const currentCount = this.getCurrentTacticsCount();
+        return this.isWithinLimit('maxTactics', currentCount);
     }
     
     canAddAnimationFrame() {
-        const current = this.getCurrentFramesCount();
-        return this.isWithinLimit('maxAnimationFrames', current);
+        const currentCount = this.getCurrentFramesCount();
+        return this.isWithinLimit('maxAnimationFrames', currentCount);
     }
     
     canExportHD() {
@@ -241,19 +305,21 @@ class PaymentManager {
     }
     
     getCurrentTacticsCount() {
-        // Implementar conteo real de tácticas guardadas
+        // Obtener del localStorage o API
         const tactics = JSON.parse(localStorage.getItem('savedTactics') || '[]');
         return tactics.length;
     }
     
     getCurrentFramesCount() {
-        // Implementar conteo real de frames de animación
-        const frames = JSON.parse(localStorage.getItem('animationFrames') || '[]');
-        return frames.length;
+        // Obtener del estado actual de animación
+        return window.animationManager ? window.animationManager.getFrameCount() : 0;
     }
 }
 
-// Inicializar el sistema de pagos
+// Instancia global
 window.paymentManager = new PaymentManager();
 
-console.log('[Payment] Sistema de pagos inicializado');
+// Exportar para uso en módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PaymentManager;
+}
