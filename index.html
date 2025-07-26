@@ -283,6 +283,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     
     <!-- FREEMIUM SYSTEM STYLES -->
     <link rel="stylesheet" href="css/freemium-styles.css">
+    
+    <!-- PWA ADVANCED STYLES -->
+    <link rel="stylesheet" href="css/pwa-styles.css">
 </head>
 <body>
     <!-- Toggle de tema claro/oscuro -->
@@ -783,6 +786,22 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script src="js/paymentManager.js"></script>
     <script src="js/freemiumController.js"></script>
     <script src="js/freemiumTutorial.js"></script>
+    
+    <!-- PWA ADVANCED SCRIPTS -->
+    <script src="js/pwaManager.js"></script>
+    <script src="js/pwaIntegration.js"></script>
+    
+    <!-- PWA VERIFICATION (Development Only) -->
+    <script>
+        // Solo cargar verificación en modo desarrollo
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' ||
+            window.location.search.includes('dev=true')) {
+            const script = document.createElement('script');
+            script.src = 'js/pwaVerification.js';
+            document.head.appendChild(script);
+        }
+    </script>
     
     <script type="module" src="js/main.js"></script>
     

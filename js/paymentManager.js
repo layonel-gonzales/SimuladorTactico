@@ -65,40 +65,29 @@ class PaymentManager {
             console.error('[PaymentManager] ❌ Error en inicialización:', error);
         }
     }
-            },
-            pro: {
-                name: 'Pro',
-                price: 19.99,
-                stripeId: 'price_pro_monthly',
-                features: {
-                    // Todo lo de Premium +
-                    maxLines: -1,
-                    maxTactics: -1,
-                    maxAnimationDuration: -1,       // Sin límites
-                    maxAnimationFrames: -1,
-                    maxAnimations: -1,
-                    formations: 'all',
-                    colors: 'all',
-                    lineWidths: 'all',
-                    export: 'hd',
-                    audioRecording: true,
-                    jsonExport: true,
-                    cloudSync: true,
-                    socialShare: true,
-                    multipleTeams: true,            // NUEVO: Múltiples equipos
-                    analytics: true,                // NUEVO: Dashboard analytics
-                    collaboration: 5,               // NUEVO: 5 usuarios simultáneos
-                    apiAccess: true,                // NUEVO: API access
-                    prioritySupport: true,          // NUEVO: Soporte prioritario
-                    whiteLabel: true,               // NUEVO: Marca personalizada
-                    maxDevices: -1                  // Ilimitado
-                }
+
+    async loadStripe() {
+        try {
+            if (!window.Stripe) {
+                const script = document.createElement('script');
+                script.src = 'https://js.stripe.com/v3/';
+                script.async = true;
+                document.head.appendChild(script);
+                
+                await new Promise((resolve) => {
+                    script.onload = resolve;
+                });
             }
-        };
-        
-        this.currentPlan = this.loadUserPlan();
-        this.stripe = null;
-        this.initStripe();
+            
+            // Inicializar Stripe con la clave correcta
+            const stripeKey = this.isTestMode ? this.config.publicKeys.test : this.config.publicKeys.live;
+            this.stripe = Stripe(stripeKey);
+            
+            console.log(`[PaymentManager] ✅ Stripe inicializado en modo ${this.isTestMode ? 'TEST' : 'PRODUCCIÓN'}`);
+            
+        } catch (error) {
+            console.error('[PaymentManager] ❌ Error cargando Stripe:', error);
+        }
     }
     
     async initStripe() {
@@ -360,6 +349,113 @@ class PaymentManager {
     getCurrentFramesCount() {
         // Obtener del estado actual de animación
         return window.animationManager ? window.animationManager.getFrameCount() : 0;
+    }
+    
+    // ==========================================
+    // MÉTODOS REQUERIDOS POR FREEMIUM CONTROLLER
+    // ==========================================
+    
+    setupPaymentElements() {
+        try {
+            // console.log('[PaymentManager] 🔧 Configurando elementos de pago...');
+            
+            // Crear botones de upgrade si no existen
+            this.createUpgradeButtons();
+            
+            // Configurar eventos
+            this.setupPaymentEvents();
+            
+            // console.log('[PaymentManager] ✅ Elementos de pago configurados');
+            
+        } catch (error) {
+            console.error('[PaymentManager] ❌ Error configurando elementos:', error);
+        }
+    }
+    
+    async getCurrentUserPlan() {
+        try {
+            // Verificar plan actual desde localStorage o API
+            const savedPlan = localStorage.getItem('userPlan');
+            if (savedPlan) {
+                const planData = JSON.parse(savedPlan);
+                return {
+                    name: planData.name || 'free',
+                    ...planData
+                };
+            }
+            
+            // Plan por defecto
+            return {
+                name: 'free',
+                type: 'free',
+                features: {
+                    maxTactics: 3,
+                    maxAnimationFrames: 10,
+                    export: false,
+                    watermark: true
+                }
+            };
+            
+        } catch (error) {
+            console.error('[PaymentManager] ❌ Error obteniendo plan del usuario:', error);
+            return { name: 'free', type: 'free' };
+        }
+    }
+    
+    createUpgradeButtons() {
+        // Crear botones de upgrade en las interfaces necesarias
+        const upgradeButton = document.createElement('button');
+        upgradeButton.className = 'btn btn-warning btn-sm ms-2';
+        upgradeButton.innerHTML = '<i class="fas fa-crown"></i> Upgrade';
+        upgradeButton.onclick = () => this.showUpgradeModal('general');
+        
+        // Agregar a la toolbar si existe
+        const toolbar = document.querySelector('.toolbar');
+        if (toolbar && !toolbar.querySelector('.upgrade-btn')) {
+            upgradeButton.classList.add('upgrade-btn');
+            toolbar.appendChild(upgradeButton);
+        }
+    }
+    
+    setupPaymentEvents() {
+        // Configurar eventos globales para el sistema de pagos
+        document.addEventListener('paymentRequired', (event) => {
+            this.showUpgradeModal(event.detail.feature);
+        });
+        
+        document.addEventListener('planChanged', (event) => {
+            this.currentPlan = event.detail.plan;
+            this.updateUI();
+        });
+    }
+    
+    updateUI() {
+        // Actualizar la interfaz según el plan actual
+        // console.log('[PaymentManager] 🔄 Actualizando UI para plan:', this.currentPlan?.name);
+    }
+    
+    showTestModeIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'test-mode-indicator';
+        indicator.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show position-fixed" 
+                 style="top: 10px; right: 10px; z-index: 9999; max-width: 300px;">
+                <i class="fas fa-flask"></i>
+                <strong>Modo Test</strong><br>
+                Pagos simulados activos
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.appendChild(indicator);
+        
+        // Auto-ocultar después de 5 segundos
+        setTimeout(() => {
+            const alert = indicator.querySelector('.alert');
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
     }
 }
 

@@ -1,0 +1,217 @@
+{
+  "name": "Simulador Táctico - Entrenador Profesional",
+  "short_name": "TacticPro",
+  "description": "Crea animaciones tácticas profesionales de fútbol y otros deportes. Herramienta esencial para entrenadores.",
+  "version": "2.0.0",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1a73e8",
+  "background_color": "#ffffff",
+  "lang": "es",
+  "dir": "ltr",
+  
+  "icons": [
+    {
+      "src": "img/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "img/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Editor táctico principal en desktop"
+    },
+    {
+      "src": "img/screenshot-mobile.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Editor táctico optimizado para móvil"
+    }
+  ],
+
+  "categories": [
+    "sports",
+    "education", 
+    "productivity",
+    "utilities"
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Nueva Táctica",
+      "short_name": "Nueva",
+      "description": "Crear una nueva táctica rápidamente",
+      "url": "/?action=new-tactic",
+      "icons": [
+        {
+          "src": "img/icon-new-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mis Tácticas",
+      "short_name": "Tácticas",
+      "description": "Ver tácticas guardadas",
+      "url": "/?action=my-tactics",
+      "icons": [
+        {
+          "src": "img/icon-folder-192.png",
+          "sizes": "192x192", 
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Modo Colaborativo",
+      "short_name": "Colaborar",
+      "description": "Trabajar en equipo en tiempo real",
+      "url": "/?action=collaborate",
+      "icons": [
+        {
+          "src": "img/icon-team-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Panel Admin",
+      "short_name": "Admin",
+      "description": "Acceso rápido al panel de administración",
+      "url": "/admin-panel.html",
+      "icons": [
+        {
+          "src": "img/icon-admin-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "tactic_file",
+          "accept": ["application/json", "image/*", "video/*"]
+        }
+      ]
+    }
+  },
+
+  "file_handlers": [
+    {
+      "action": "/open-tactic",
+      "accept": {
+        "application/json": [".tactic", ".json"],
+        "application/x-tactic": [".tactic"]
+      },
+      "icons": [
+        {
+          "src": "img/icon-file-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+
+  "protocol_handlers": [
+    {
+      "protocol": "web+tactic",
+      "url": "/open?url=%s"
+    }
+  ],
+
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+
+  "handle_links": "preferred",
+
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.tacticpro.app",
+      "id": "com.tacticpro.app"
+    },
+    {
+      "platform": "itunes", 
+      "url": "https://apps.apple.com/app/tacticpro/id123456789"
+    }
+  ],
+
+  "prefer_related_applications": false,
+
+  "display_override": [
+    "window-controls-overlay",
+    "minimal-ui",
+    "standalone",
+    "browser"
+  ]
+}

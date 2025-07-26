@@ -29,11 +29,11 @@ class FreemiumConfigManager {
     
     async loadConfig() {
         try {
-            console.log('[FreemiumConfigManager] Cargando configuración...');
+            // console.log('[FreemiumConfigManager] Cargando configuración...');
             
             // Verificar si necesitamos recargar
             if (this.isConfigCacheValid()) {
-                console.log('[FreemiumConfigManager] Usando configuración en caché');
+                // console.log('[FreemiumConfigManager] Usando configuración en caché');
                 return this.config;
             }
             
@@ -43,12 +43,12 @@ class FreemiumConfigManager {
                 response = await fetch('/api/config');
                 if (response.ok) {
                     this.config = await response.json();
-                    console.log('[FreemiumConfigManager] Configuración cargada desde servidor');
+                    console.log('[FreemiumConfigManager] ✅ Configuración cargada desde servidor');
                 } else {
                     throw new Error(`Server response: ${response.status}`);
                 }
             } catch (serverError) {
-                console.warn('[FreemiumConfigManager] Error del servidor, intentando archivo local:', serverError.message);
+                // console.warn('[FreemiumConfigManager] Error del servidor, intentando archivo local:', serverError.message);
                 
                 // Fallback al archivo local
                 response = await fetch(this.configPath);
@@ -56,18 +56,18 @@ class FreemiumConfigManager {
                     throw new Error(`Error loading local config: ${response.status}`);
                 }
                 this.config = await response.json();
-                console.log('[FreemiumConfigManager] Configuración cargada desde archivo local');
+                console.log('[FreemiumConfigManager] ✅ Configuración cargada desde archivo local');
             }
             
             this.isLoaded = true;
             this.lastLoadTime = Date.now();
             
-            console.log('[FreemiumConfigManager] Configuración cargada:', {
-                version: this.config.version,
-                lastUpdated: this.config.lastUpdated,
-                plans: Object.keys(this.config.plans).length,
-                source: response.url.includes('/api/') ? 'servidor' : 'local'
-            });
+            // console.log('[FreemiumConfigManager] Configuración cargada:', {
+            //     version: this.config.version,
+            //     lastUpdated: this.config.lastUpdated,
+            //     plans: Object.keys(this.config.plans).length,
+            //     source: response.url.includes('/api/') ? 'servidor' : 'local'
+            // });
             
             // Validar configuración
             this.validateConfig();
@@ -171,6 +171,39 @@ class FreemiumConfigManager {
     async getPlanFeatureValue(planName, featureName) {
         const feature = await this.getPlanFeature(planName, featureName);
         return feature ? feature.value : null;
+    }
+    
+    async getCurrentUserPlan() {
+        try {
+            // Verificar localStorage primero
+            const savedPlan = localStorage.getItem('userPlan');
+            if (savedPlan) {
+                const planData = JSON.parse(savedPlan);
+                return {
+                    name: planData.name || 'free',
+                    ...planData
+                };
+            }
+            
+            // Si no hay plan guardado, verificar autenticación
+            if (window.authSystem && window.authSystem.getCurrentUser) {
+                const user = window.authSystem.getCurrentUser();
+                if (user && user.plan) {
+                    return await this.getPlan(user.plan);
+                }
+            }
+            
+            // Plan por defecto
+            const freePlan = await this.getPlan('free');
+            return {
+                name: 'free',
+                ...freePlan
+            };
+            
+        } catch (error) {
+            console.error('[FreemiumConfigManager] ❌ Error obteniendo plan del usuario:', error);
+            return await this.getPlan('free'); // Fallback seguro
+        }
     }
     
     // ==========================================

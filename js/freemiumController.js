@@ -18,35 +18,27 @@ class FreemiumController {
     }
     
     async init() {
-        console.log('[FreemiumController] Inicializando...');
+        // console.log('[FreemiumController] Inicializando...');
         await this.loadUserPlan();
         this.setupLimitationChecks();
         this.setupProgressIndicators();
-        console.log('[FreemiumController] Plan del usuario:', this.userPlan?.name);
+        console.log('[FreemiumController] ✅ Plan del usuario:', this.userPlan?.name || 'free');
     }
     
     async loadUserPlan() {
         try {
-            console.log('[FreemiumController] Cargando plan del usuario...');
+            // console.log('[FreemiumController] Cargando plan del usuario...');
             
             // Primero verificar si tenemos el config manager
             if (window.freemiumConfigManager) {
                 await freemiumConfigManager.loadConfig();
                 
-                // Obtener plan del usuario desde el paymentManager o autenticación
-                let userPlanName = 'free'; // Por defecto
-                
-                if (window.paymentManager) {
-                    const currentPlan = await paymentManager.getCurrentUserPlan();
-                    userPlanName = currentPlan?.name || 'free';
-                }
-                
-                // Cargar datos del plan desde la configuración dinámica
-                const planData = await freemiumConfigManager.getPlan(userPlanName);
+                // Obtener plan del usuario desde el config manager
+                const currentPlan = await freemiumConfigManager.getCurrentUserPlan();
                 
                 this.userPlan = {
-                    name: userPlanName,
-                    ...planData
+                    name: currentPlan.name || 'free',
+                    ...currentPlan
                 };
                 
                 console.log('[FreemiumController] Plan cargado desde configuración dinámica:', this.userPlan);
