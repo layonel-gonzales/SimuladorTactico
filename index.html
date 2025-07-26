@@ -115,6 +115,29 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
             }
             
             console.log('🎯 Interfaz configurada para usuario:', userEmail);
+            
+            // Mostrar panel de desarrollador si está en modo desarrollo
+            showDevPanelIfDevelopment();
+        }
+        
+        function showDevPanelIfDevelopment() {
+            // Mostrar solo si está en localhost o modo desarrollo
+            const isDevelopment = window.location.hostname === 'localhost' || 
+                                window.location.hostname === '127.0.0.1' ||
+                                window.location.search.includes('dev=true');
+            
+            if (isDevelopment) {
+                const devPanel = document.getElementById('dev-panel-access');
+                if (devPanel) {
+                    devPanel.style.display = 'block';
+                    console.log('🛠️ Panel de desarrollador disponible');
+                }
+            }
+        }
+        
+        function openDevPanel() {
+            console.log('🛠️ Abriendo panel de desarrollador...');
+            window.open('/dev-panel.html', 'DevPanel', 'width=1400,height=900,scrollbars=yes,resizable=yes');
         }
     </script>
     
@@ -257,6 +280,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <link rel="apple-touch-icon" sizes="180x180" href="img/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/icon-192.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/icon-192.png">
+    
+    <!-- FREEMIUM SYSTEM STYLES -->
+    <link rel="stylesheet" href="css/freemium-styles.css">
 </head>
 <body>
     <!-- Toggle de tema claro/oscuro -->
@@ -752,6 +778,12 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <!-- Player Card Manager para gestión unificada de cards -->
     <script src="js/playerCardManager.js"></script>
     
+    <!-- FREEMIUM SYSTEM -->
+    <script src="js/freemiumConfigManager.js"></script>
+    <script src="js/paymentManager.js"></script>
+    <script src="js/freemiumController.js"></script>
+    <script src="js/freemiumTutorial.js"></script>
+    
     <script type="module" src="js/main.js"></script>
     
     <!-- Indicador de estado de usuario -->
@@ -760,6 +792,13 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         <span id="user-info">Cargando...</span>
         <button id="logout-btn" class="btn btn-sm btn-outline-danger ms-2" style="font-size:11px;padding:2px 8px;">
             <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+    
+    <!-- Panel de Desarrollador (solo en modo desarrollo) -->
+    <div id="dev-panel-access" style="position:fixed;top:10px;left:10px;z-index:9999;background:rgba(40,44,52,0.95);padding:8px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:13px;display:none;">
+        <button id="dev-panel-btn" class="btn btn-sm btn-outline-warning" style="font-size:11px;padding:2px 8px;color:#f39c12;border-color:#f39c12;" onclick="openDevPanel()">
+            <i class="fas fa-code me-1"></i>Dev Panel
         </button>
     </div>
     <script>

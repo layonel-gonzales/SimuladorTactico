@@ -1,0 +1,360 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-26T00:00:00.000Z",
+  "plans": {
+    "free": {
+      "name": "Gratuito",
+      "price": 0,
+      "description": "Plan básico para usuarios nuevos",
+      "features": {
+        "maxLines": {
+          "value": 5,
+          "description": "Máximo número de líneas por táctica",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxPlayers": {
+          "value": 11,
+          "description": "Máximo número de jugadores en el campo",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxAnimationDuration": {
+          "value": 10,
+          "description": "Duración máxima de animaciones en segundos",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxAnimationFrames": {
+          "value": 5,
+          "description": "Máximo número de frames en animaciones",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxSimultaneousAnimations": {
+          "value": 1,
+          "description": "Máximo número de animaciones simultáneas",
+          "type": "number",
+          "category": "animation"
+        },
+        "formations": {
+          "value": ["4-4-2", "4-3-3"],
+          "description": "Formaciones disponibles para cargar jugadores",
+          "type": "array",
+          "category": "tactical"
+        },
+        "colors": {
+          "value": ["#ff0000", "#0000ff", "#00ff00"],
+          "description": "Colores disponibles para dibujo",
+          "type": "array",
+          "category": "drawing"
+        },
+        "lineWidths": {
+          "value": [6],
+          "description": "Grosores de línea disponibles",
+          "type": "array",
+          "category": "drawing"
+        },
+        "export": {
+          "value": "watermark",
+          "description": "Tipo de exportación (watermark/hd)",
+          "type": "string",
+          "category": "export"
+        },
+        "audioRecording": {
+          "value": false,
+          "description": "Capacidad de grabar audio",
+          "type": "boolean",
+          "category": "animation"
+        },
+        "jsonExport": {
+          "value": false,
+          "description": "Exportación en formato JSON",
+          "type": "boolean",
+          "category": "export"
+        },
+        "cloudSync": {
+          "value": false,
+          "description": "Sincronización en la nube",
+          "type": "boolean",
+          "category": "storage"
+        },
+        "socialShare": {
+          "value": false,
+          "description": "Compartir directo en redes sociales",
+          "type": "boolean",
+          "category": "export"
+        },
+        "maxDevices": {
+          "value": 3,
+          "description": "Máximo número de dispositivos por cuenta",
+          "type": "number",
+          "category": "account"
+        }
+      }
+    },
+    "premium": {
+      "name": "Premium",
+      "price": 9.99,
+      "description": "Plan completo para usuarios regulares",
+      "features": {
+        "maxLines": {
+          "value": -1,
+          "description": "Líneas ilimitadas",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxPlayers": {
+          "value": 22,
+          "description": "Máximo número de jugadores en el campo",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxAnimationDuration": {
+          "value": 120,
+          "description": "Duración máxima de animaciones en segundos",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxAnimationFrames": {
+          "value": -1,
+          "description": "Frames ilimitados",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxSimultaneousAnimations": {
+          "value": -1,
+          "description": "Animaciones simultáneas ilimitadas",
+          "type": "number",
+          "category": "animation"
+        },
+        "formations": {
+          "value": ["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "5-3-2", "3-4-3", "4-1-4-1", "3-4-2-1", "5-4-1", "4-5-1"],
+          "description": "Todas las formaciones disponibles para cargar jugadores",
+          "type": "array",
+          "category": "tactical"
+        },
+        "colors": {
+          "value": ["#ff0000", "#0000ff", "#00ff00", "#ffff00", "#ff00ff", "#00ffff", "#ffffff", "#000000", "#808080", "#800000", "#008000", "#000080", "#800080", "#008080", "#ffa500"],
+          "description": "Paleta completa de colores para dibujo",
+          "type": "array",
+          "category": "drawing"
+        },
+          "category": "drawing"
+        },
+        "lineWidths": {
+          "value": "all",
+          "description": "Todos los grosores disponibles",
+          "type": "string",
+          "category": "drawing"
+        },
+        "export": {
+          "value": "hd",
+          "description": "Exportación sin marca de agua",
+          "type": "string",
+          "category": "export"
+        },
+        "audioRecording": {
+          "value": true,
+          "description": "Grabación de audio profesional",
+          "type": "boolean",
+          "category": "animation"
+        },
+        "jsonExport": {
+          "value": true,
+          "description": "Exportación JSON completa",
+          "type": "boolean",
+          "category": "export"
+        },
+        "cloudSync": {
+          "value": true,
+          "description": "Sincronización automática",
+          "type": "boolean",
+          "category": "storage"
+        },
+        "socialShare": {
+          "value": true,
+          "description": "Compartir directo habilitado",
+          "type": "boolean",
+          "category": "export"
+        },
+        "maxDevices": {
+          "value": 10,
+          "description": "Hasta 10 dispositivos",
+          "type": "number",
+          "category": "account"
+        }
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "price": 19.99,
+      "description": "Plan profesional para entrenadores y clubes",
+      "features": {
+        "maxLines": {
+          "value": -1,
+          "description": "Sin límites de líneas",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxPlayers": {
+          "value": 22,
+          "description": "Máximo número de jugadores en el campo",
+          "type": "number",
+          "category": "drawing"
+        },
+        "maxAnimationDuration": {
+          "value": -1,
+          "description": "Sin límites de duración",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxAnimationFrames": {
+          "value": -1,
+          "description": "Sin límites de frames",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxSimultaneousAnimations": {
+          "value": -1,
+          "description": "Sin límites de animaciones simultáneas",
+          "type": "number",
+          "category": "animation"
+        },
+        "formations": {
+          "value": ["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "5-3-2", "3-4-3", "4-1-4-1", "3-4-2-1", "5-4-1", "4-5-1", "3-3-4", "4-3-2-1", "5-2-3"],
+          "description": "Acceso completo a formaciones para cargar jugadores",
+          "type": "array",
+          "category": "tactical"
+        },
+        "colors": {
+          "value": ["#ff0000", "#0000ff", "#00ff00", "#ffff00", "#ff00ff", "#00ffff", "#ffffff", "#000000", "#808080", "#800000", "#008000", "#000080", "#800080", "#008080", "#ffa500", "#ff69b4", "#9370db", "#87ceeb", "#ffd700", "#32cd32"],
+          "description": "Paleta profesional completa para dibujo",
+          "type": "array",
+          "category": "drawing"
+        },
+        "lineWidths": {
+          "value": "all",
+          "description": "Herramientas avanzadas de dibujo",
+          "type": "string",
+          "category": "drawing"
+        },
+        "export": {
+          "value": "hd",
+          "description": "Exportación profesional",
+          "type": "string",
+          "category": "export"
+        },
+        "audioRecording": {
+          "value": true,
+          "description": "Audio profesional avanzado",
+          "type": "boolean",
+          "category": "animation"
+        },
+        "jsonExport": {
+          "value": true,
+          "description": "Exportación avanzada",
+          "type": "boolean",
+          "category": "export"
+        },
+        "cloudSync": {
+          "value": true,
+          "description": "Sincronización profesional",
+          "type": "boolean",
+          "category": "storage"
+        },
+        "socialShare": {
+          "value": true,
+          "description": "Compartir profesional",
+          "type": "boolean",
+          "category": "export"
+        },
+        "maxDevices": {
+          "value": -1,
+          "description": "Dispositivos ilimitados",
+          "type": "number",
+          "category": "account"
+        },
+        "multipleTeams": {
+          "value": true,
+          "description": "Gestión de múltiples equipos",
+          "type": "boolean",
+          "category": "professional"
+        },
+        "analytics": {
+          "value": true,
+          "description": "Dashboard de analytics",
+          "type": "boolean",
+          "category": "professional"
+        },
+        "collaboration": {
+          "value": 5,
+          "description": "Colaboración hasta 5 usuarios",
+          "type": "number",
+          "category": "professional"
+        },
+        "apiAccess": {
+          "value": true,
+          "description": "Acceso a API",
+          "type": "boolean",
+          "category": "professional"
+        },
+        "prioritySupport": {
+          "value": true,
+          "description": "Soporte prioritario",
+          "type": "boolean",
+          "category": "professional"
+        },
+        "whiteLabel": {
+          "value": true,
+          "description": "Marca personalizada",
+          "type": "boolean",
+          "category": "professional"
+        }
+      }
+    }
+  },
+  "categories": {
+    "drawing": {
+      "name": "Herramientas de Dibujo",
+      "icon": "🎨",
+      "description": "Limitaciones relacionadas con el sistema de dibujo"
+    },
+    "animation": {
+      "name": "Sistema de Animación",
+      "icon": "🎬",
+      "description": "Limitaciones de videos y animaciones"
+    },
+    "storage": {
+      "name": "Almacenamiento",
+      "icon": "💾",
+      "description": "Limitaciones de guardado y sincronización"
+    },
+    "export": {
+      "name": "Exportación",
+      "icon": "📤",
+      "description": "Limitaciones de exportación y compartir"
+    },
+    "tactical": {
+      "name": "Herramientas Tácticas",
+      "icon": "⚽",
+      "description": "Formaciones y herramientas tácticas"
+    },
+    "account": {
+      "name": "Gestión de Cuenta",
+      "icon": "👤",
+      "description": "Limitaciones de cuenta y dispositivos"
+    },
+    "professional": {
+      "name": "Herramientas Profesionales",
+      "icon": "🏆",
+      "description": "Funciones exclusivas para profesionales"
+    }
+  },
+  "adminSettings": {
+    "allowConfigChanges": true,
+    "requireAdminAuth": true,
+    "logConfigChanges": true,
+    "backupBeforeChanges": true
+  }
+}

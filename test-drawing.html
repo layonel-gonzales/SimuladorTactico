@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Prueba de Limitaciones de Dibujo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background: #f8f9fa; }
+        .test-card { 
+            background: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .limit-indicator {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .limit-reached {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .limit-ok {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .line-counter { 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            margin: 10px 0; 
+        }
+        .color-palette { 
+            display: flex; 
+            gap: 10px; 
+            margin: 10px 0; 
+        }
+        .color-btn { 
+            width: 40px; 
+            height: 40px; 
+            border: 2px solid #ddd; 
+            border-radius: 50%; 
+            cursor: pointer; 
+        }
+        .color-btn.active { 
+            border: 3px solid #000; 
+        }
+        .color-btn.disabled { 
+            opacity: 0.3; 
+            cursor: not-allowed; 
+        }
+        .test-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Prueba de Limitaciones de Dibujo</h1>
+        <p class="lead">Esta página te permite probar específicamente las limitaciones de dibujo del sistema freemium.</p>
+        
+        <!-- Estado Actual -->
+        <div class="test-card">
+            <h3>📊 Estado Actual del Sistema</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="plan-status" class="limit-indicator">
+                        <strong>Plan Actual:</strong> <span id="current-plan">Cargando...</span>
+                    </div>
+                    <div id="lines-status" class="limit-indicator">
+                        <strong>Líneas:</strong> <span id="lines-count">0</span> / <span id="max-lines">0</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="colors-status" class="limit-indicator">
+                        <strong>Colores Disponibles:</strong> <span id="colors-count">0</span>
+                    </div>
+                    <div id="system-status" class="limit-indicator">
+                        <strong>Sistema Freemium:</strong> <span id="freemium-status">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pruebas de Líneas -->
+        <div class="test-card">
+            <h3>📏 Prueba de Límite de Líneas</h3>
+            <p>El plan gratuito permite máximo <strong>5 líneas</strong>. Vamos a probar qué pasa cuando intentas dibujar más.</p>
+            
+            <div class="line-counter" id="line-counter">Líneas dibujadas: 0 / 5</div>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="testDrawLine()">➕ Dibujar Línea</button>
+                <button class="btn btn-warning" onclick="testMaxLines()">🔥 Probar Límite (Dibujar 6 líneas)</button>
+                <button class="btn btn-secondary" onclick="resetLines()">🔄 Resetear Líneas</button>
+            </div>
+            
+            <div id="line-test-log" class="test-log"></div>
+        </div>
+        
+        <!-- Pruebas de Colores -->
+        <div class="test-card">
+            <h3>🎨 Prueba de Límite de Colores</h3>
+            <p>El plan gratuito tiene solo <strong>3 colores</strong> disponibles. Los colores premium deberían estar bloqueados.</p>
+            
+            <div class="color-palette" id="color-palette">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="testColorLimits()">🧪 Probar Colores Disponibles</button>
+                <button class="btn btn-warning" onclick="testPremiumColors()">💎 Intentar Colores Premium</button>
+            </div>
+            
+            <div id="color-test-log" class="test-log"></div>
+        </div>
+        
+        <!-- Pruebas de Formaciones -->
+        <div class="test-card">
+            <h3>⚽ Prueba de Formaciones para Carga de Jugadores</h3>
+            <p>El plan gratuito solo permite <strong>2 formaciones</strong>: 4-4-2 y 4-3-3 para cargar jugadores.</p>
+            
+            <div id="formations-list">
+                <!-- Se llenará dinámicamente -->
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="testFormations()">🧪 Probar Formaciones Disponibles</button>
+                <button class="btn btn-warning" onclick="testPremiumFormations()">💎 Intentar Formaciones Premium</button>
+            </div>
+            
+            <div id="formation-test-log" class="test-log"></div>
+        </div>
+        
+        <!-- Pruebas de Modalidad Premium -->
+        <div class="test-card">
+            <h3>💎 Simulación de Upgrade</h3>
+            <p>Prueba qué sucede cuando se alcanza un límite y se muestra el modal de upgrade.</p>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-warning" onclick="triggerUpgradeModal('lines')">⚠️ Modal: Límite de Líneas</button>
+                <button class="btn btn-warning" onclick="triggerUpgradeModal('colors')">⚠️ Modal: Límite de Colores</button>
+                <button class="btn btn-success" onclick="simulatePremiumUpgrade()">💎 Simular Upgrade a Premium</button>
+            </div>
+        </div>
+        
+        <!-- Log General -->
+        <div class="test-card">
+            <h3>📝 Log de Actividades</h3>
+            <button class="btn btn-secondary btn-sm" onclick="clearAllLogs()">🧹 Limpiar Logs</button>
+            <div id="main-log" class="test-log"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/freemiumConfigManager.js"></script>
+    <script src="js/freemiumController.js"></script>
+    <script src="js/paymentManager.js"></script>
+    
+    <script>
+        // ==========================================
+        // VARIABLES GLOBALES
+        // ==========================================
+        
+        let currentLines = 0;
+        let maxLines = 5;
+        let availableColors = [];
+        let availableFormations = [];
+        
+        // ==========================================
+        // FUNCIONES DE LOG
+        // ==========================================
+        
+        function log(message, elementId = 'main-log', type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById(elementId);
+            const color = {
+                'success': '#4ade80',
+                'error': '#f87171',
+                'warning': '#fbbf24',
+                'info': '#60a5fa'
+            }[type] || '#e2e8f0';
+            
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearAllLogs() {
+            ['main-log', 'line-test-log', 'color-test-log', 'formation-test-log'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+        }
+        
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        
+        async function initializeTests() {
+            log('🔧 Inicializando pruebas de dibujo...', 'main-log', 'info');
+            
+            try {
+                // Verificar que los sistemas están cargados
+                if (!window.freemiumController) {
+                    throw new Error('FreemiumController no disponible');
+                }
+                
+                if (!window.freemiumConfigManager) {
+                    throw new Error('FreemiumConfigManager no disponible');
+                }
+                
+                // Esperar a que la configuración se cargue
+                await freemiumConfigManager.loadConfig();
+                
+                // Obtener información del plan actual
+                const plan = freemiumController.getPlanName();
+                maxLines = freemiumController.getMaxLines();
+                const maxColors = freemiumController.getMaxColors();
+                
+                // Actualizar interfaz
+                document.getElementById('current-plan').textContent = plan.toUpperCase();
+                document.getElementById('max-lines').textContent = maxLines;
+                document.getElementById('colors-count').textContent = Array.isArray(maxColors) ? maxColors.length : maxColors;
+                document.getElementById('freemium-status').textContent = '✅ Funcionando';
+                
+                // Obtener colores disponibles
+                if (freemiumConfigManager.config && freemiumConfigManager.config.plans[plan]) {
+                    availableColors = freemiumConfigManager.config.plans[plan].features.colors.value;
+                    availableFormations = freemiumConfigManager.config.plans[plan].features.formations.value;
+                }
+                
+                // Cargar paleta de colores
+                loadColorPalette();
+                loadFormationsList();
+                
+                // Actualizar estado
+                updateUI();
+                
+                log(`✅ Sistema inicializado - Plan: ${plan}, Líneas máx: ${maxLines}`, 'main-log', 'success');
+                
+            } catch (error) {
+                log(`❌ Error inicializando: ${error.message}`, 'main-log', 'error');
+                document.getElementById('freemium-status').textContent = '❌ Error';
+            }
+        }
+        
+        // ==========================================
+        // FUNCIONES DE PRUEBA DE LÍNEAS
+        // ==========================================
+        
+        function testDrawLine() {
+            log('🖊️ Intentando dibujar una línea...', 'line-test-log', 'info');
+            
+            if (freemiumController.canDrawLine()) {
+                currentLines++;
+                log(`✅ Línea ${currentLines} dibujada exitosamente`, 'line-test-log', 'success');
+                updateUI();
+            } else {
+                log(`❌ No se puede dibujar más líneas (límite: ${maxLines})`, 'line-test-log', 'error');
+                // Aquí se debería mostrar el modal de upgrade
+                if (window.freemiumController.showUpgradeModal) {
+                    freemiumController.showUpgradeModal('lines', { current: currentLines, max: maxLines });
+                }
+            }
+        }
+        
+        function testMaxLines() {
+            log('🔥 Probando límite máximo de líneas...', 'line-test-log', 'warning');
+            
+            for (let i = currentLines; i < maxLines + 2; i++) {
+                setTimeout(() => {
+                    testDrawLine();
+                }, i * 500);
+            }
+        }
+        
+        function resetLines() {
+            currentLines = 0;
+            if (window.freemiumController && freemiumController.resetCounters) {
+                freemiumController.resetCounters();
+            }
+            updateUI();
+            log('🔄 Contador de líneas reseteado', 'line-test-log', 'info');
+        }
+        
+        // ==========================================
+        // FUNCIONES DE PRUEBA DE COLORES
+        // ==========================================
+        
+        function loadColorPalette() {
+            const palette = document.getElementById('color-palette');
+            palette.innerHTML = '';
+            
+            // Colores disponibles
+            availableColors.forEach((color, index) => {
+                const colorBtn = document.createElement('div');
+                colorBtn.className = 'color-btn';
+                colorBtn.style.backgroundColor = color;
+                colorBtn.title = `Color ${index + 1} (Disponible)`;
+                colorBtn.onclick = () => selectColor(color, true);
+                palette.appendChild(colorBtn);
+            });
+            
+            // Colores premium (bloqueados)
+            const premiumColors = ['#ff69b4', '#9932cc', '#ffd700', '#ff4500', '#00ced1'];
+            premiumColors.forEach((color, index) => {
+                const colorBtn = document.createElement('div');
+                colorBtn.className = 'color-btn disabled';
+                colorBtn.style.backgroundColor = color;
+                colorBtn.title = `Color Premium ${index + 1} (Bloqueado)`;
+                colorBtn.onclick = () => selectColor(color, false);
+                palette.appendChild(colorBtn);
+            });
+        }
+        
+        function selectColor(color, available) {
+            if (available) {
+                log(`✅ Color seleccionado: ${color}`, 'color-test-log', 'success');
+                // Aquí se aplicaría el color al sistema de dibujo
+            } else {
+                log(`❌ Color premium bloqueado: ${color}`, 'color-test-log', 'error');
+                // Mostrar modal de upgrade
+                if (window.freemiumController && freemiumController.showUpgradeModal) {
+                    freemiumController.showUpgradeModal('colors', { color: color });
+                }
+            }
+        }
+        
+        function testColorLimits() {
+            log('🧪 Probando límites de colores...', 'color-test-log', 'info');
+            
+            availableColors.forEach((color, index) => {
+                setTimeout(() => {
+                    selectColor(color, true);
+                }, index * 300);
+            });
+        }
+        
+        function testPremiumColors() {
+            log('💎 Intentando usar colores premium...', 'color-test-log', 'warning');
+            
+            const premiumColors = ['#ff69b4', '#9932cc', '#ffd700'];
+            premiumColors.forEach((color, index) => {
+                setTimeout(() => {
+                    selectColor(color, false);
+                }, index * 500);
+            });
+        }
+        
+        // ==========================================
+        // FUNCIONES DE PRUEBA DE FORMACIONES
+        // ==========================================
+        
+        function loadFormationsList() {
+            const container = document.getElementById('formations-list');
+            container.innerHTML = '';
+            
+            // Formaciones disponibles
+            availableFormations.forEach(formation => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-success btn-sm me-2 mb-2';
+                btn.textContent = formation;
+                btn.onclick = () => selectFormation(formation, true);
+                container.appendChild(btn);
+            });
+            
+            // Formaciones premium
+            const premiumFormations = ['3-5-2', '5-3-2', '4-2-3-1', '3-4-3'];
+            premiumFormations.forEach(formation => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-secondary btn-sm me-2 mb-2';
+                btn.textContent = formation + ' 💎';
+                btn.disabled = true;
+                btn.onclick = () => selectFormation(formation, false);
+                container.appendChild(btn);
+            });
+        }
+        
+        function selectFormation(formation, available) {
+            if (available) {
+                log(`✅ Formación cargada: ${formation} - Jugadores posicionados correctamente`, 'formation-test-log', 'success');
+            } else {
+                log(`❌ Formación premium bloqueada: ${formation} - Se requiere upgrade`, 'formation-test-log', 'error');
+                if (window.freemiumController && freemiumController.showUpgradeModal) {
+                    freemiumController.showUpgradeModal('formation_limit', { formation: formation });
+                }
+            }
+        }
+        
+        function testFormations() {
+            log('🧪 Probando carga de jugadores con formaciones disponibles...', 'formation-test-log', 'info');
+            
+            availableFormations.forEach((formation, index) => {
+                setTimeout(() => {
+                    selectFormation(formation, true);
+                }, index * 400);
+            });
+        }
+        
+        function testPremiumFormations() {
+            log('💎 Intentando usar formaciones premium para carga de jugadores...', 'formation-test-log', 'warning');
+            
+            const premiumFormations = ['3-5-2', '5-3-2', '4-2-3-1'];
+            premiumFormations.forEach((formation, index) => {
+                setTimeout(() => {
+                    selectFormation(formation, false);
+                }, index * 500);
+            });
+        }
+        
+        // ==========================================
+        // FUNCIONES DE UI Y MODALES
+        // ==========================================
+        
+        function updateUI() {
+            const linesElement = document.getElementById('lines-count');
+            const lineCounter = document.getElementById('line-counter');
+            const linesStatus = document.getElementById('lines-status');
+            
+            linesElement.textContent = currentLines;
+            lineCounter.textContent = `Líneas dibujadas: ${currentLines} / ${maxLines}`;
+            
+            // Actualizar estado visual
+            if (currentLines >= maxLines) {
+                linesStatus.className = 'limit-indicator limit-reached';
+            } else if (currentLines >= maxLines * 0.8) {
+                linesStatus.className = 'limit-indicator';
+            } else {
+                linesStatus.className = 'limit-indicator limit-ok';
+            }
+        }
+        
+        function triggerUpgradeModal(type) {
+            log(`⚠️ Disparando modal de upgrade: ${type}`, 'main-log', 'warning');
+            
+            if (window.freemiumController && freemiumController.showUpgradeModal) {
+                const data = {
+                    lines: { current: currentLines, max: maxLines },
+                    colors: { current: availableColors.length, max: 'unlimited' },
+                    formations: { current: availableFormations.length, max: 'all' }
+                };
+                
+                freemiumController.showUpgradeModal(type, data[type]);
+            } else {
+                log('❌ Modal de upgrade no disponible', 'main-log', 'error');
+            }
+        }
+        
+        function simulatePremiumUpgrade() {
+            log('💎 Simulando upgrade a premium...', 'main-log', 'info');
+            
+            if (window.paymentManager && paymentManager.showPaymentModal) {
+                paymentManager.showPaymentModal('premium');
+            } else {
+                log('⚠️ Sistema de pagos no disponible, redirigiendo a página de precios', 'main-log', 'warning');
+                // Simular redirección
+                setTimeout(() => {
+                    log('🔗 Redirigiendo a: /pricing.html', 'main-log', 'info');
+                }, 1000);
+            }
+        }
+        
+        // ==========================================
+        // INICIALIZACIÓN AUTOMÁTICA
+        // ==========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎨 Iniciando página de pruebas de dibujo...', 'main-log', 'info');
+            
+            // Esperar a que se carguen los scripts
+            setTimeout(() => {
+                initializeTests();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

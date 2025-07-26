@@ -2,49 +2,96 @@
  * ==========================================
  * 💳 PAYMENT MANAGER - SISTEMA DE PAGOS
  * ==========================================
- * Sistema de planes y pagos para Soccer Tactics
+ * Sistema completo de pagos con Stripe
+ * Incluye modo sandbox para testing y desarrollo
  */
 
 class PaymentManager {
     constructor() {
-        this.plans = {
-            free: {
-                name: 'Gratuito',
-                price: 0,
-                features: {
-                    maxTactics: 3,
-                    maxAnimationFrames: 3,
-                    formations: ['4-4-2', '4-3-3'],
-                    export: 'watermark',
-                    realPlayers: false,
-                    cloudSave: false
-                }
+        this.isTestMode = this.detectTestMode();
+        this.stripe = null;
+        this.config = {
+            // Claves públicas (seguro exponerlas)
+            publicKeys: {
+                test: 'pk_test_51...',  // Tu clave pública de test
+                live: 'pk_live_51...'   // Tu clave pública de producción
             },
-            monthly: {
-                name: 'Premium Mensual',
-                price: 4.99,
-                stripeId: 'price_premium_monthly',
-                features: {
-                    maxTactics: -1, // ilimitado
-                    maxAnimationFrames: -1,
-                    formations: 'all',
-                    export: 'hd',
-                    realPlayers: true,
-                    cloudSave: true
-                }
+            // URLs del backend
+            endpoints: {
+                test: 'http://localhost:3000/api',
+                live: 'https://api.simuladortactico.com/api'
+            }
+        };
+        
+        this.currentPlan = null;
+        this.debugMode = false;
+        this.webhookLog = [];
+        
+        this.init();
+    }
+
+    detectTestMode() {
+        // Detectar automáticamente si estamos en modo de prueba
+        const hostname = window.location.hostname;
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+        const isTestDomain = hostname.includes('.test') || hostname.includes('staging');
+        const hasTestParam = new URLSearchParams(window.location.search).has('test_mode');
+        
+        return isLocalhost || isTestDomain || hasTestParam;
+    }
+
+    async init() {
+        try {
+            console.log(`[PaymentManager] 🚀 Inicializando en modo: ${this.isTestMode ? '🧪 TEST' : '🔴 PRODUCCIÓN'}`);
+            
+            // Cargar Stripe.js dinámicamente
+            await this.loadStripe();
+            
+            // Configurar Stripe con la clave correcta
+            const publicKey = this.isTestMode ? this.config.publicKeys.test : this.config.publicKeys.live;
+            this.stripe = Stripe(publicKey);
+            
+            // Configurar elementos de UI
+            this.setupPaymentElements();
+            
+            // Mostrar indicador de modo test si corresponde
+            if (this.isTestMode) {
+                this.showTestModeIndicator();
+            }
+            
+            console.log('[PaymentManager] ✅ Inicializado correctamente');
+            
+        } catch (error) {
+            console.error('[PaymentManager] ❌ Error en inicialización:', error);
+        }
+    }
             },
-            yearly: {
-                name: 'Premium Anual',
-                price: 39.99,
-                stripeId: 'price_premium_yearly',
+            pro: {
+                name: 'Pro',
+                price: 19.99,
+                stripeId: 'price_pro_monthly',
                 features: {
+                    // Todo lo de Premium +
+                    maxLines: -1,
                     maxTactics: -1,
+                    maxAnimationDuration: -1,       // Sin límites
                     maxAnimationFrames: -1,
+                    maxAnimations: -1,
                     formations: 'all',
+                    colors: 'all',
+                    lineWidths: 'all',
                     export: 'hd',
-                    realPlayers: true,
-                    cloudSave: true,
-                    bonus: '33% descuento'
+                    audioRecording: true,
+                    jsonExport: true,
+                    cloudSync: true,
+                    socialShare: true,
+                    multipleTeams: true,            // NUEVO: Múltiples equipos
+                    analytics: true,                // NUEVO: Dashboard analytics
+                    collaboration: 5,               // NUEVO: 5 usuarios simultáneos
+                    apiAccess: true,                // NUEVO: API access
+                    prioritySupport: true,          // NUEVO: Soporte prioritario
+                    whiteLabel: true,               // NUEVO: Marca personalizada
+                    maxDevices: -1                  // Ilimitado
                 }
             }
         };
