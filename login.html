@@ -180,20 +180,20 @@
         </div>
         
         <form id="loginForm">
-            <div class="mb-4">
-                <input type="password" 
-                       class="form-control" 
-                       id="password" 
-                       placeholder="Ingresa tu clave de acceso"
-                       autocomplete="current-password"
-                       required>
+            <div class="mb-3">
+                <input type="email" class="form-control" id="email" placeholder="Ingresa tu email" autocomplete="username" required>
             </div>
-            
+            <div class="mb-4">
+                <input type="password" class="form-control" id="password" placeholder="Ingresa tu clave de acceso" autocomplete="current-password" required>
+            </div>
             <div id="error-message" class="alert alert-danger d-none" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <span id="error-text">Clave incorrecta. Inténtalo de nuevo.</span>
             </div>
-            
+            <div id="premium-warning-row" class="alert alert-danger d-none" role="alert" style="font-weight:bold;">
+                <i class="fas fa-ban me-2"></i>
+                Límite de dispositivos alcanzado para este usuario (máx. 3)
+            </div>
             <button type="submit" class="btn btn-login" id="loginBtn">
                 <span class="login-text">
                     <i class="fas fa-sign-in-alt me-2"></i>
@@ -204,7 +204,6 @@
                     Verificando...
                 </span>
             </button>
-            
             <div id="success-message" class="success-message d-none">
                 <i class="fas fa-check-circle me-2"></i>
                 Acceso autorizado. Redirigiendo...
@@ -221,9 +220,12 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     
-    <script>
-        // Función para obtener el hash válido (calculado dinámicamente para mayor seguridad)
+    <script type="module">
+        // --- Lógica de autenticación y límite de dispositivos ---
+        import { getOrCreateDeviceId } from './js/deviceIdManager.js';
+
         async function getValidPasswordHash() {
             const expectedPassword = "Anibal2023";
             const encoder = new TextEncoder();
@@ -232,12 +234,11 @@
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
-        
+
         let attemptCount = 0;
         const maxAttempts = 5;
         let isProcessing = false;
-        
-        // Función para generar hash SHA-256
+
         async function generateHash(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
@@ -245,32 +246,22 @@
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
-        
-        // Función para mostrar error
+
         function showError(message) {
             const errorDiv = document.getElementById('error-message');
             const errorText = document.getElementById('error-text');
             errorText.textContent = message;
             errorDiv.classList.remove('d-none');
-            
-            // Ocultar después de 4 segundos
-            setTimeout(() => {
-                errorDiv.classList.add('d-none');
-            }, 4000);
+            setTimeout(() => { errorDiv.classList.add('d-none'); }, 4000);
         }
-        
-        // Función para mostrar éxito
         function showSuccess() {
             const successDiv = document.getElementById('success-message');
             successDiv.classList.remove('d-none');
         }
-        
-        // Función para mostrar estado de carga
         function setLoading(loading) {
             const btn = document.getElementById('loginBtn');
             const loginText = btn.querySelector('.login-text');
             const loadingSpinner = btn.querySelector('.loading-spinner');
-            
             if (loading) {
                 loginText.style.display = 'none';
                 loadingSpinner.style.display = 'inline';
@@ -281,63 +272,75 @@
                 btn.disabled = false;
             }
         }
-        
-        // Función principal de validación
-        async function validatePassword(password) {
-            if (isProcessing) {
-                console.log('Ya hay una validación en proceso');
-                return false;
+
+        // Lógica de límite de dispositivos por email
+        function canLoginWithDevice(email) {
+            const dbKey = 'simuladorTactico_mockUsers';
+            const db = JSON.parse(localStorage.getItem(dbKey) || '{}');
+            const deviceId = getOrCreateDeviceId();
+            let user = db[email] || { id: 'user123', email, premium: true, devices: [] };
+            if (!user.devices.includes(deviceId)) {
+                if (user.devices.length >= 3) {
+                    return false;
+                }
             }
-            
+            return true;
+        }
+        function registerDeviceForUser(email) {
+            const dbKey = 'simuladorTactico_mockUsers';
+            const db = JSON.parse(localStorage.getItem(dbKey) || '{}');
+            const deviceId = getOrCreateDeviceId();
+            let user = db[email] || { id: 'user123', email, premium: true, devices: [] };
+            if (!user.devices.includes(deviceId)) {
+                user.devices.push(deviceId);
+            }
+            db[email] = user;
+            localStorage.setItem(dbKey, JSON.stringify(db));
+        }
+
+        async function validateLogin(email, password) {
+            if (isProcessing) return false;
             if (attemptCount >= maxAttempts) {
                 showError('Demasiados intentos fallidos. Recarga la página.');
                 return false;
             }
-            
             isProcessing = true;
             setLoading(true);
-            
             try {
-                // Obtener hash válido y generar hash de la entrada
+                // Límite de dispositivos
+                if (!canLoginWithDevice(email)) {
+                    document.getElementById('premium-warning-row').classList.remove('d-none');
+                    setLoading(false);
+                    isProcessing = false;
+                    return false;
+                } else {
+                    document.getElementById('premium-warning-row').classList.add('d-none');
+                }
+                // Validar contraseña
                 const [validHash, inputHash] = await Promise.all([
                     getValidPasswordHash(),
                     generateHash(password)
                 ]);
-                
-                // Simular delay de verificación
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Comparar hashes
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 if (inputHash === validHash) {
-                    console.log('✅ Contraseña correcta');
                     showSuccess();
-                    
-                    // Marcar como autenticado en sessionStorage
+                    registerDeviceForUser(email);
                     sessionStorage.setItem('app_authenticated', 'true');
                     sessionStorage.setItem('auth_timestamp', Date.now().toString());
-                    
-                    // Redirigir después de un momento
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                    
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1200);
                     return true;
                 } else {
-                    console.log('❌ Contraseña incorrecta');
                     attemptCount++;
                     const remaining = maxAttempts - attemptCount;
-                    
                     if (remaining > 0) {
                         showError(`Clave incorrecta. Intentos restantes: ${remaining}`);
                     } else {
                         showError('Demasiados intentos fallidos. Recarga la página.');
                         document.getElementById('loginBtn').disabled = true;
                     }
-                    
                     return false;
                 }
             } catch (error) {
-                console.error('Error en validación:', error);
                 showError('Error en la validación. Inténtalo de nuevo.');
                 return false;
             } finally {
@@ -345,47 +348,34 @@
                 setLoading(false);
             }
         }
-        
-        // Event listeners
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            
-            if (!password) {
-                showError('Por favor ingresa una contraseña');
+            if (!email || !password) {
+                showError('Por favor ingresa email y contraseña');
                 return;
             }
-            
-            await validatePassword(password);
+            await validateLogin(email, password);
         });
-        
-        // Enfocar el input al cargar
+
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('password').focus();
-            
+            document.getElementById('email').focus();
             // Verificar si ya está autenticado
             const isAuthenticated = sessionStorage.getItem('app_authenticated');
             const authTime = sessionStorage.getItem('auth_timestamp');
-            
             if (isAuthenticated === 'true' && authTime) {
                 const timeDiff = Date.now() - parseInt(authTime);
-                const hourInMs = 60 * 60 * 1000; // 1 hora
-                
+                const hourInMs = 60 * 60 * 1000;
                 if (timeDiff < hourInMs) {
-                    // Aún válido, redirigir
-                    console.log('Usuario ya autenticado, redirigiendo...');
                     window.location.href = 'index.html';
                 } else {
-                    // Expiró, limpiar
                     sessionStorage.removeItem('app_authenticated');
                     sessionStorage.removeItem('auth_timestamp');
                 }
             }
         });
-        
-        console.log('🔐 Sistema de login seguro cargado');
-        console.log('🔒 Autenticación con hash SHA-256 activada');
     </script>
 </body>
 </html>

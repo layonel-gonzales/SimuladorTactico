@@ -559,7 +559,76 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script src="js/test-drawing-bug.js"></script>
     <!-- Script de prueba para bug de líneas que desaparecen -->
     <script src="js/test-line-disappearing-bug.js"></script>
+    <!-- Redirección si no hay sesión iniciada -->
+    <script>
+      // Si no está autenticado, redirige a login.html
+      const isAuthenticated = sessionStorage.getItem('app_authenticated');
+      const authTime = sessionStorage.getItem('auth_timestamp');
+      const hourInMs = 60 * 60 * 1000;
+      if (!(isAuthenticated === 'true' && authTime && (Date.now() - parseInt(authTime) < hourInMs))) {
+        window.location.href = 'login.html';
+      }
+    </script>
+    
     <script type="module" src="js/main.js"></script>
+
+    <!-- Controles de login/logout y deviceId para pruebas -->
+    <div id="freemium-controls" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 8px #0002;font-size:14px;max-width:320px;">
+      <div style="margin-bottom:6px;">
+        <b>Freemium (Mock):</b>
+      </div>
+      <div id="device-id-row" style="margin-bottom:6px;word-break:break-all;">
+        <span style="color:#888;">DeviceId:</span> <span id="device-id-value">(cargando...)</span>
+      </div>
+      <div id="auth-row" style="margin-bottom:6px;">
+        <input id="mock-email" type="email" placeholder="Email" style="width:120px;font-size:13px;" value="test@demo.com">
+        <input id="mock-pass" type="password" placeholder="Password" style="width:80px;font-size:13px;">
+        <button id="mock-login-btn" style="font-size:13px;">Login</button>
+        <button id="mock-logout-btn" style="font-size:13px;display:none;">Logout</button>
+      </div>
+      <div id="auth-status-row" style="color:#0a0;font-weight:bold;display:none;">Login exitoso</div>
+    </div>
+    <script>
+      // Mostrar deviceId
+      function updateDeviceIdUI() {
+        const el = document.getElementById('device-id-value');
+        if (window.deviceId) el.textContent = window.deviceId;
+      }
+      document.addEventListener('DOMContentLoaded', updateDeviceIdUI);
+      setTimeout(updateDeviceIdUI, 500);
+
+      // Login/logout mock
+      const loginBtn = document.getElementById('mock-login-btn');
+      const logoutBtn = document.getElementById('mock-logout-btn');
+      const emailInput = document.getElementById('mock-email');
+      const passInput = document.getElementById('mock-pass');
+      const statusRow = document.getElementById('auth-status-row');
+      function updateAuthUI() {
+        if (window.authSystem && window.authSystem.isAuthenticated) {
+          loginBtn.style.display = 'none';
+          logoutBtn.style.display = '';
+          statusRow.style.display = '';
+          statusRow.textContent = 'Login exitoso (' + (window.authSystem.user?.email || '') + ')';
+        } else {
+          loginBtn.style.display = '';
+          logoutBtn.style.display = 'none';
+          statusRow.style.display = 'none';
+        }
+      }
+      loginBtn.onclick = function() {
+        if (window.authSystem) {
+          window.authSystem.login(emailInput.value, passInput.value);
+          updateAuthUI();
+        }
+      };
+      logoutBtn.onclick = function() {
+        if (window.authSystem) {
+          window.authSystem.logout();
+          updateAuthUI();
+        }
+      };
+      setTimeout(updateAuthUI, 500);
+    </script>
     <script type="module">
         import ShareManager from './js/shareManager.js';
         window.shareManager = new ShareManager();

@@ -1,4 +1,5 @@
 import { drawFootballField } from './fieldDrawer.js';
+import { getOrCreateDeviceId } from './deviceIdManager.js';
 import { staticPlayers } from './players.js';
 import DrawingManager from './drawingManager.js';
 import PlayerManager from './playerManager.js';
@@ -20,6 +21,10 @@ import ConfigurationUI from './configurationUI.js';
 // Modo 2: Crear animaciones tácticas con frames
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- GESTIÓN DE DEVICEID (FREEMIUM) ---
+    const deviceId = getOrCreateDeviceId();
+    window.deviceId = deviceId; // Exponer globalmente para pruebas
+    console.log('[Freemium] deviceId actual:', deviceId);
     
     // SISTEMA DE AUTENTICACIÓN: Verificar acceso antes de inicializar la aplicación
     const waitForAuthentication = () => {

@@ -7,7 +7,12 @@
     "build-production": "npm run protect && npm run minify",
     "minify": "terser js/*.js --compress --mangle --output dist/app.min.js",
     "obfuscate": "javascript-obfuscator js/ --output obfuscated/ --compact true --control-flow-flattening true",
-    "build-secure": "npm run obfuscate && npm run add-license-checks"
+    "build-secure": "npm run obfuscate && npm run add-license-checks",
+    "start": "node server/freemium-server.js",
+    "dev": "nodemon server/freemium-server.js",
+    "test": "echo \"Tests pendientes\" && exit 0",
+    "install-deps": "npm install",
+    "setup": "npm install && cp env.example .env && echo \"Configurar .env con tus claves de Stripe\""
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.0.0",
@@ -19,6 +24,9 @@
     "express": "^4.18.2",
     "stripe": "^11.15.0",
     "jsonwebtoken": "^9.0.0",
-    "express-rate-limit": "^6.7.0"
+    "express-rate-limit": "^6.7.0",
+    "cors": "^2.8.5",
+    "bcrypt": "^5.1.0",
+    "uuid": "^9.0.0"
   }
 }
