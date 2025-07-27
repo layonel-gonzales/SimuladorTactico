@@ -29,7 +29,42 @@ export default class DrawingManager {
         this.ballImg.src = 'img/ball.png';
         this.ballSize = 20; // Tamaño del balón en píxeles
         
+        // Detección de DevTools Device Toolbar para ajustes específicos
+        this.isDeviceEmulation = this.detectDeviceEmulation();
+        
         this.init();
+        
+        // Exponer función de debug globalmente para Device Toolbar
+        if (typeof window !== 'undefined') {
+            window.debugDrawingManager = () => this.debugDeviceToolbar();
+        }
+    }
+    
+    /**
+     * Detecta si estamos en modo de emulación de dispositivo (DevTools)
+     */
+    detectDeviceEmulation() {
+        // Detección más conservadora para no interferir con el funcionamiento
+        try {
+            // Detectar Device Toolbar específicamente
+            const hasDevToolsSignals = (
+                // Usuario agente móvil sin capacidades táctiles reales
+                (navigator.userAgent.includes('Mobile') && !('ontouchstart' in window)) ||
+                // DPR alto pero sin capacidades móviles nativas
+                (window.devicePixelRatio > 1.5 && navigator.userAgent.includes('Mobile')) ||
+                // Dimensiones típicas de emulación móvil en desktop
+                (window.innerWidth < 500 && window.devicePixelRatio > 1)
+            );
+                
+            if (hasDevToolsSignals) {
+                console.log('[DrawingManager] 🔧 Device Toolbar detectado');
+            }
+            return hasDevToolsSignals;
+        } catch (e) {
+            // Si hay error en la detección, asumir modo normal
+            console.warn('[DrawingManager] Error en detección de emulación:', e);
+            return false;
+        }
     }
     
     init() {
@@ -68,9 +103,26 @@ export default class DrawingManager {
             e.preventDefault();
             console.log('[DrawingManager] touchstart event triggered');
             const touch = e.touches[0];
+            
+            // CRÍTICO: Si estamos en modo eliminar, manejar como click para eliminar
+            if (this.deleteLineMode) {
+                console.log('[DrawingManager] touchstart en modo eliminar - convirtiendo a click');
+                const clickEvent = new MouseEvent('click', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    bubbles: true,
+                    cancelable: true
+                });
+                this.handleCanvasClick(clickEvent);
+                return;
+            }
+            
+            // MEJORA: Crear evento con bubbles y cancelable para mayor compatibilidad
             const mouseEvent = new MouseEvent('mousedown', {
                 clientX: touch.clientX,
-                clientY: touch.clientY
+                clientY: touch.clientY,
+                bubbles: true,
+                cancelable: true
             });
             this.startDrawing(mouseEvent);
         }, { passive: false });
@@ -78,9 +130,12 @@ export default class DrawingManager {
         this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
+            // MEJORA: Crear evento con bubbles y cancelable para mayor compatibilidad
             const mouseEvent = new MouseEvent('mousemove', {
                 clientX: touch.clientX,
-                clientY: touch.clientY
+                clientY: touch.clientY,
+                bubbles: true,
+                cancelable: true
             });
             this.draw(mouseEvent);
         }, { passive: false });
@@ -88,7 +143,7 @@ export default class DrawingManager {
         this.canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             this.stopDrawing();
-        });
+        }, { passive: false });
         
         console.log('[DrawingManager] Event listeners configurados exitosamente');
     }
@@ -168,10 +223,72 @@ export default class DrawingManager {
     // Obtiene las coordenadas del ratón relativas al canvas
     getMousePos(e) {
         const rect = this.canvas.getBoundingClientRect();
-        return {
+        
+        // CORRECCIÓN SIMPLIFICADA: Las coordenadas del evento ya están en CSS pixels
+        // El canvas maneja internamente el scaling con DPR, así que no necesitamos ajustar aquí
+        const pos = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
+        
+        // Debug extendido para DevTools
+        if (this.isDeviceEmulation || (e.type === 'click' && this.deleteLineMode)) {
+            console.group('[DrawingManager] 📍 Cálculo de posición del mouse');
+            console.log('Evento:', {
+                type: e.type,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                target: e.target?.id
+            });
+            console.log('Rect del canvas:', rect);
+            console.log('DPR:', window.devicePixelRatio);
+            console.log('Canvas dimensions:', {
+                cssWidth: this.canvas.style.width,
+                cssHeight: this.canvas.style.height,
+                actualWidth: this.canvas.width,
+                actualHeight: this.canvas.height
+            });
+            console.log('Posición calculada:', pos);
+            console.log('Emulación detectada:', this.isDeviceEmulation);
+            console.groupEnd();
+        }
+        
+        return pos;
+    }
+    
+    // Calcula la distancia de un punto a un segmento de línea
+    distanceToLineSegment(point, lineStart, lineEnd) {
+        const A = point.x - lineStart.x;
+        const B = point.y - lineStart.y;
+        const C = lineEnd.x - lineStart.x;
+        const D = lineEnd.y - lineStart.y;
+
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        
+        if (lenSq === 0) {
+            // El segmento es un punto
+            return Math.hypot(A, B);
+        }
+        
+        let param = dot / lenSq;
+        
+        let xx, yy;
+        
+        if (param < 0) {
+            xx = lineStart.x;
+            yy = lineStart.y;
+        } else if (param > 1) {
+            xx = lineEnd.x;
+            yy = lineEnd.y;
+        } else {
+            xx = lineStart.x + param * C;
+            yy = lineStart.y + param * D;
+        }
+        
+        const dx = point.x - xx;
+        const dy = point.y - yy;
+        return Math.hypot(dx, dy);
     }
     
     // Redibuja todas las líneas almacenadas
@@ -296,37 +413,80 @@ export default class DrawingManager {
     
     // Maneja el click en el canvas (para borrar líneas)
     handleCanvasClick(e) {
-        if (!this.isEnabled() || !this.deleteLineMode) return;
+        console.log('[DrawingManager] 🎯 handleCanvasClick disparado:', {
+            enabled: this.isEnabled(),
+            deleteMode: this.deleteLineMode,
+            eventType: e.type,
+            target: e.target?.id,
+            emulation: this.isDeviceEmulation,
+            canvasPointerEvents: this.canvas.style.pointerEvents,
+            timestamp: Date.now()
+        });
+        
+        if (!this.isEnabled() || !this.deleteLineMode) {
+            console.log('[DrawingManager] ❌ Click ignorado - no habilitado o no en modo borrar');
+            return;
+        }
         
         const pos = this.getMousePos(e);
         let lineDeleted = false;
         let deletedLineIndex = -1;
         
+        console.log('[DrawingManager] Buscando línea para eliminar en posición:', pos);
+        console.log('[DrawingManager] Estado del canvas:', {
+            rect: this.canvas.getBoundingClientRect(),
+            computedStyle: getComputedStyle(this.canvas),
+            classList: Array.from(this.canvas.classList)
+        });
+        
         // Buscar la línea más cercana al punto de click (incluyendo el balón)
         for (let i = this.lines.length - 1; i >= 0; i--) {
             const line = this.lines[i];
             
-            // Verificar si se hizo click en el balón
+            // Ajustar tolerancia según el contexto - MÁS GENEROSA para Device Toolbar y puntero circular
+            const ballTolerance = this.isDeviceEmulation ? this.ballSize * 2.5 : this.ballSize * 1.5;
+            const lineTolerance = this.isDeviceEmulation ? line.properties.width + 25 : line.properties.width + 12;
+            
+            console.log(`[DrawingManager] Verificando línea ${i}, tolerancias AMPLIADAS: balón=${ballTolerance}, línea=${lineTolerance}`);
+            
+            // Verificar si se hizo click en el balón con tolerancia ampliada
             if (line.ballPosition) {
                 const ballDistance = Math.hypot(line.ballPosition.x - pos.x, line.ballPosition.y - pos.y);
-                if (ballDistance < this.ballSize) {
+                console.log(`[DrawingManager] Distancia al balón: ${ballDistance} (tolerancia ampliada: ${ballTolerance})`);
+                if (ballDistance < ballTolerance) {
                     this.lines.splice(i, 1);
                     lineDeleted = true;
                     deletedLineIndex = i;
+                    console.log(`[DrawingManager] ✅ Línea eliminada por click en balón (tolerancia ampliada)`);
                     break;
                 }
             }
             
-            // Verificar si se hizo click en la línea
-            if (!lineDeleted) {
-                for (const point of line.points) {
-                    const distance = Math.hypot(point.x - pos.x, point.y - pos.y);
-                    if (distance < line.properties.width + 5) { // +5 de margen
-                        this.lines.splice(i, 1);
-                        lineDeleted = true;
-                        deletedLineIndex = i;
+            // Verificar si se hizo click cerca de cualquier punto de la línea
+            if (!lineDeleted && line.points && line.points.length > 0) {
+                // Método mejorado: verificar distancia a cada segmento de línea, no solo puntos
+                let foundNearSegment = false;
+                
+                for (let j = 0; j < line.points.length - 1; j++) {
+                    const p1 = line.points[j];
+                    const p2 = line.points[j + 1];
+                    
+                    // Calcular distancia del punto click al segmento de línea
+                    const segmentDistance = this.distanceToLineSegment(pos, p1, p2);
+                    console.log(`[DrawingManager] Distancia al segmento ${j}: ${segmentDistance} (tolerancia: ${lineTolerance})`);
+                    
+                    if (segmentDistance < lineTolerance) {
+                        foundNearSegment = true;
                         break;
                     }
+                }
+                
+                if (foundNearSegment) {
+                    this.lines.splice(i, 1);
+                    lineDeleted = true;
+                    deletedLineIndex = i;
+                    console.log(`[DrawingManager] ✅ Línea eliminada por click cerca de segmento`);
+                    break;
                 }
             }
             
@@ -343,30 +503,57 @@ export default class DrawingManager {
             this.showDeleteFeedback(pos);
         } else {
             console.log('[DrawingManager] ❌ No se encontró línea para eliminar en esa posición');
+            console.log(`[DrawingManager] Total líneas disponibles: ${this.lines.length}`);
+            // Mostrar feedback de que no se encontró nada
+            this.showNoDeleteFeedback(pos);
         }
     }
     
     // Mostrar feedback visual cuando se elimina una línea
     showDeleteFeedback(pos) {
-        const originalCtx = this.ctx.globalCompositeOperation;
         this.ctx.save();
         this.ctx.globalCompositeOperation = 'source-over';
         this.ctx.strokeStyle = '#ff0000';
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 3;
         this.ctx.beginPath();
-        this.ctx.arc(pos.x, pos.y, 15, 0, 2 * Math.PI);
+        // Hacer círculo más visible en Device Toolbar
+        const radius = this.isDeviceEmulation ? 20 : 15;
+        this.ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
         this.ctx.stroke();
         this.ctx.restore();
         
-        // Eliminar el feedback después de 200ms
+        // Eliminar el feedback después de 300ms (más tiempo para ver en emulación)
         setTimeout(() => {
             this.redrawLines();
-        }, 200);
+        }, this.isDeviceEmulation ? 400 : 200);
+    }
+    
+    // Mostrar feedback cuando no se encuentra línea para eliminar
+    showNoDeleteFeedback(pos) {
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'source-over';
+        this.ctx.strokeStyle = '#ffa500'; // Naranja para indicar "no encontrado"
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        const radius = this.isDeviceEmulation ? 25 : 20;
+        this.ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
+        this.ctx.setLineDash([5, 5]); // Línea punteada
+        this.ctx.stroke();
+        this.ctx.setLineDash([]); // Restaurar línea sólida
+        this.ctx.restore();
+        
+        // Eliminar el feedback después de un tiempo menor
+        setTimeout(() => {
+            this.redrawLines();
+        }, 150);
     }
     
     // Redimensionar el canvas para que coincida con su contenedor
     resizeCanvas() {
         const rect = this.canvas.parentElement.getBoundingClientRect();
+        
+        // Re-detectar emulación en cada resize (puede cambiar dinámicamente)
+        this.isDeviceEmulation = this.detectDeviceEmulation();
         
         // MEJORA: Usar devicePixelRatio para alta resolución en el canvas de dibujo
         const dpr = window.devicePixelRatio || 1;
@@ -387,7 +574,7 @@ export default class DrawingManager {
         }
         
         this.applyContextProperties();
-        console.log(`DrawingManager: Canvas redimensionado con DPR: ${dpr} - líneas actuales:`, this.lines?.length || 0);
+        console.log(`DrawingManager: Canvas redimensionado con DPR: ${dpr} - líneas:`, this.lines?.length || 0);
     }
 
     // Método para habilitar/deshabilitar el dibujo de líneas
@@ -423,5 +610,41 @@ export default class DrawingManager {
     // Verificar si está habilitado antes de procesar eventos
     isEnabled() {
         return this.enabled !== false; // Por defecto habilitado si no se establece
+    }
+    
+    // Función de debug para Device Toolbar
+    debugDeviceToolbar() {
+        console.group('🔧 DEBUG DEVICE TOOLBAR');
+        console.log('Estado actual:', {
+            isDeviceEmulation: this.isDeviceEmulation,
+            deleteLineMode: this.deleteLineMode,
+            enabled: this.isEnabled(),
+            canvasId: this.canvas?.id,
+            linesCount: this.lines?.length || 0
+        });
+        console.log('Propiedades del navegador:', {
+            userAgent: navigator.userAgent,
+            touchStart: 'ontouchstart' in window,
+            devicePixelRatio: window.devicePixelRatio,
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight
+        });
+        console.log('Canvas estado:', {
+            pointerEvents: this.canvas.style.pointerEvents,
+            cursor: this.canvas.style.cursor,
+            classList: Array.from(this.canvas.classList),
+            rect: this.canvas.getBoundingClientRect()
+        });
+        console.log('Re-detectando emulación...');
+        this.isDeviceEmulation = this.detectDeviceEmulation();
+        console.log('Nueva detección:', this.isDeviceEmulation);
+        console.groupEnd();
+        
+        return {
+            isDeviceEmulation: this.isDeviceEmulation,
+            deleteLineMode: this.deleteLineMode,
+            enabled: this.isEnabled(),
+            linesCount: this.lines?.length || 0
+        };
     }
 }
