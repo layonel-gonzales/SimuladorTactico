@@ -95,7 +95,7 @@ export default class UIManager {
 
                 // NUEVA LÓGICA: Mantener persistencia en lugar de reemplazar
                 console.log('UIManager: Jugadores seleccionados en modal:', selectedPlayers);
-                console.log('UIManager: Jugadores actualmente en campo:', this.state.activePlayers.map(p => p.id));
+                console.log('UIManager: Jugadores actualmente en campo:', this.state.activePlayers.map(p => p && p.id ? p.id : 'ID inválido'));
 
                 // Filtrar para no más de 11 jugadores
                 const playersToActivate = selectedPlayers.slice(0, 11);
@@ -103,9 +103,9 @@ export default class UIManager {
                 // Mapear los IDs seleccionados a objetos de jugador
                 this.state.activePlayers = playersToActivate.map(id =>
                     this.playerManager.getPlayerById(id)
-                ).filter(player => player !== null); // Filtrar nulls
+                ).filter(player => player !== null && player !== undefined); // Filtrar nulls y undefined
 
-                console.log('UIManager: Nuevos jugadores activos:', this.state.activePlayers.map(p => p.name));
+                console.log('UIManager: Nuevos jugadores activos:', this.state.activePlayers.map(p => p && p.name ? p.name : 'Jugador sin nombre'));
 
                 // Verificar si hay una animación pendiente de importar
                 if (window.pendingAnimationData) {
@@ -242,6 +242,11 @@ export default class UIManager {
 
         // Iterar sobre los jugadores activos y actualizar su posición
         this.state.activePlayers.forEach(player => {
+            if (!player || !player.id) {
+                console.warn('UIManager: Jugador inválido encontrado, saltando:', player);
+                return;
+            }
+            
             const token = document.querySelector(`.player-token[data-player-id="${player.id}"]`);
             if (token && typeof player.x === 'number' && typeof player.y === 'number') {
                 // Las propiedades player.x y player.y ya están guardadas como porcentajes (0-100)
@@ -434,39 +439,46 @@ export default class UIManager {
                 // Fallback al método anterior
                 token = document.createElement('div');
                 token.className = 'player-token';
-                token.dataset.playerId = player.id;
+                token.dataset.playerId = player.id || 'unknown';
                 token.style.left = `${(player.x / 100) * pitchRect.width}px`;
                 token.style.top = `${(player.y / 100) * pitchRect.height}px`;
+                
+                const playerName = player.name || `Jugador ${player.number || '?'}`;
+                const playerPosition = player.position || 'N/A';
+                const playerImage = player.image_url || 'img/default_player.png';
+                const playerJersey = player.jersey_number || '?';
+                const playerOverall = this.playerManager.calculateOverall(player);
+                
                 token.innerHTML = `
                     <div class="minicard-overall player-card-element" 
                          data-element="overall" 
-                         data-player-id="${player.id}"
-                         title="Overall: ${this.playerManager.calculateOverall(player)}">
-                        ${this.playerManager.calculateOverall(player)}
+                         data-player-id="${player.id || 'unknown'}"
+                         title="Overall: ${playerOverall}">
+                        ${playerOverall}
                     </div>
                     <div class="minicard-position player-card-element" 
                          data-element="position" 
-                         data-player-id="${player.id}"
-                         title="Posición: ${player.position}">
-                        ${player.position}
+                         data-player-id="${player.id || 'unknown'}"
+                         title="Posición: ${playerPosition}">
+                        ${playerPosition}
                     </div>
-                    <img src="${player.image_url}" 
+                    <img src="${playerImage}" 
                          class="minicard-player-image player-card-element" 
                          data-element="image" 
-                         data-player-id="${player.id}"
-                         alt="${player.name}"
-                         title="${player.name}">
+                         data-player-id="${player.id || 'unknown'}"
+                         alt="${playerName}"
+                         title="${playerName}">
                     <div class="minicard-name player-card-element" 
                          data-element="name" 
-                         data-player-id="${player.id}"
-                         title="Nombre: ${player.name}">
-                        ${player.name}
+                         data-player-id="${player.id || 'unknown'}"
+                         title="Nombre: ${playerName}">
+                        ${playerName}
                     </div>
                     <div class="minicard-jersey-number player-card-element" 
                          data-element="jersey" 
-                         data-player-id="${player.id}"
-                         title="Dorsal: ${player.jersey_number || '?'}">
-                        ${player.jersey_number || '?'}
+                         data-player-id="${player.id || 'unknown'}"
+                         title="Dorsal: ${playerJersey}">
+                        ${playerJersey}
                     </div>
                 `;
             }

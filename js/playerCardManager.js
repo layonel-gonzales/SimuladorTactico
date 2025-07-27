@@ -5,12 +5,15 @@
  * Sistema centralizado para manejar todas las cards de jugador
  * tanto en el campo como en la selección de plantilla.
  * Proporciona acceso uniforme a elementos: overall, foto, nombre, etc.
+ * 
+ * ✨ ACTUALIZACIÓN: Integración con CardStyleManager para estilos modulares
  */
 
 class PlayerCardManager {
     constructor() {
         this.cardInstances = new Map(); // Almacena todas las instancias de cards
         this.cardElements = new Map(); // Cache de elementos DOM
+        this.useStyleManager = false; // Flag para determinar si usar el nuevo sistema
         this.globalConfig = {
             showOverall: true,
             showPosition: true,
@@ -38,6 +41,31 @@ class PlayerCardManager {
     init() {
         console.log('🎴 PlayerCardManager iniciado');
         this.setupCardObserver();
+        this.initializeStyleManager();
+    }
+    
+    /**
+     * Inicializa el sistema de estilos si está disponible
+     */
+    initializeStyleManager() {
+        try {
+            // Buscar el sistema de estilos en el objeto global window
+            if (window.cardStyleManager && typeof window.cardStyleManager === 'object') {
+                this.useStyleManager = true;
+                window.cardStyleManager.init();
+                console.log('🎨 Sistema de estilos de cards activado');
+                
+                // Escuchar cambios de estilo para regenerar cards existentes
+                window.addEventListener('cardStyleChanged', (event) => {
+                    this.onStyleChanged(event.detail);
+                });
+            } else {
+                console.log('🎴 Usando sistema clásico de cards (compatibilidad)');
+            }
+        } catch (error) {
+            console.warn('⚠️ No se pudo cargar el sistema de estilos, usando clásico:', error);
+            this.useStyleManager = false;
+        }
     }
     
     /**
@@ -94,6 +122,28 @@ class PlayerCardManager {
      * @returns {string} HTML de la estructura
      */
     createCardStructure(player, type, cardId, screenType) {
+        // 🎨 NUEVO: Usar CardStyleManager si está disponible
+        if (this.useStyleManager && window.cardStyleManager) {
+            try {
+                // Convertir datos del jugador al formato esperado por los estilos
+                const playerData = {
+                    number: player.jersey_number || player.number || '?',
+                    name: player.name || 'Jugador',
+                    position: player.position || '',
+                    image: player.image_url || player.image || 'img/default_player.png',
+                    rating: this.calculateOverall(player)
+                };
+                
+                const styledCard = window.cardStyleManager.createStyledCard(playerData, type, cardId, screenType);
+                console.log(`🎨 Card creada con estilo: ${window.cardStyleManager.getCurrentStyle().name}`);
+                return styledCard;
+            } catch (error) {
+                console.warn('⚠️ Error con sistema de estilos, usando clásico:', error);
+                // Fallback al sistema clásico
+            }
+        }
+        
+        // 🎴 SISTEMA CLÁSICO (funcionalidad original sin cambios)
         const overall = this.calculateOverall(player);
         const uniquePrefix = `${screenType}-${type}`;
         
@@ -467,6 +517,92 @@ class PlayerCardManager {
             }
         }
         return cards;
+    }
+    
+    /**
+     * 🎨 NUEVO: Maneja cambios de estilo de cards
+     * @param {Object} styleData - Datos del nuevo estilo
+     */
+    onStyleChanged(styleData) {
+        if (!this.useStyleManager) return;
+        
+        console.log(`🎨 Cambiando estilo de cards a: ${styleData.style.name}`);
+        
+        // Regenerar todas las cards existentes con el nuevo estilo
+        for (const [cardId, cardData] of this.cardInstances) {
+            this.refreshCardStyle(cardId, cardData);
+        }
+        
+        // Notificar a otros sistemas si es necesario
+        window.dispatchEvent(new CustomEvent('cardsStyleApplied', {
+            detail: { styleId: styleData.styleId, cardsUpdated: this.cardInstances.size }
+        }));
+    }
+    
+    /**
+     * 🎨 NUEVO: Refresca el estilo de una card específica
+     * @param {string} cardId - ID de la card
+     * @param {Object} cardData - Datos de la card
+     */
+    refreshCardStyle(cardId, cardData) {
+        if (!this.useStyleManager || !cardData.element) return;
+        
+        try {
+            // Crear la nueva estructura con el estilo actual
+            const newStructure = this.createCardStructure(
+                cardData.player, 
+                cardData.type, 
+                cardId, 
+                cardData.screenType
+            );
+            
+            // Reemplazar el contenido de la card
+            cardData.element.innerHTML = newStructure;
+            
+            // Actualizar cache de elementos
+            this.updateElementCache(cardId, cardData.element);
+            
+            console.log(`🎨 Card ${cardId} actualizada con nuevo estilo`);
+        } catch (error) {
+            console.warn(`⚠️ Error actualizando estilo de card ${cardId}:`, error);
+        }
+    }
+    
+    /**
+     * 🔄 NUEVO: Actualiza el cache de elementos DOM de una card
+     * @param {string} cardId - ID de la card
+     * @param {HTMLElement} cardElement - Elemento DOM de la card
+     */
+    updateElementCache(cardId, cardElement) {
+        const elements = {
+            overall: cardElement.querySelector('[data-element="overall"]'),
+            position: cardElement.querySelector('[data-element="position"]'),
+            image: cardElement.querySelector('[data-element="image"]'),
+            name: cardElement.querySelector('[data-element="name"]'),
+            jersey: cardElement.querySelector('[data-element="jersey"]')
+        };
+        
+        this.cardElements.set(cardId, elements);
+    }
+    
+    /**
+     * 🎨 NUEVO: Obtiene información del sistema de estilos
+     * @returns {Object} Información del sistema de estilos
+     */
+    getStyleInfo() {
+        if (!this.useStyleManager || !window.cardStyleManager) {
+            return {
+                enabled: false,
+                currentStyle: 'classic',
+                availableStyles: ['classic']
+            };
+        }
+        
+        return {
+            enabled: true,
+            currentStyle: window.cardStyleManager.getCurrentStyle(),
+            availableStyles: window.cardStyleManager.getAvailableStyles()
+        };
     }
 }
 
