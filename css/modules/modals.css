@@ -1,0 +1,363 @@
+/* ============================================
+   🪟 SISTEMA DE MODALES
+   ============================================ */
+
+/* === OVERLAY BASE === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* === MODAL BASE === */
+.modal {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: scale(0.8);
+    transition: transform var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-overlay.show .modal {
+    transform: scale(1);
+}
+
+/* === CABECERA DEL MODAL === */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* === CUERPO DEL MODAL === */
+.modal-body {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    flex: 1;
+    color: var(--text-primary);
+}
+
+/* === PIE DEL MODAL === */
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* === TAMAÑOS DE MODAL === */
+.modal-sm {
+    max-width: 300px;
+}
+
+.modal-md {
+    max-width: 500px;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-xl {
+    max-width: 1200px;
+}
+
+.modal-fullscreen {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+}
+
+/* === MODAL DE CONFIRMACIÓN === */
+.modal-confirm .modal-header {
+    background: linear-gradient(135deg, var(--color-warning), var(--color-danger));
+    color: white;
+}
+
+.modal-confirm .modal-body {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.modal-confirm .modal-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-warning);
+}
+
+/* === MODAL DE ÉXITO === */
+.modal-success .modal-header {
+    background: linear-gradient(135deg, var(--color-success), var(--color-info));
+    color: white;
+}
+
+.modal-success .modal-icon {
+    color: var(--color-success);
+}
+
+/* === MODAL DE ERROR === */
+.modal-error .modal-header {
+    background: linear-gradient(135deg, var(--color-danger), #dc3545);
+    color: white;
+}
+
+.modal-error .modal-icon {
+    color: var(--color-danger);
+}
+
+/* === MODAL LOADING === */
+.modal-loading .modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xxl);
+    min-height: 200px;
+}
+
+.modal-loading .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-loading .loading-text {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* === MODAL CON PESTAÑAS === */
+.modal-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 0 var(--spacing-lg);
+}
+
+.modal-tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+    flex: 1;
+}
+
+.modal-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.modal-tab-content {
+    display: none;
+}
+
+.modal-tab-content.active {
+    display: block;
+}
+
+/* === MODAL RESPONSIVE === */
+@media (max-width: 768px) {
+    .modal {
+        max-width: 95vw;
+        max-height: 95vh;
+        margin: var(--spacing-sm);
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--spacing-md);
+    }
+    
+    .modal-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .modal-fullscreen {
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* === ANIMACIONES ESPECIALES === */
+@keyframes modalSlideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+.modal-slide-up {
+    animation: modalSlideInUp var(--transition-normal) ease-out;
+}
+
+.modal-slide-down {
+    animation: modalSlideOutDown var(--transition-normal) ease-in;
+}
+
+/* === Z-INDEX PERSONALIZADO === */
+.custom-z-index-modal {
+    z-index: 8888 !important;
+}
+
+.modal-backdrop {
+    z-index: 8887 !important;
+}
+
+/* === MODAL DE ORIENTACIÓN ESPECÍFICO === */
+.orientation-modal-unique {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 99999 !important;
+    text-align: center !important;
+    color: white !important;
+    font-family: var(--font-family-primary) !important;
+}
+
+.orientation-modal-unique img {
+    width: 120px !important;
+    height: 120px !important;
+    margin-bottom: var(--spacing-lg) !important;
+    opacity: 0.9 !important;
+    animation: rotate-pulse 2s ease-in-out infinite !important;
+    filter: brightness(0.9) !important;
+}
+
+.orientation-modal-unique h2 {
+    font-size: var(--font-size-xl) !important;
+    font-weight: 600 !important;
+    margin-bottom: var(--spacing-md) !important;
+    color: #ffffff !important;
+}
+
+.orientation-modal-unique p {
+    font-size: var(--font-size-md) !important;
+    margin-bottom: var(--spacing-lg) !important;
+    color: #cccccc !important;
+    max-width: 300px !important;
+    line-height: 1.5 !important;
+}
+
+.orientation-modal-unique button {
+    background: var(--color-primary) !important;
+    color: white !important;
+    border: none !important;
+    padding: var(--spacing-sm) var(--spacing-lg) !important;
+    border-radius: var(--border-radius-md) !important;
+    font-size: var(--font-size-sm) !important;
+    cursor: pointer !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.orientation-modal-unique button:hover {
+    background: var(--color-secondary) !important;
+    transform: scale(1.05) !important;
+}
+
+@keyframes rotate-pulse {
+    0%, 100% {
+        transform: rotate(-15deg) scale(1);
+    }
+    50% {
+        transform: rotate(15deg) scale(1.1);
+    }
+}

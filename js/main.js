@@ -15,6 +15,8 @@ import CustomPlayersManager from './customPlayersManager.js';
 import CustomPlayersUI from './customPlayersUI.js';
 import ConfigurationManager from './configurationManager.js';
 import ConfigurationUI from './configurationUI.js';
+import FieldStyleManager from './fieldStyleManager.js';
+import FieldStyleIntegration from './fieldStyleIntegration.js';
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
@@ -216,6 +218,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar la interfaz de configuración COMPLETA
     const configurationUI = new ConfigurationUI(configurationManager, customPlayersManager, playerManager);
     window.configurationUI = configurationUI; // Hacer disponible globalmente
+    
+    // === INICIALIZAR SISTEMA DE ESTILOS DE CANCHA ===
+    console.log('[Main] Inicializando sistema de estilos de cancha...');
+    
+    // Inicializar el gestor de estilos de cancha
+    const fieldStyleManager = new FieldStyleManager();
+    window.fieldStyleManager = fieldStyleManager; // Hacer disponible globalmente
+    
+    // Inicializar la integración de estilos de cancha
+    const fieldStyleIntegration = new FieldStyleIntegration();
+    window.fieldStyleIntegration = fieldStyleIntegration; // Hacer disponible globalmente
+    
+    console.log('[Main] Sistema de estilos de cancha inicializado correctamente');
     
     // Conectar el botón de configuración al modal COMPLETO
     const configurationBtn = document.getElementById('configuration-btn');
@@ -561,8 +576,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         fieldCtx.setTransform(1, 0, 0, 1, 0, 0);
         fieldCtx.scale(dpr, dpr);
         
-        // Dibujar el campo usando las dimensiones CSS
-        drawFootballField(footballFieldCanvas, fieldCtx);
+        // Dibujar el campo usando el sistema de estilos
+        if (window.fieldStyleManager) {
+            window.fieldStyleManager.drawField(footballFieldCanvas, fieldCtx);
+        } else {
+            // Fallback al dibujo original si no está disponible el sistema de estilos
+            drawFootballField(footballFieldCanvas, fieldCtx);
+        }
         console.log(`main.js: Campo redibujado - CSS: ${cssWidth}x${cssHeight}, Canvas: ${canvasWidth}x${canvasHeight}, DPR: ${dpr}`);
         console.log(`main.js: Forzando redibujo completo del campo con arcos actualizados`);
     }

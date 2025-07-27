@@ -1,0 +1,364 @@
+/* ============================================
+   🎛️ COMPONENTES DE INTERFAZ
+   ============================================ */
+
+/* === BOTONES GENERALES === */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* === VARIANTES DE BOTONES === */
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background: color-mix(in srgb, var(--color-primary) 90%, black);
+}
+
+.btn-secondary {
+    background: var(--color-secondary);
+    color: white;
+    border-color: var(--color-secondary);
+}
+
+.btn-success {
+    background: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+.btn-danger {
+    background: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+}
+
+.btn-warning {
+    background: var(--color-warning);
+    color: #212529;
+    border-color: var(--color-warning);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* === TAMAÑOS DE BOTONES === */
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-lg);
+}
+
+/* === INPUTS Y FORMULARIOS === */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-sm);
+    background: var(--bg-light);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.25);
+    outline: none;
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-sm);
+    background: var(--bg-light) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") no-repeat right var(--spacing-sm) center/16px 12px;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* === CARDS === */
+.card {
+    background: var(--bg-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow var(--transition-fast);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+}
+
+.card-body {
+    padding: var(--spacing-md);
+}
+
+.card-footer {
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* === BADGES === */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    border-radius: var(--border-radius-xl);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.badge-secondary {
+    background: var(--color-secondary);
+    color: white;
+}
+
+.badge-success {
+    background: var(--color-success);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--color-danger);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--color-warning);
+    color: #212529;
+}
+
+/* === PROGRESS BARS === */
+.progress {
+    display: flex;
+    height: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+}
+
+.progress-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    background: var(--color-primary);
+    transition: width var(--transition-normal);
+}
+
+/* === TOOLTIPS === */
+.tooltip {
+    position: absolute;
+    z-index: var(--z-tooltip);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* === SWITCHES === */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition-fast);
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--transition-fast);
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--color-primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* === TABS === */
+.nav-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: var(--spacing-md);
+}
+
+.nav-tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+}
+
+.nav-tab:hover {
+    color: var(--text-primary);
+}
+
+.nav-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+/* === DROPDOWNS === */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: calc(var(--z-menu) + 1);
+    min-width: 200px;
+    background: var(--bg-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+    
+    .card {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Evita zoom en iOS */
+    }
+}

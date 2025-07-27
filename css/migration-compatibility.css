@@ -1,0 +1,104 @@
+/* ============================================
+   🔄 ARCHIVO DE MIGRACIÓN - COMPATIBILIDAD
+   ============================================ */
+
+/* 
+   Este archivo asegura que todas las clases y estilos
+   del estilo.css original funcionen con la nueva 
+   estructura modular.
+*/
+
+/* === IMPORTS DEL NUEVO SISTEMA === */
+@import './style-modular.css';
+
+/* ============================================
+   🔗 MAPEO DE COMPATIBILIDAD
+   ============================================ */
+
+/* === CLASES LEGACY QUE NECESITAN MAPPING === */
+
+/* 
+   Todas las clases importantes ya están definidas en los módulos:
+   - .hidden, .visible, .mode-controls -> utilities.css
+   - #drawing-mode-controls, #animation-mode-controls -> utilities.css y menus.css
+   - .player-token y variantes -> player-tokens.css
+   - Todos los componentes UI -> components.css
+   - Sistema de modales -> modals.css
+*/
+
+/* === ESTILOS ESPECÍFICOS ADICIONALES === */
+
+/* Placeholder para estilos muy específicos del proyecto si son necesarios */
+
+/* ============================================
+   📋 NOTAS DE MIGRACIÓN
+   ============================================ */
+
+/*
+BENEFICIOS DE LA MODULARIZACIÓN:
+
+✅ MANTENIBILIDAD:
+   - Cada módulo tiene una responsabilidad específica
+   - Fácil localización de estilos
+   - Mejor organización del código
+
+✅ ESCALABILIDAD:
+   - Nuevos componentes en archivos separados
+   - Reutilización de variables y utilidades
+   - Sistema de design tokens consistente
+
+✅ RENDIMIENTO:
+   - Mejor cache de archivos CSS
+   - Carga condicional posible
+   - Menor repetición de código
+
+✅ COLABORACIÓN:
+   - Múltiples desarrolladores pueden trabajar sin conflictos
+   - Convenciones claras
+   - Documentación integrada
+
+ESTRUCTURA FINAL:
+css/
+├── style-modular.css          (NUEVO - archivo principal)
+├── migration-compatibility.css (ESTE archivo)
+├── estilo.css                 (LEGACY - mantener por ahora)
+├── freemium-styles.css        (mantener)
+├── pwa-styles.css            (mantener)
+└── modules/
+    ├── variables.css         (variables y design tokens)
+    ├── base.css             (reset y estilos base)
+    ├── utilities.css        (clases utilitarias)
+    ├── field.css           (campo de fútbol)
+    ├── player-tokens.css   (tokens de jugadores)
+    ├── components.css      (botones, forms, cards, etc.)
+    ├── menus.css          (navegación y menús)
+    └── modals.css         (sistema de modales)
+
+CLASES DE VISIBILIDAD PRESERVADAS:
+- .hidden          -> display: none !important
+- .visible         -> display: block !important  
+- .visible-flex    -> display: flex !important
+- .mode-controls.hidden/.visible -> funcionan igual
+
+VARIABLES CSS MEJORADAS:
+- Sistema de espaciado consistente
+- Paleta de colores centralizada
+- Z-index organizados
+- Responsive design tokens
+- Modo oscuro/claro/alto contraste
+
+RESPONSIVE DESIGN MEJORADO:
+- Breakpoints estandarizados
+- Variables adaptativas
+- Mobile-first approach
+- Clases utilitarias responsive
+
+PARA ACTIVAR EL NUEVO SISTEMA:
+1. Cambiar import en index.html:
+   <link rel="stylesheet" href="css/migration-compatibility.css">
+   
+2. Probar toda la funcionalidad
+3. Ajustar cualquier estilo específico si es necesario
+4. Una vez confirmado, usar solo style-modular.css
+
+*/

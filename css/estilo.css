@@ -114,6 +114,8 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
+    overflow: hidden; /* Evitar desbordamiento */
+    box-sizing: border-box; /* Incluir padding y border en el tamaño */
 }
 
 .player-token:hover {
@@ -129,60 +131,66 @@ html, body {
 
 .player-token .minicard-position {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 0.8em;
+    top: 8px;
+    right: 8px;
+    font-size: 0.75em;
     font-weight: bold;
     color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 2px 6px;
-    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 1px 4px;
+    border-radius: 6px;
     user-select: none;
+    max-width: 24px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .player-token .minicard-player-image {
     position: absolute;
-    top: 20px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(32px, 40%, 48px);
-    height: clamp(32px, 40%, 48px);
+    width: clamp(28px, 35%, 42px);
+    height: clamp(28px, 35%, 42px);
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid var(--text-primary, #fff);
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
 }
 
 .player-token .minicard-name {
     position: absolute;
-    bottom: 18px;
-    left: 8px;
-    right: 8px;
+    bottom: 15px;
+    left: 6px;
+    right: 6px;
     text-align: center;
-    font-size: 0.7em;
+    font-size: 0.65em;
     font-weight: bold;
     color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 4px;
-    border-radius: 6px;
+    padding: 1px 3px;
+    border-radius: 4px;
     user-select: none;
+    max-width: calc(100% - 12px);
 }
 
 .player-token .minicard-jersey-number {
     position: absolute;
-    bottom: 38px;
+    bottom: 35px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.9em;
+    font-size: 0.8em;
     font-weight: bold;
     color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -191,14 +199,14 @@ html, body {
 
 .player-token .minicard-overall {
     position: absolute;
-    top: 15px;
-    left: 1px;
-    font-size: 0.7em;
+    top: 12px;
+    left: 6px;
+    font-size: 0.65em;
     font-weight: bold;
     color: var(--color-gold, gold);
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 22px;
-    height: 22px;
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -491,73 +499,130 @@ html, body {
 /* === ESTILOS DE MINICARDS === */
 .minicard-overall {
     position: absolute;
-    top: 14px;
-    left: 1px;
-    font-size: 0.7em;
+    top: 12px;
+    left: 4px;
+    font-size: 0.65em;
     font-weight: bold;
     color: var(--color-gold);
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 25px;
-    height: 25px;
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     line-height: 1;
+    box-sizing: border-box;
 }
 
 .minicard-position {
     position: absolute;
-    top: 15px;
-    right: 10px;
-    font-size: 0.8em;
+    top: 10px;
+    right: 8px;
+    font-size: 0.7em;
     font-weight: bold;
     color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 2px 5px;
-    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 1px 4px;
+    border-radius: 4px;
     text-align: center;
+    max-width: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
 }
 
 .minicard-player-image {
     position: absolute;
-    top: 45px;
+    top: 35px;
     left: 50%;
     transform: translateX(-50%);
-    width: 50px;
-    height: 58px;
+    width: clamp(40px, 45%, 50px);
+    height: clamp(45px, 50%, 58px);
     object-fit: cover;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .minicard-name {
     position: absolute;
-    bottom: 20px;
-    left: 8px;
-    right: 8px;
+    bottom: 18px;
+    left: 6px;
+    right: 6px;
     text-align: center;
     font-size: 0.55em;
     font-weight: bold;
     color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 5px;
+    padding: 1px 3px;
     box-sizing: border-box;
     border-radius: 3px;
+    max-width: calc(100% - 12px);
 }
 
 .minicard-jersey-number {
     position: absolute;
-    bottom: 40px;
+    bottom: 38px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: bold;
     color: var(--text-primary);
     text-shadow: 0 0 3px black;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* === CONTENEDORES DE CARDS - PREVENIR DESBORDAMIENTO === */
+.card-container, .player-container, [style*="marco3.png"] {
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+}
+
+/* Aplicar contención a cualquier elemento con background de marco */
+*[style*="marco3.png"], *[class*="minicard"], .player-token {
+    contain: layout style !important;
+    overflow: hidden !important;
+}
+
+/* Asegurar que todos los elementos absolutos estén contenidos */
+.player-token *, .minicard-container * {
+    position: absolute;
+    max-width: calc(100% - 8px) !important;
+    max-height: calc(100% - 8px) !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Ajustes específicos para elementos de texto */
+.minicard-name, .player-token .minicard-name {
+    max-width: calc(100% - 12px) !important;
+    left: 6px !important;
+    right: 6px !important;
+}
+
+.minicard-position, .player-token .minicard-position {
+    max-width: 28px !important;
+    right: 6px !important;
+}
+
+.minicard-overall, .player-token .minicard-overall {
+    left: 4px !important;
+    max-width: 22px !important;
 }
 
 /* === WATERMARK === */
@@ -1320,5 +1385,370 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     .tutorial-modal-btn {
         padding: 14px 20px !important;
         font-size: 14px !important;
+    }
+}
+
+/* ============================================
+   🎨 SISTEMA DE ESTILOS DE CANCHA - NOTIFICACIONES Y ANIMACIONES
+   ============================================ */
+
+/* === NOTIFICACIONES DE CAMBIO DE ESTILO === */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* === CONFIGURACIÓN DE ESTILOS DE CANCHA === */
+.field-style-config {
+    background: var(--bg-secondary);
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+}
+
+.field-style-config h6 {
+    color: var(--color-primary);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+#field-style-btn {
+    transition: all 0.3s ease;
+}
+
+#field-style-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2);
+}
+
+/* === MODAL DE ESTILOS === */
+#field-style-modal .modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--color-primary);
+    border-radius: 12px;
+}
+
+#field-style-modal .modal-header {
+    background: var(--color-primary);
+    border-radius: 12px 12px 0 0;
+}
+
+#field-style-modal .modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+#field-style-modal-preview {
+    max-width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+#field-style-modal-preview:hover {
+    transform: scale(1.02);
+}
+
+/* === CONFIGURATION MODAL FIELD TAB === */
+.configuration-modal .nav-tabs .nav-link {
+    color: var(--text-primary);
+    border-color: transparent;
+}
+
+.configuration-modal .nav-tabs .nav-link.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.configuration-modal .tab-pane {
+    background: var(--bg-secondary);
+    border-radius: 0 0 8px 8px;
+    padding: 20px;
+}
+
+#field-preview-canvas {
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    background: var(--pitch-green-primary);
+    transition: border-color 0.3s ease;
+}
+
+#field-preview-canvas:hover {
+    border-color: var(--color-accent);
+}
+
+/* === RESPONSIVE FIELD STYLES === */
+@media (max-width: 768px) {
+    .field-style-config {
+        margin: 10px 0;
+        padding: 15px !important;
+    }
+    
+    #field-style-btn span {
+        display: none !important;
+    }
+    
+    #field-style-modal .modal-dialog {
+        margin: 10px;
+    }
+    
+    #field-style-modal-preview {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* === DEBUG MODE INDICATORS === */
+.debug-mode .field-style-config {
+    border: 2px dashed var(--color-warning);
+    position: relative;
+}
+
+.debug-mode .field-style-config::before {
+    content: "🐛 DEBUG: Field Styles";
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: var(--color-warning);
+    color: black;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* === TRANSICIONES SUAVES PARA CAMBIOS DE ESTILO === */
+#football-field {
+    transition: opacity 0.3s ease;
+}
+
+.field-style-transition {
+    opacity: 0.7;
+}
+
+/* === ESTILOS PARA CONFIGURATION TABS === */
+.configuration-modal .nav-pills .nav-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+}
+
+.configuration-modal .nav-pills .nav-link:not(.active):hover {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: var(--color-primary);
+}
+
+.configuration-modal .form-label {
+    color: var(--color-primary);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.configuration-modal .form-control,
+.configuration-modal .form-select {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--color-secondary);
+    color: var(--text-primary);
+}
+
+.configuration-modal .form-control:focus,
+.configuration-modal .form-select:focus {
+    background-color: var(--bg-tertiary);
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(23, 162, 184, 0.25);
+}
+
+.configuration-modal .form-check-input:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.configuration-modal .alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* === MEJORAS VISUALES PARA FIELD CONFIGURATION === */
+.field-config-section {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+.field-config-section h6 {
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+/* === BOTÓN DE ESTILOS DE CANCHA === */
+#field-styles-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#field-styles-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+#field-styles-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+#field-styles-btn:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.field-styles-btn-always-visible {
+    position: relative;
+    z-index: var(--z-menu);
+}
+
+/* === RESPONSIVE PARA BOTONES DE CAMPO === */
+@media (max-width: 768px) {
+    #field-styles-btn {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    #field-styles-btn i {
+        font-size: 16px;
+    }
+}
+
+/* === INDICADOR DE ESTILO ACTIVO === */
+#field-styles-btn.active-style {
+    background-color: var(--color-accent) !important;
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 10px rgba(253, 126, 20, 0.5);
+}
+
+#field-styles-btn.active-style::after {
+    content: '●';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    color: #28a745;
+    font-size: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* === RESPONSIVE PARA CARDS DE JUGADORES === */
+@media (max-width: 768px) {
+    .player-token {
+        width: clamp(50px, 7vw, 90px) !important;
+        height: clamp(70px, 10vw, 130px) !important;
+    }
+    
+    .player-token .minicard-position {
+        font-size: 0.7em !important;
+        top: 6px !important;
+        right: 6px !important;
+        padding: 1px 3px !important;
+        max-width: 22px !important;
+    }
+    
+    .player-token .minicard-player-image {
+        width: clamp(24px, 30%, 36px) !important;
+        height: clamp(24px, 30%, 36px) !important;
+        top: 15px !important;
+    }
+    
+    .player-token .minicard-name {
+        font-size: 0.6em !important;
+        bottom: 12px !important;
+        left: 4px !important;
+        right: 4px !important;
+        padding: 1px 2px !important;
+    }
+    
+    .player-token .minicard-jersey-number {
+        font-size: 0.75em !important;
+        width: 14px !important;
+        height: 14px !important;
+        bottom: 30px !important;
+    }
+    
+    .player-token .minicard-overall {
+        font-size: 0.6em !important;
+        width: 18px !important;
+        height: 18px !important;
+        top: 10px !important;
+        left: 4px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .player-token {
+        width: clamp(45px, 6vw, 80px) !important;
+        height: clamp(60px, 9vw, 110px) !important;
+    }
+    
+    .player-token .minicard-position {
+        font-size: 0.65em !important;
+        max-width: 20px !important;
+    }
+    
+    .player-token .minicard-player-image {
+        width: clamp(20px, 28%, 32px) !important;
+        height: clamp(20px, 28%, 32px) !important;
+        top: 12px !important;
+    }
+    
+    .player-token .minicard-name {
+        font-size: 0.55em !important;
+        bottom: 10px !important;
+    }
+    
+    .player-token .minicard-jersey-number {
+        font-size: 0.7em !important;
+        width: 12px !important;
+        height: 12px !important;
+        bottom: 25px !important;
+    }
+    
+    .player-token .minicard-overall {
+        font-size: 0.55em !important;
+        width: 16px !important;
+        height: 16px !important;
+        top: 8px !important;
     }
 }

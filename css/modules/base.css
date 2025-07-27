@@ -1,0 +1,90 @@
+/* ============================================
+   🔧 RESET Y ESTILOS BASE
+   ============================================ */
+
+/* === RESET UNIVERSAL === */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+}
+
+/* === BASE HTML & BODY === */
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+    font-family: var(--font-family-primary);
+    background-color: var(--bg-tertiary);
+}
+
+/* === ELEMENTOS SELECCIONABLES === */
+input, textarea, select, button {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+
+/* === SCROLLBARS PERSONALIZADOS === */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary);
+}
+
+/* === ESTILOS PARA ELEMENTOS DRAG & DROP === */
+.draggable {
+    cursor: grab;
+    transition: var(--transition-fast);
+}
+
+.draggable:hover {
+    transform: scale(1.05);
+}
+
+.draggable.dragging {
+    cursor: grabbing;
+    transform: scale(1.1);
+    z-index: var(--z-tokens);
+}
+
+/* === FOCUS STYLES === */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* === ACCESIBILIDAD === */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

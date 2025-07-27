@@ -344,6 +344,13 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
             <i class="fas fa-cogs"></i>
         </button>
         
+        <button id="field-styles-btn" class="btn btn-info btn-sm field-styles-btn-always-visible" 
+                title="Estilos de cancha"
+                data-intro="Cambia el estilo visual del campo de fútbol entre diferentes temas disponibles." 
+                data-step="3d">
+            <i class="fas fa-palette"></i>
+        </button>
+        
         <button id="fullscreen-toggle-btn" class="btn btn-secondary btn-sm fullscreen-btn-always-visible" 
                 title="Pantalla completa"
                 data-intro="Activa o desactiva el modo pantalla completa para una mejor experiencia de juego." 
@@ -770,6 +777,298 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         </div>
     </div>
 
+    <!-- Modal de Configuración del Simulador -->
+    <div class="modal fade custom-z-index-modal" style="z-index: 11000;" id="configuration-modal" tabindex="-1" aria-labelledby="configurationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="configurationModalLabel">
+                        <i class="fas fa-cogs me-2"></i>Configuración del Simulador
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs de configuración -->
+                    <ul class="nav nav-tabs mb-4" id="configurationTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-panel" type="button" role="tab">
+                                <i class="fas fa-palette me-1"></i>Visual
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="field-tab" data-bs-toggle="tab" data-bs-target="#field-panel" type="button" role="tab">
+                                <i class="fas fa-futbol me-1"></i>Campo
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance-panel" type="button" role="tab">
+                                <i class="fas fa-tachometer-alt me-1"></i>Rendimiento
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-panel" type="button" role="tab">
+                                <i class="fas fa-sliders-h me-1"></i>Avanzado
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Panel Visual -->
+                        <div class="tab-pane fade show active" id="visual-panel" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-paint-brush me-2"></i>Tema de la Interfaz
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="theme-select" class="form-label">Tema Global</label>
+                                                    <select class="form-select" id="theme-select">
+                                                        <option value="dark">🌙 Modo Oscuro</option>
+                                                        <option value="light">☀️ Modo Claro</option>
+                                                        <option value="auto">🔄 Automático</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="ui-scale-select" class="form-label">Escala de UI</label>
+                                                    <select class="form-select" id="ui-scale-select">
+                                                        <option value="small">Pequeña (90%)</option>
+                                                        <option value="normal" selected>Normal (100%)</option>
+                                                        <option value="large">Grande (110%)</option>
+                                                        <option value="extra-large">Extra Grande (125%)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Campo -->
+                        <div class="tab-pane fade" id="field-panel" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-futbol me-2"></i>Estilo del Campo
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-8">
+                                                    <label for="field-style-select" class="form-label">Estilo Visual del Campo</label>
+                                                    <select class="form-select" id="field-style-select">
+                                                        <!-- Se llenará dinámicamente con JavaScript -->
+                                                    </select>
+                                                    <div class="form-text">
+                                                        Cada estilo cambia la apariencia visual del campo de fútbol
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Vista Previa</label>
+                                                    <div class="field-preview-container">
+                                                        <canvas id="field-preview-canvas" width="200" height="120" class="border rounded" style="width: 100%; max-width: 200px; height: auto;"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="field-grid-toggle">
+                                                        <label class="form-check-label" for="field-grid-toggle">
+                                                            Mostrar Grid de Ayuda
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="field-animations-toggle" checked>
+                                                        <label class="form-check-label" for="field-animations-toggle">
+                                                            Animaciones del Campo
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-users me-2"></i>Jugadores
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="player-scale-select" class="form-label">Tamaño de Jugadores</label>
+                                                    <select class="form-select" id="player-scale-select">
+                                                        <option value="small">Pequeño (80%)</option>
+                                                        <option value="normal" selected>Normal (100%)</option>
+                                                        <option value="large">Grande (120%)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch mt-4">
+                                                        <input class="form-check-input" type="checkbox" id="player-names-toggle" checked>
+                                                        <label class="form-check-label" for="player-names-toggle">
+                                                            Mostrar Nombres
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Rendimiento -->
+                        <div class="tab-pane fade" id="performance-panel" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-rocket me-2"></i>Optimización
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="fps-limit-select" class="form-label">Límite de FPS</label>
+                                                    <select class="form-select" id="fps-limit-select">
+                                                        <option value="30">30 FPS (Batería)</option>
+                                                        <option value="60" selected>60 FPS (Estándar)</option>
+                                                        <option value="120">120 FPS (Alto)</option>
+                                                        <option value="unlimited">Sin Límite</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="quality-select" class="form-label">Calidad Gráfica</label>
+                                                    <select class="form-select" id="quality-select">
+                                                        <option value="low">Baja</option>
+                                                        <option value="medium">Media</option>
+                                                        <option value="high" selected>Alta</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <hr class="my-4">
+                                            
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="reduce-animations-toggle">
+                                                        <label class="form-check-label" for="reduce-animations-toggle">
+                                                            Reducir Animaciones
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="hardware-acceleration-toggle" checked>
+                                                        <label class="form-check-label" for="hardware-acceleration-toggle">
+                                                            Aceleración por Hardware
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Avanzado -->
+                        <div class="tab-pane fade" id="advanced-panel" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-cog me-2"></i>Configuración Avanzada
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="debug-mode-toggle">
+                                                        <label class="form-check-label" for="debug-mode-toggle">
+                                                            Modo Debug
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="auto-save-toggle" checked>
+                                                        <label class="form-check-label" for="auto-save-toggle">
+                                                            Guardado Automático
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <hr class="my-4">
+                                            
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <h6>Gestión de Datos</h6>
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        <button class="btn btn-outline-primary btn-sm" id="export-config-btn">
+                                                            <i class="fas fa-download me-1"></i>Exportar Configuración
+                                                        </button>
+                                                        <button class="btn btn-outline-success btn-sm" id="import-config-btn">
+                                                            <i class="fas fa-upload me-1"></i>Importar Configuración
+                                                        </button>
+                                                        <button class="btn btn-outline-warning btn-sm" id="reset-config-btn">
+                                                            <i class="fas fa-undo me-1"></i>Restaurar Valores
+                                                        </button>
+                                                    </div>
+                                                    <input type="file" id="import-config-file" accept=".json" style="display: none;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Información</h6>
+                                        <ul class="mb-0">
+                                            <li>Los cambios se guardan automáticamente</li>
+                                            <li>Algunas configuraciones requieren recargar la página</li>
+                                            <li>El modo debug muestra información técnica adicional</li>
+                                            <li>Puedes exportar/importar tu configuración para hacer respaldo</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="reset-all-config-btn">
+                        <i class="fas fa-refresh me-1"></i>Restaurar Todo
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-1"></i>Aplicar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Simple Tutorial System - Reemplazo local de Shepherd.js -->
@@ -865,5 +1164,11 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         import ShareManager from './js/shareManager.js';
         window.shareManager = new ShareManager();
     </script>
+    
+    <!-- Sistema de estilos de cancha - Integración directa -->
+    <script src="fieldStylesDirectIntegration.js"></script>
+    
+    <!-- Corrector de overflow para cards de jugadores -->
+    <script src="cardOverflowFix.js"></script>
 </body>
 </html>
