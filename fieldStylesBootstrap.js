@@ -126,7 +126,7 @@ function setupFieldStyleEvents(selectElement, previewCanvas) {
 
 // Mostrar notificación de éxito
 function showSuccessMessage() {
-    createNotification('🎨 Sistema de estilos de cancha activado', 'success');
+    // Eliminado: Notificación innecesaria de sistema activado
 }
 
 // Mostrar notificación de error

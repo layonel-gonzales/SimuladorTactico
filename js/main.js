@@ -240,6 +240,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
+    // Inicializar sistema de estilos de cancha después de un delay
+    setTimeout(() => {
+        if (window.fieldStylesDirectIntegration) {
+            window.fieldStylesDirectIntegration.init();
+        }
+    }, 2000);
+    
     // Conectar todos los gestores
     animationManager.uiManager = uiManager;
     modeManager.setManagers(drawingManager, ballDrawingManager, animationManager, uiManager);

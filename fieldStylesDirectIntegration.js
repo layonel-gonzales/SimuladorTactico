@@ -66,22 +66,14 @@ async function initializeDirectIntegration() {
     // Configurar eventos
     setupFieldStyleEvents(fieldStyleSelect, previewCanvas);
     
-    // Asegurar que el botón de configuración funcione
-    if (configBtn && modal) {
-        setupConfigurationButton(configBtn, modal);
-    }
+    // NO configurar el botón de configuración aquí - se maneja en main.js
     
-    // Configurar botón específico de estilos de cancha
+    // Configurar SOLO el botón específico de estilos de cancha
     if (fieldStylesBtn && modal) {
         setupFieldStylesButton(fieldStylesBtn, modal);
     }
     
     console.log('🎉 Integración directa completada');
-    
-    // Mostrar notificación simple de activación
-    setTimeout(() => {
-        createNotification('🎨 Sistema de estilos de cancha activado', 'success');
-    }, 1000);
 }
 
 // Poblar el select de estilos
@@ -391,8 +383,8 @@ window.fieldStylesDirectIntegration = {
     updatePreview: () => updatePreview(document.getElementById('field-preview-canvas'))
 };
 
-// Inicializar automáticamente
-autoInit();
+// COMENTADO: Evitar auto-inicialización que causa conflictos
+// autoInit();
 
 console.log('🛠️ Integración directa lista. Funciones en window.fieldStylesDirectIntegration');
 console.log('  - init(): Reinicializar integración');

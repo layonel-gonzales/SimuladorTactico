@@ -111,70 +111,110 @@ class CardStyleManager {
         const currentStyle = this.styles[this.currentStyle];
         
         try {
-            return currentStyle.createFunction.call(this, player, type, cardId, screenType, currentStyle.theme);
+            // IMPORTANTE: Siempre pasar el player.id para que esté disponible en todas las funciones
+            return currentStyle.createFunction.call(this, player, type, cardId, screenType, currentStyle.theme, player.id);
         } catch (error) {
             console.error(`❌ Error creando card con estilo ${this.currentStyle}:`, error);
-            return this.createClassicCard(player, type, cardId, screenType, this.styles.classic?.theme || {});
+            return this.createClassicCard(player, type, cardId, screenType, this.styles.classic?.theme || {}, player.id);
         }
     }
 
-    createClassicCard(player, type = 'field', cardId, screenType, theme) {
+    createStyledCard(player, type = 'field', cardId, screenType) {
+        console.log(`[CardStyleManager][DEBUG] Creando card estilizada para jugador ${player.id || player.name}, tipo: ${type}, estilo: ${this.currentStyle}`);
+        
+        if (!this.stylesLoaded) {
+            console.warn('⚠️ Estilos no cargados, usando clásico');
+            return this.createClassicCard(player, type, cardId, screenType, this.styles.classic?.theme || {}, player.id);
+        }
+        
+        const currentStyle = this.styles[this.currentStyle];
+        
+        try {
+            // IMPORTANTE: Siempre pasar el player.id para que esté disponible en todas las funciones
+            const result = currentStyle.createFunction.call(this, player, type, cardId, screenType, currentStyle.theme, player.id);
+            console.log(`[CardStyleManager][DEBUG] HTML generado exitosamente:`, result.substring(0, 200) + '...');
+            return result;
+        } catch (error) {
+            console.error(`❌ Error creando card con estilo ${this.currentStyle}:`, error);
+            return this.createClassicCard(player, type, cardId, screenType, this.styles.classic?.theme || {}, player.id);
+        }
+    }
+
+    createClassicCard(player, type = 'field', cardId, screenType, theme, playerId) {
         const positionText = player.position && player.position !== 'N/A' ? player.position : '';
-        const playerName = player.name && player.name.trim() !== '' ? player.name : `Jugador ${player.number}`;
+        const playerName = player.name && player.name.trim() !== '' ? player.name : `Jugador ${player.number || '?'}`;
+        
+        // CRÍTICO: Asegurar que el ID del jugador sea correcto
+        const actualPlayerId = player.id || playerId || 'unknown';
+        
+        console.log(`[CardStyleManager][DEBUG] createClassicCard - ID del jugador: ${actualPlayerId}, nombre: ${playerName}, tipo: ${type}`);
         
         if (type === 'field') {
             return `
-                <div class="minicard-overall card-style-classic" data-card-style="classic">
-                    <div class="minicard-position">
-                        <span class="minicard-position-text">${positionText}</span>
-                    </div>
-                    <div class="minicard-player-image">
-                        <img src="${player.image}" alt="Jugador" loading="lazy">
-                    </div>
-                    <div class="minicard-number">
-                        <span class="minicard-number-text">${player.number}</span>
-                    </div>
-                    <div class="minicard-name">
-                        <span class="minicard-name-text">${playerName}</span>
-                    </div>
-                    <div class="minicard-rating">
-                        <span class="minicard-rating-text">${player.rating || '85'}</span>
-                    </div>
+                <div class="minicard-overall player-card-element" 
+                     data-element="overall" 
+                     data-player-id="${actualPlayerId}"
+                     title="Overall: ${player.rating || '85'}">
+                    ${player.rating || '85'}
+                </div>
+                <div class="minicard-position player-card-element" 
+                     data-element="position" 
+                     data-player-id="${actualPlayerId}"
+                     title="Posición: ${positionText}">
+                    ${positionText}
+                </div>
+                <img src="${player.image || player.image_url || 'img/default_player.png'}" 
+                     class="minicard-player-image player-card-element" 
+                     data-element="image" 
+                     data-player-id="${actualPlayerId}"
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="minicard-name player-card-element" 
+                     data-element="name" 
+                     data-player-id="${actualPlayerId}"
+                     title="Nombre: ${playerName}">
+                    ${playerName}
+                </div>
+                <div class="minicard-jersey-number player-card-element" 
+                     data-element="jersey" 
+                     data-player-id="${actualPlayerId}"
+                     title="Dorsal: ${player.jersey_number || player.number || '?'}">
+                    ${player.jersey_number || player.number || '?'}
                 </div>
             `;
         } else {
             return `
-                <div class="squad-player-item card-style-classic" data-card-style="classic">
-                    <div class="player-info-container">
-                        <div class="player-position-badge">
-                            <span class="position-text">${positionText}</span>
-                        </div>
-                        <div class="player-image-container">
-                            <img src="${player.image}" alt="${playerName}" class="player-avatar" loading="lazy">
-                        </div>
-                        <div class="player-number-badge">
-                            <span class="number-text">${player.number}</span>
-                        </div>
-                        <div class="player-details">
-                            <div class="player-name-text">${playerName}</div>
-                            <div class="player-rating-display">
-                                <span class="rating-value">${player.rating || '85'}</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="minicard-overall player-card-element" 
+                     data-element="overall" 
+                     data-player-id="${actualPlayerId}"
+                     title="Overall: ${player.rating || '85'}">
+                    ${player.rating || '85'}
+                </div>
+                <img src="${player.image || player.image_url || 'img/default_player.png'}" 
+                     class="player-card-element" 
+                     data-element="image" 
+                     data-player-id="${actualPlayerId}"
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="player-name player-card-element" 
+                     data-element="name" 
+                     data-player-id="${actualPlayerId}"
+                     title="Nombre: ${playerName}">
+                    ${playerName}
                 </div>
             `;
         }
     }
 
-    createModernCard(player, type = 'field', cardId, screenType, theme) {
+    createModernCard(player, type = 'field', cardId, screenType, theme, playerId) {
         const positionText = player.position && player.position !== 'N/A' ? player.position : '';
         const playerName = player.name && player.name.trim() !== '' ? player.name : `Jugador ${player.number}`;
         const rating = player.rating || '85';
+        const actualPlayerId = playerId || player.id || 'unknown';
         
         if (type === 'field') {
             return `
-                <div class="minicard-overall card-style-modern" data-card-style="modern">
+                <div class="minicard-overall card-style-modern" data-card-style="modern" data-player-id="${actualPlayerId}">
                     <div class="modern-card-bg">
                         <div class="modern-gradient-overlay"></div>
                         <div class="modern-position-badge">
@@ -201,7 +241,7 @@ class CardStyleManager {
             `;
         } else {
             return `
-                <div class="squad-player-item card-style-modern" data-card-style="modern">
+                <div class="squad-player-item card-style-modern" data-card-style="modern" data-player-id="${actualPlayerId}">
                     <div class="modern-selection-card">
                         <div class="modern-card-header">
                             <div class="modern-position-chip">
@@ -237,15 +277,16 @@ class CardStyleManager {
         }
     }
 
-    createFifaCard(player, type = 'field', cardId, screenType, theme) {
+    createFifaCard(player, type = 'field', cardId, screenType, theme, playerId) {
         const positionText = player.position && player.position !== 'N/A' ? player.position : '';
         const playerName = player.name && player.name.trim() !== '' ? player.name : `Jugador ${player.number}`;
         const rating = player.rating || '85';
         const ratingColor = this.getRatingColor(parseInt(rating));
+        const actualPlayerId = playerId || player.id || 'unknown';
         
         if (type === 'field') {
             return `
-                <div class="minicard-overall card-style-fifa" data-card-style="fifa">
+                <div class="minicard-overall card-style-fifa" data-card-style="fifa" data-player-id="${actualPlayerId}">
                     <div class="fifa-card-container">
                         <div class="fifa-card-background">
                             <div class="fifa-rating-corner ${ratingColor}">
@@ -265,7 +306,7 @@ class CardStyleManager {
             `;
         } else {
             return `
-                <div class="squad-player-item card-style-fifa" data-card-style="fifa">
+                <div class="squad-player-item card-style-fifa" data-card-style="fifa" data-player-id="${actualPlayerId}">
                     <div class="fifa-selection-card">
                         <div class="fifa-card-top">
                             <div class="fifa-rating-badge ${ratingColor}">
@@ -297,14 +338,15 @@ class CardStyleManager {
         }
     }
 
-    createRetroCard(player, type = 'field', cardId, screenType, theme) {
+    createRetroCard(player, type = 'field', cardId, screenType, theme, playerId) {
         const positionText = player.position && player.position !== 'N/A' ? player.position : '';
         const playerName = player.name && player.name.trim() !== '' ? player.name : `Jugador ${player.number}`;
         const rating = player.rating || '85';
+        const actualPlayerId = playerId || player.id || 'unknown';
         
         if (type === 'field') {
             return `
-                <div class="minicard-overall card-style-retro" data-card-style="retro">
+                <div class="minicard-overall card-style-retro" data-card-style="retro" data-player-id="${actualPlayerId}">
                     <div class="retro-card-body">
                         <div class="retro-card-frame">
                             <div class="retro-position-banner">
@@ -332,7 +374,7 @@ class CardStyleManager {
             `;
         } else {
             return `
-                <div class="squad-player-item card-style-retro" data-card-style="retro">
+                <div class="squad-player-item card-style-retro" data-card-style="retro" data-player-id="${actualPlayerId}">
                     <div class="retro-selection-card">
                         <div class="retro-card-header">
                             <span class="retro-card-title">PLAYER CARD</span>

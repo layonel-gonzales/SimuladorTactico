@@ -21,7 +21,7 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'simulador_tactico_secret_2025';
 
 // Middleware
@@ -533,6 +533,24 @@ app.get('/api/user/status', authenticateToken, (req, res) => {
     }
 });
 
+// Endpoint de bienvenida del API
+app.get('/api', (req, res) => {
+    res.json({
+        message: '🚀 Simulador Táctico API',
+        version: '1.0.0',
+        endpoints: [
+            'POST /api/auth/login',
+            'POST /api/auth/register', 
+            'GET /api/user/status',
+            'GET /api/devices',
+            'POST /api/stripe/create-checkout-session',
+            'GET /api/health'
+        ],
+        status: 'active',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
     res.json({ 
@@ -545,15 +563,7 @@ app.get('/api/health', (req, res) => {
 
 // --- ENDPOINTS ESPECÍFICOS FREEMIUM ---
 
-// Ruta de acceso directo al panel de desarrollador
-app.get('/dev', (req, res) => {
-    res.redirect('/dev-panel.html');
-});
-
-// Ruta de acceso directo al panel de administración
-app.get('/admin', (req, res) => {
-    res.redirect('/admin-panel.html');
-});
+// Rutas de desarrollo eliminadas para producción
 
 // Obtener configuración freemium
 app.get('/api/config', (req, res) => {
@@ -890,8 +900,7 @@ app.get('/api/user/usage', authenticateToken, (req, res) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor Freemium corriendo en puerto ${PORT}`);
-    console.log(`📊 Panel de admin: http://localhost:${PORT}/admin`);
-    console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+    console.log(` API Base: http://localhost:${PORT}/api`);
 });
 
 // Datos de prueba (solo para desarrollo)

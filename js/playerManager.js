@@ -202,13 +202,31 @@ export default class PlayerManager {
     }
     
     getPlayerById(id) {
+        console.log(`[PlayerManager] Buscando jugador con ID: ${id} (tipo: ${typeof id})`);
+        
         // Buscar primero en jugadores personalizados, luego en estáticos
         if (this.customPlayersManager) {
             const customPlayer = this.customPlayersManager.getPlayerById(id, this.players);
-            if (customPlayer) return customPlayer;
+            if (customPlayer) {
+                console.log(`[PlayerManager] Jugador encontrado en personalizados:`, customPlayer.name);
+                return customPlayer;
+            }
         }
         
-        return this.players.find(player => player.id === id);
+        const staticPlayer = this.players.find(player => {
+            const match = player.id === id || player.id === String(id) || player.id === Number(id);
+            if (match) {
+                console.log(`[PlayerManager] Jugador encontrado en estáticos:`, player.name);
+            }
+            return match;
+        });
+        
+        if (!staticPlayer) {
+            console.warn(`[PlayerManager] Jugador con ID ${id} NO encontrado`);
+            console.log(`[PlayerManager] IDs disponibles:`, this.players.slice(0, 5).map(p => `${p.id} (${typeof p.id})`));
+        }
+        
+        return staticPlayer;
     }
 
     // Nuevo método para obtener todos los jugadores (estáticos + personalizados) con filtros

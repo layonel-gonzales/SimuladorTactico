@@ -21,6 +21,8 @@ export default class CustomPlayersUI {
         const customPlayersBtn = document.getElementById('custom-players-btn');
         if (customPlayersBtn) {
             customPlayersBtn.addEventListener('click', () => {
+                console.log('[CustomPlayersUI][DEBUG] Click en BOTÓN VERDE - Jugadores Personalizados.');
+                console.log('[CustomPlayersUI][DEBUG] Llamando a openCustomPlayersModal...');
                 this.openCustomPlayersModal();
             });
         }
@@ -144,12 +146,24 @@ export default class CustomPlayersUI {
     }
 
     openCustomPlayersModal() {
-        const modal = new bootstrap.Modal(document.getElementById('custom-players-modal'));
-        modal.show();
+        console.log('[CustomPlayersUI][DEBUG] Ejecutando openCustomPlayersModal...');
+        console.log('[CustomPlayersUI][DEBUG] Buscando modal custom-players-modal...');
         
-        // Actualizar listas al abrir
-        this.refreshCustomPlayersList();
-        this.updateCalculatedOverall();
+        const modalElement = document.getElementById('custom-players-modal');
+        console.log('[CustomPlayersUI][DEBUG] Modal element encontrado:', !!modalElement);
+        
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            console.log('[CustomPlayersUI][DEBUG] Bootstrap Modal creado, mostrando...');
+            modal.show();
+            console.log('[CustomPlayersUI][DEBUG] Modal custom-players-modal mostrado.');
+            
+            // Actualizar listas al abrir
+            this.refreshCustomPlayersList();
+            this.updateCalculatedOverall();
+        } else {
+            console.error('[CustomPlayersUI][ERROR] No se encontró el modal custom-players-modal');
+        }
     }
 
     async handleAddPlayer() {

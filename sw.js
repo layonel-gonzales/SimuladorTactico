@@ -8,19 +8,19 @@
  * - Actualización automática
  * - Análisis de uso
  * 
- * @version 2.0.0
+ * @version 2.0.1
  */
 
-const CACHE_NAME = 'tacticpro-v2.0.0';
-const STATIC_CACHE = 'tacticpro-static-v2.0.0';
-const DYNAMIC_CACHE = 'tacticpro-dynamic-v2.0.0';
-const API_CACHE = 'tacticpro-api-v2.0.0';
+const CACHE_NAME = 'tacticpro-v2.0.2';
+const STATIC_CACHE = 'tacticpro-static-v2.0.2';
+const DYNAMIC_CACHE = 'tacticpro-dynamic-v2.0.2';
+const API_CACHE = 'tacticpro-api-v2.0.2';
 
 // Archivos críticos para caché inmediato
 const CRITICAL_RESOURCES = [
   '/',
   '/index.html',
-  '/css/estilo-unificado.css',
+  '/css/estilo.css',
   '/js/main.js',
   '/js/freemiumController.js',
   '/js/playerManager.js',
@@ -36,16 +36,15 @@ const CRITICAL_RESOURCES = [
 
 // Archivos para caché progresivo
 const CACHEABLE_RESOURCES = [
-  '/admin-panel.html',
-  '/dev-panel.html',
-  '/payment-test.html',
-  '/css/mobile-fixes.css',
-  '/css/orientation-modal.css',
+  '/css/cardStyles.css',
+  '/css/freemium-styles.css',
   '/js/paymentManagerTest.js',
   '/js/configurationManager.js',
   '/js/tutorialManager.js',
   '/js/themeManager.js',
-  '/js/fullscreenManager.js'
+  '/js/fullscreenManager.js',
+  '/js/playerCardManager.js',
+  '/js/cardStyleManager.js'
 ];
 
 // APIs que se pueden cachear
@@ -57,20 +56,20 @@ const API_ENDPOINTS = [
 
 // 📦 INSTALACIÓN DEL SERVICE WORKER
 self.addEventListener('install', (event) => {
-  console.log('🚀 SW: Instalando Service Worker v2.0.0');
+  console.log('🚀 SW: Instalando Service Worker v2.0.1');
   
   event.waitUntil(
     Promise.all([
-      // Caché crítico inmediato
-      caches.open(STATIC_CACHE).then((cache) => {
+      // Caché crítico inmediato con manejo de errores
+      caches.open(STATIC_CACHE).then(async (cache) => {
         console.log('📦 SW: Cacheando recursos críticos');
-        return cache.addAll(CRITICAL_RESOURCES);
+        return cacheResourcesSafely(cache, CRITICAL_RESOURCES);
       }),
       
-      // Caché progresivo
-      caches.open(DYNAMIC_CACHE).then((cache) => {
+      // Caché progresivo con manejo de errores
+      caches.open(DYNAMIC_CACHE).then(async (cache) => {
         console.log('📂 SW: Preparando caché dinámico');
-        return cache.addAll(CACHEABLE_RESOURCES.slice(0, 5)); // Solo algunos inicialmente
+        return cacheResourcesSafely(cache, CACHEABLE_RESOURCES.slice(0, 5));
       }),
       
       // Configurar background sync
@@ -81,6 +80,30 @@ self.addEventListener('install', (event) => {
     ])
   );
 });
+
+// Función para cachear recursos de forma segura
+async function cacheResourcesSafely(cache, resources) {
+  const results = await Promise.allSettled(
+    resources.map(async (resource) => {
+      try {
+        const response = await fetch(resource);
+        if (response.ok) {
+          await cache.put(resource, response);
+          console.log(`✅ SW: Cacheado exitosamente: ${resource}`);
+        } else {
+          console.warn(`⚠️ SW: No se pudo cachear (${response.status}): ${resource}`);
+        }
+      } catch (error) {
+        console.warn(`❌ SW: Error cacheando: ${resource}`, error.message);
+      }
+    })
+  );
+  
+  const successful = results.filter(result => result.status === 'fulfilled').length;
+  const failed = results.filter(result => result.status === 'rejected').length;
+  
+  console.log(`📊 SW: Cache completado - Exitosos: ${successful}, Fallos: ${failed}`);
+}
 
 // 🔄 ACTIVACIÓN DEL SERVICE WORKER
 self.addEventListener('activate', (event) => {
@@ -216,8 +239,12 @@ async function handleAPIRequest(request) {
     
     if (networkResponse.ok) {
       // Cachear respuesta exitosa
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(API_CACHE);
+        cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.log('⚠️ SW: Error al cachear API response:', cacheError);
+      }
     }
     
     return networkResponse;
@@ -259,8 +286,12 @@ async function handleStaticResource(request) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.log('⚠️ SW: Error al cachear recurso estático:', cacheError);
+      }
     }
     
     return networkResponse;
@@ -276,8 +307,12 @@ async function handleHTMLRequest(request) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.log('⚠️ SW: Error al cachear HTML:', cacheError);
+      }
     }
     
     return networkResponse;
@@ -298,14 +333,21 @@ async function handleDynamicResource(request) {
   // Stale-while-revalidate para recursos dinámicos
   const cachedResponse = await caches.match(request);
   
-  const fetchPromise = fetch(request).then((networkResponse) => {
+  const fetchPromise = fetch(request).then(async (networkResponse) => {
     if (networkResponse.ok) {
-      const cache = caches.open(DYNAMIC_CACHE);
-      cache.then(c => c.put(request, networkResponse.clone()));
+      try {
+        // Clonar la respuesta antes de usar el cuerpo
+        const responseClone = networkResponse.clone();
+        const cache = await caches.open(DYNAMIC_CACHE);
+        await cache.put(request, responseClone);
+      } catch (error) {
+        console.log('⚠️ SW: Error al cachear recurso dinámico:', error);
+      }
     }
     return networkResponse;
   }).catch(() => {
     console.log('🌐 SW: Recurso dinámico no disponible');
+    return null;
   });
   
   return cachedResponse || fetchPromise;

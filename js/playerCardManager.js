@@ -76,6 +76,9 @@ class PlayerCardManager {
      * @returns {HTMLElement} Elemento DOM de la card
      */
     createPlayerCard(player, type = 'field', options = {}) {
+        console.log(`[PlayerCardManager][DEBUG] Creando tarjeta para jugador:`, player);
+        console.log(`[PlayerCardManager][DEBUG] Tipo: ${type}, ID del jugador: ${player.id}`);
+        
         const screenType = this.detectScreenType();
         const timestamp = Date.now();
         const cardId = `${type}-card-${player.id}-${screenType}-${timestamp}`;
@@ -89,14 +92,82 @@ class PlayerCardManager {
         cardElement.dataset.screenType = screenType;
         cardElement.dataset.createdAt = timestamp;
         
+        console.log(`[PlayerCardManager][DEBUG] Elemento creado con ID: ${player.id}`);
+        console.log(`[PlayerCardManager][DEBUG] Clase inicial: ${cardElement.className}`);
+        console.log(`[PlayerCardManager][DEBUG] Dataset playerId: ${cardElement.dataset.playerId}`);
+        
         // Agregar atributos de accesibilidad
         cardElement.setAttribute('role', 'button');
         cardElement.setAttribute('aria-label', `Jugador ${player.name} - ${screenType}`);
         cardElement.setAttribute('tabindex', '0');
         
-        // Crear estructura interna con identificadores únicos
-        const cardStructure = this.createCardStructure(player, type, cardId, screenType);
-        cardElement.innerHTML = cardStructure;
+        // USAR SIEMPRE EL SISTEMA CLÁSICO (más confiable)
+        console.log(`[PlayerCardManager][DEBUG] Usando sistema clásico para crear estructura HTML`);
+        
+        const playerName = player.name || `Jugador ${player.number || '?'}`;
+        const playerPosition = player.position || 'N/A';
+        const playerImage = player.image_url || 'img/default_player.png';
+        const playerJersey = player.jersey_number || player.number || '?';
+        const playerOverall = this.calculateOverall(player);
+        
+        if (type === 'field') {
+            cardElement.innerHTML = `
+                <div class="minicard-overall player-card-element" 
+                     data-element="overall" 
+                     data-player-id="${player.id}"
+                     title="Overall: ${playerOverall}">
+                    ${playerOverall}
+                </div>
+                <div class="minicard-position player-card-element" 
+                     data-element="position" 
+                     data-player-id="${player.id}"
+                     title="Posición: ${playerPosition}">
+                    ${playerPosition}
+                </div>
+                <img src="${playerImage}" 
+                     class="minicard-player-image player-card-element" 
+                     data-element="image" 
+                     data-player-id="${player.id}"
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="minicard-name player-card-element" 
+                     data-element="name" 
+                     data-player-id="${player.id}"
+                     title="Nombre: ${playerName}">
+                    ${playerName}
+                </div>
+                <div class="minicard-jersey-number player-card-element" 
+                     data-element="jersey" 
+                     data-player-id="${player.id}"
+                     title="Dorsal: ${playerJersey}">
+                    ${playerJersey}
+                </div>
+            `;
+        } else {
+            cardElement.innerHTML = `
+                <div class="minicard-overall player-card-element" 
+                     data-element="overall" 
+                     data-player-id="${player.id}"
+                     title="Overall: ${playerOverall}">
+                    ${playerOverall}
+                </div>
+                <img src="${playerImage}" 
+                     class="player-card-element" 
+                     data-element="image" 
+                     data-player-id="${player.id}"
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="player-name player-card-element" 
+                     data-element="name" 
+                     data-player-id="${player.id}"
+                     title="Nombre: ${playerName}">
+                    ${playerName}
+                </div>
+            `;
+        }
+        
+        console.log(`[PlayerCardManager][DEBUG] HTML generado:`, cardElement.innerHTML.substring(0, 200) + '...');
+        console.log(`[PlayerCardManager][DEBUG] Card creada final:`, cardElement);
         
         // Registrar la card
         this.registerCard(cardId, {
