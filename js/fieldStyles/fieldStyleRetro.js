@@ -1,5 +1,5 @@
 // fieldStyleRetro.js - Estilo retro/vintage de cancha
-export function drawRetroField(canvas, ctx) {
+function drawRetroField(canvas, ctx) {
     const cssWidth = parseFloat(canvas.style.width) || canvas.width;
     const cssHeight = parseFloat(canvas.style.height) || canvas.height;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -238,4 +238,15 @@ function addVintageEffects(ctx, width, height) {
     ctx.fillRect(0, 0, width, height);
     
     ctx.globalAlpha = 1;
+}
+
+// Registrar estilo en el sistema global
+if (window.styleRegistry) {
+    window.styleRegistry.registerFieldStyle('retro', {
+        name: 'Retro',
+        description: 'Estilo vintage de los 80s-90s',
+        icon: '📺',
+        drawFunction: drawRetroField
+    });
+    console.log('✅ Estilo de campo retro registrado');
 }

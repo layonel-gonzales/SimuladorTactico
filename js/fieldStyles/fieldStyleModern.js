@@ -1,5 +1,5 @@
 // fieldStyleModern.js - Estilo moderno de cancha
-export function drawModernField(canvas, ctx) {
+function drawModernField(canvas, ctx) {
     const cssWidth = parseFloat(canvas.style.width) || canvas.width;
     const cssHeight = parseFloat(canvas.style.height) || canvas.height;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -218,4 +218,15 @@ function drawTechnicalAreas(ctx, width, height, isMobile) {
     ctx.strokeRect(width * 0.95, height * 0.5 - areaLength/2, areaDepth, areaLength);
     
     ctx.globalAlpha = 1;
+}
+
+// Registrar estilo en el sistema global
+if (window.styleRegistry) {
+    window.styleRegistry.registerFieldStyle('modern', {
+        name: 'Moderno',
+        description: 'Estilo moderno con efecto 3D',
+        icon: '✨',
+        drawFunction: drawModernField
+    });
+    console.log('✅ Estilo de campo moderno registrado');
 }

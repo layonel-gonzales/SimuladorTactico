@@ -3,22 +3,11 @@
   "version": "1.0.0",
   "description": "Sistema de protección para Soccer Tactics",
   "scripts": {
-    "protect": "node protection/protect.js",
-    "build-production": "npm run protect && npm run minify",
-    "minify": "terser js/*.js --compress --mangle --output dist/app.min.js",
-    "obfuscate": "javascript-obfuscator js/ --output obfuscated/ --compact true --control-flow-flattening true",
-    "build-secure": "npm run obfuscate && npm run add-license-checks",
     "start": "node server/freemium-server.js",
     "dev": "nodemon server/freemium-server.js",
     "test": "echo \"Tests pendientes\" && exit 0",
     "install-deps": "npm install",
     "setup": "npm install && cp env.example .env && echo \"Configurar .env con tus claves de Stripe\""
-  },
-  "devDependencies": {
-    "javascript-obfuscator": "^4.0.0",
-    "terser": "^5.16.0",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",

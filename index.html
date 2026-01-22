@@ -74,6 +74,10 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
 <html lang="es">
 <head>
     <!-- SISTEMA FREEMIUM DE AUTENTICACIÓN - VERSION LIMPIA -->
+    <!-- 🎨 SISTEMA DE REGISTRO DE ESTILOS MODULARES -->
+    <script src="js/styleRegistry.js"></script>
+    
+    <!-- Sistema de autenticación -->
     <script src="js/freemiumAuthSystem-simple.js"></script>
     
     <!-- VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR -->
@@ -1110,6 +1114,18 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <!-- Theme Manager para modo claro/oscuro -->
     <script src="js/themeManager.js"></script>
     
+    <!-- 🎨 SISTEMA DE REGISTRO DE ESTILOS MODULARES -->
+    <script src="js/styleRegistry.js"></script>
+    
+    <!-- 🎨 Loader de estilos modulares (carga cardStyles y fieldStyles) -->
+    <script src="js/styleLoader.js"></script>
+    
+    <!-- 🎨 Gestor de estilos de cards (refactorizado) -->
+    <script src="js/cardStyleManager-refactored.js"></script>
+    
+    <!-- 🏟️ Gestor de estilos de campos (refactorizado) -->
+    <script src="js/fieldStyleManager-refactored.js"></script>
+    
     <!-- Player Card Manager para gestión unificada de cards -->
     <script src="js/playerCardManager.js"></script>
     
@@ -1137,9 +1153,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     
     <script type="module" src="js/main.js"></script>
     
-    <!-- 🎨 NUEVO: Sistema de estilos de cards -->
-    <script src="js/cardStyleManager.js"></script>
+    <!-- 🎨 Sistemas de UI de estilos (compatibles con nuevos managers) -->
     <script src="js/cardStyleUI.js"></script>
+    <script src="js/fieldStyleUI.js"></script>
     <script src="js/cardStyleInit.js"></script>
     
     <!-- Indicador de estado de usuario -->
@@ -1199,9 +1215,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     </script>
     
     <!-- Sistema de estilos de cancha - Integración directa -->
-    <script src="fieldStylesDirectIntegration.js"></script>
+    <!-- <script src="fieldStylesDirectIntegration.js"></script> -->
     
     <!-- Corrector de overflow para cards de jugadores -->
-    <script src="cardOverflowFix.js"></script>
+    <!-- <script src="cardOverflowFix.js"></script> -->
 </body>
 </html>

@@ -1,5 +1,5 @@
 // fieldStyleNight.js - Estilo nocturno de cancha
-export function drawNightField(canvas, ctx) {
+function drawNightField(canvas, ctx) {
     const cssWidth = parseFloat(canvas.style.width) || canvas.width;
     const cssHeight = parseFloat(canvas.style.height) || canvas.height;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -248,4 +248,15 @@ function drawFloodlights(ctx, width, height) {
     
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#ffffff';
+}
+
+// Registrar estilo en el sistema global
+if (window.styleRegistry) {
+    window.styleRegistry.registerFieldStyle('night', {
+        name: 'Nocturno',
+        description: 'Cancha iluminada por la noche',
+        icon: '🌙',
+        drawFunction: drawNightField
+    });
+    console.log('✅ Estilo de campo nocturno registrado');
 }

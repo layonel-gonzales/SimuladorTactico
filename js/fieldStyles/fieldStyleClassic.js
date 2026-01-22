@@ -1,5 +1,5 @@
 // fieldStyleClassic.js - Estilo clásico de cancha
-export function drawClassicField(canvas, ctx) {
+function drawClassicField(canvas, ctx) {
     const cssWidth = parseFloat(canvas.style.width) || canvas.width;
     const cssHeight = parseFloat(canvas.style.height) || canvas.height;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -132,4 +132,15 @@ function drawPenaltySpots(ctx, width, height, isMobile) {
     ctx.beginPath();
     ctx.arc(width * 0.83, height * 0.5, spotSize, 0, 2 * Math.PI);
     ctx.fill();
+}
+
+// Registrar estilo en el sistema global
+if (window.styleRegistry) {
+    window.styleRegistry.registerFieldStyle('classic', {
+        name: 'Clásico',
+        description: 'Estilo clásico de cancha de fútbol',
+        icon: '⚽',
+        drawFunction: drawClassicField
+    });
+    console.log('✅ Estilo de campo clásico registrado');
 }
