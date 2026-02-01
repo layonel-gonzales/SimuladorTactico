@@ -8,7 +8,6 @@ class StyleRegistry {
     constructor() {
         this.cardStyles = new Map();
         this.fieldStyles = new Map();
-        console.log('📋 StyleRegistry inicializado');
     }
 
     /**
@@ -36,7 +35,6 @@ class StyleRegistry {
             createFunction: styleConfig.createFunction
         });
 
-        console.log(`✅ Estilo de card registrado: ${id} (${styleConfig.name})`);
         return true;
     }
 
@@ -63,7 +61,6 @@ class StyleRegistry {
             drawFunction: styleConfig.drawFunction
         });
 
-        console.log(`✅ Estilo de campo registrado: ${id} (${styleConfig.name})`);
         return true;
     }
 
@@ -101,7 +98,6 @@ class StyleRegistry {
     removeCardStyle(id) {
         if (this.cardStyles.has(id)) {
             this.cardStyles.delete(id);
-            console.log(`🗑️ Estilo de card eliminado: ${id}`);
             return true;
         }
         return false;
@@ -113,7 +109,6 @@ class StyleRegistry {
     removeFieldStyle(id) {
         if (this.fieldStyles.has(id)) {
             this.fieldStyles.delete(id);
-            console.log(`🗑️ Estilo de campo eliminado: ${id}`);
             return true;
         }
         return false;
@@ -147,5 +142,3 @@ class StyleRegistry {
 
 // Crear instancia global singleton
 window.styleRegistry = new StyleRegistry();
-
-console.log('✅ StyleRegistry disponible en window.styleRegistry');

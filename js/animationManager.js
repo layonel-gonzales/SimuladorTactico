@@ -37,8 +37,6 @@ export default class AnimationManager {
         this.frames.push(this.getCurrentState());
         this.updateFrameIndicator();
         this.updateButtonsAvailability(); // ✨ Configurar estado inicial de botones
-        
-        console.log('AnimationManager: Inicializado correctamente');
     }
     
     setupDOMReferences() {
@@ -64,23 +62,11 @@ export default class AnimationManager {
         // Controles de frames
         if (this.btnPrev) {
             this.btnPrev.addEventListener('click', () => {
-                console.log('[AnimationManager] 🔴 Click en botón Previous');
-                console.log('[AnimationManager] Estado actual:', {
-                    currentFrame: this.currentFrame,
-                    totalFrames: this.frames.length,
-                    btnDisabled: this.btnPrev.disabled
-                });
                 this.gotoFrame(this.currentFrame - 1);
             });
         }
         if (this.btnNext) {
             this.btnNext.addEventListener('click', () => {
-                console.log('[AnimationManager] 🔴 Click en botón Next');
-                console.log('[AnimationManager] Estado actual:', {
-                    currentFrame: this.currentFrame,
-                    totalFrames: this.frames.length,
-                    btnDisabled: this.btnNext.disabled
-                });
                 this.gotoFrame(this.currentFrame + 1);
             });
         }
@@ -163,7 +149,6 @@ export default class AnimationManager {
             this.checkForAudioRecordingSuggestion();
         }
         
-        console.log(`[AnimationManager] Modo grabación: ${this.isRecordMode ? 'ACTIVADO' : 'DESACTIVADO'}`);
     }
     
     // ✨ NUEVA FUNCIÓN: Actualizar disponibilidad de botones según el estado
@@ -215,7 +200,6 @@ export default class AnimationManager {
                 'Necesitas al menos 2 frames para poder eliminar uno';
         }
         
-        console.log(`[AnimationManager] Botones actualizados - Frames: ${this.frames.length}, Grabando: ${isRecording}`);
     }
     
     // Guardar frame en modo grabación
@@ -235,7 +219,6 @@ export default class AnimationManager {
         this.updateFrameIndicator();
         this.updateButtonsAvailability(); // ✨ Actualizar botones cuando se graba automáticamente
         
-        console.log(`[AnimationManager] 🎬 Frame ${this.frames.length} guardado automáticamente durante grabación`);
     }
     
     getCurrentState() {
@@ -262,16 +245,11 @@ export default class AnimationManager {
     
     setStateFromFrame(frame) {
         if (!frame || !frame.players) {
-            console.log('[AnimationManager] ⚠️ Frame inválido:', frame);
             return;
-        }
-        
-        console.log('[AnimationManager] 🔄 Aplicando estado desde frame:', frame);
-        console.log('[AnimationManager] Players en frame:', frame.players.length);
+        }       
         
         // Restaurar posiciones de jugadores preservando toda la información
         const existingPlayers = this.getActivePlayers();
-        console.log('[AnimationManager] Players existentes:', existingPlayers.length);
         
         const newPlayers = frame.players.map(framePlayer => {
             // Buscar jugador existente
@@ -307,26 +285,20 @@ export default class AnimationManager {
             }
         });
         
-        console.log('[AnimationManager] 📋 Players finales para aplicar:', newPlayers.length);
-        
         this.setActivePlayers(newPlayers);
         this.ensureBallInPlayers();
         
         if (this.uiManager) {
-            console.log('[AnimationManager] 🖼️ Renderizando jugadores en el campo...');
             this.uiManager.renderPlayersOnPitch();
         } else {
             console.log('[AnimationManager] ⚠️ UIManager no disponible');
         }
-        
-        console.log('[AnimationManager] ✅ Estado del frame aplicado correctamente');
     }
     
     updateFrameIndicator() {
         if (this.frameIndicator) {
             const indicator = `${this.currentFrame + 1}/${this.frames.length}`;
             this.frameIndicator.textContent = indicator;
-            console.log(`[AnimationManager] 📊 Indicador actualizado: ${indicator}`);
         }
     }
     
@@ -349,7 +321,6 @@ export default class AnimationManager {
         this.updateFrameIndicator();
         this.updateButtonsAvailability(); // ✨ Actualizar botones después de agregar frame
         
-        console.log(`[AnimationManager] ✅ Nuevo frame agregado - Total: ${this.frames.length}, Actual: ${this.currentFrame + 1}`);
         
         // Sugerir grabación de audio cuando se tienen suficientes frames
         this.checkForAudioRecordingSuggestion();
@@ -358,7 +329,6 @@ export default class AnimationManager {
     deleteCurrentFrame() {
         // No permitir eliminar si solo hay un frame
         if (this.frames.length <= 1) {
-            console.log('[AnimationManager] ❌ No se puede eliminar: debe haber al menos 1 frame');
             return;
         }
         
@@ -367,8 +337,6 @@ export default class AnimationManager {
         
         // Eliminar el frame actual
         this.frames.splice(this.currentFrame, 1);
-        
-        console.log(`[AnimationManager] 🗑️ Frame ${frameToDelete}/${totalFrames} eliminado - Nuevos totales: ${this.frames.length}`);
         
         // Ajustar el currentFrame después de eliminar
         if (this.currentFrame >= this.frames.length) {
@@ -385,23 +353,17 @@ export default class AnimationManager {
         this.updateFrameIndicator();
         this.updateButtonsAvailability();
         
-        console.log(`[AnimationManager] 📍 Ahora en frame ${this.currentFrame + 1}/${this.frames.length}`);
     }
     
     gotoFrame(idx) {
         if (idx < 0 || idx >= this.frames.length) {
-            console.log(`[AnimationManager] ⚠️ Navegación inválida: ${idx + 1} (disponibles: 1-${this.frames.length})`);
             return;
         }
-        
-        console.log(`[AnimationManager] 🚀 Iniciando navegación desde frame ${this.currentFrame + 1} hacia frame ${idx + 1}`);
-        
+             
         this.saveCurrentFrame();
         this.currentFrame = idx;
         this.setStateFromFrame(this.frames[this.currentFrame]);
         this.updateFrameIndicator();
-        
-        console.log(`[AnimationManager] 📍 Navegado a frame ${idx + 1}/${this.frames.length}`);
     }
     
     // Función de interpolación lineal
@@ -525,7 +487,6 @@ export default class AnimationManager {
             this.suggestAudioRecording();
         }
         
-        console.log('[AnimationManager] Animación detenida');
     }
     
     // Método para verificar si se debe sugerir grabación de audio
@@ -567,8 +528,6 @@ export default class AnimationManager {
                 audioBtn.style.animation = '';
                 audioBtn.title = 'Grabar audio';
             }, 6000);
-            
-            console.log('[AnimationManager] 💡 Tip: Se puede grabar audio para explicar la animación');
         }
     }
     
@@ -728,8 +687,6 @@ export default class AnimationManager {
             .filter(p => !p.isBall && p.type !== 'ball' && p.role !== 'ball' && p.id !== 'ball')
             .map(p => p.id);
         
-        console.log('[AnimationManager] Exportando con jugadores:', selectedPlayerIds);
-        
         const exportData = {
             version: '2.0',
             type: 'animation',
@@ -747,7 +704,6 @@ export default class AnimationManager {
         // Incluir audio solo para exportación JSON (no para URLs)
         if (this.audioManager && this.audioManager.hasRecordedAudio()) {
             exportData.audio = this.audioManager.getAudioDataForExport();
-            console.log('[AnimationManager] Audio incluido en exportación');
         }
         
         return exportData;
@@ -784,10 +740,8 @@ export default class AnimationManager {
             // Cargar audio si está disponible
             if (data.audio && this.audioManager) {
                 this.audioManager.loadAudioFromData(data.audio);
-                console.log('[AnimationManager] Audio cargado desde importación');
             }
             
-            console.log(`[AnimationManager] Animación importada: ${this.frames.length} frames`);
             return true;
             
         } catch (error) {
@@ -830,7 +784,6 @@ export default class AnimationManager {
             this.drawingManager.redraw();
         }
         
-        console.log('[AnimationManager] Animación reseteada, manteniéndose en modo animación');
     }
     
     // Getters para otros módulos
@@ -898,7 +851,6 @@ export default class AnimationManager {
 
             // Iniciar grabación
             mediaRecorder.start();
-            console.log('[AnimationManager] Iniciando captura de video de la animación real');
 
             // Reproducir la animación REAL de la aplicación mientras se graba
             await this.playAnimationForRecording();
@@ -906,7 +858,6 @@ export default class AnimationManager {
             // Detener grabación
             setTimeout(() => {
                 mediaRecorder.stop();
-                console.log('[AnimationManager] Captura de video completada');
             }, 1000); // Pequeña pausa al final
 
         } catch (error) {
@@ -942,7 +893,6 @@ export default class AnimationManager {
                 audio: false // Audio lo manejaremos por separado
             });
 
-            console.log('[AnimationManager] Captura de pantalla iniciada');
             return screenStream;
 
         } catch (error) {
@@ -1020,8 +970,7 @@ export default class AnimationManager {
 
             // Programar inicio del audio sincronizado
             this.scheduledAudioSource = audioSource;
-            
-            console.log('[AnimationManager] Audio preparado para sincronización');
+
             return combinedStream;
 
         } catch (error) {
@@ -1046,7 +995,6 @@ export default class AnimationManager {
         // Iniciar audio si está disponible
         if (this.scheduledAudioSource) {
             this.scheduledAudioSource.start(0);
-            console.log('[AnimationManager] Audio iniciado sincrónicamente');
         }
 
         // Reproducir la animación normal
@@ -1056,7 +1004,6 @@ export default class AnimationManager {
         await this.sleep(1500);
         
         this.isRecordingVideo = false;
-        console.log('[AnimationManager] Animación para grabación completada');
     }
 
     // Versión síncrona de playAnimation para grabación
@@ -1366,9 +1313,6 @@ export default class AnimationManager {
             // Para una implementación completa, aquí usarías FFmpeg.js
             // Por ahora, descargaremos como WebM (compatible con la mayoría de navegadores modernos)
             this.downloadVideo(webmBlob, 'webm');
-            
-            // TODO: Implementar conversión real a MP4 con FFmpeg.js
-            console.log('[AnimationManager] Video exportado como WebM (compatible con MP4)');
             
         } catch (error) {
             console.error('[AnimationManager] Error en conversión:', error);

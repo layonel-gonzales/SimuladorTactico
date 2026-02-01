@@ -88,8 +88,6 @@ class SimpleTutorial {
         // Agregar estilo para difuminar todos los elementos excepto el destacado
         this.addTutorialStyles();
         
-        console.log(`[Tutorial] Overlay creado - Menu top: ${menuTop}px, Menu height: ${menuHeight}px`);
-        
         // Escuchar cambios de tamaño de ventana para reajustar overlay
         this.resizeHandler = () => this.updateOverlayHeight();
         window.addEventListener('resize', this.resizeHandler);
@@ -324,7 +322,6 @@ class SimpleTutorial {
         this.tooltip.style.transform = 'none';
         this.tooltip.style.position = 'fixed';
         
-        console.log(`[Tutorial] Tooltip posicionado en: top=${top}px, left=${left}px`);
     }
 
     // Configurar eventos del tooltip
@@ -458,7 +455,6 @@ class SimpleTutorial {
             this.resizeHandler = null;
         }
         
-        console.log('[Tutorial] ✅ Tutorial completado y limpiado');
     }
 }
 
@@ -538,4 +534,3 @@ window.Shepherd = {
     Tour: ShepherdTour
 };
 
-console.log('✅ Simple Tutorial System cargado como reemplazo de Shepherd.js');

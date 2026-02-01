@@ -24,7 +24,6 @@ export default class AudioManager {
     init() {
         this.setupDOMReferences();
         this.setupEventListeners();
-        console.log('AudioManager: Inicializado correctamente');
     }
     
     setupDOMReferences() {
@@ -56,9 +55,7 @@ export default class AudioManager {
     }
     
     async startRecording() {
-        try {
-            console.log('[AudioManager] Solicitando acceso al micrófono...');
-            
+        try {         
             this.audioStream = await navigator.mediaDevices.getUserMedia({ 
                 audio: {
                     echoCancellation: true,
@@ -99,8 +96,6 @@ export default class AudioManager {
             this.isRecording = true;
             this.updateRecordingUI(true);
             
-            console.log('[AudioManager] Grabación de audio iniciada');
-            
         } catch (error) {
             console.error('[AudioManager] Error al acceder al micrófono:', error);
             this.showAudioError('No se pudo acceder al micrófono. Verifique los permisos.');
@@ -112,7 +107,6 @@ export default class AudioManager {
             this.mediaRecorder.stop();
             this.isRecording = false;
             this.updateRecordingUI(false);
-            console.log('[AudioManager] Grabación de audio detenida');
         }
     }
     
@@ -129,7 +123,6 @@ export default class AudioManager {
         const reader = new FileReader();
         reader.onload = () => {
             this.recordedAudioBase64 = reader.result;
-            console.log('[AudioManager] Audio convertido a base64');
             this.updatePlayButtonState(true);
         };
         reader.readAsDataURL(this.recordedAudioBlob);
@@ -169,7 +162,6 @@ export default class AudioManager {
             this.isPlaying = false;
         });
         
-        console.log('[AudioManager] Reproduciendo audio grabado');
     }
     
     // Método alias para compatibilidad
@@ -196,7 +188,6 @@ export default class AudioManager {
         this.recordedAudioBase64 = null;
         this.currentAudio = null;
         this.updatePlayButtonState(false);
-        console.log('[AudioManager] Audio limpiado');
     }
     
     updateRecordingUI(isRecording) {
@@ -258,7 +249,6 @@ export default class AudioManager {
             .then(blob => {
                 this.recordedAudioBlob = blob;
                 this.updatePlayButtonState(true);
-                console.log('[AudioManager] Audio cargado desde datos importados');
             })
             .catch(error => {
                 console.error('[AudioManager] Error al cargar audio:', error);
@@ -272,7 +262,6 @@ export default class AudioManager {
         this.recordedAudioBase64 = null;
         this.currentAudio = null;
         this.updatePlayButtonState(false);
-        console.log('[AudioManager] Audio limpiado');
     }
     
     getAudioDuration() {

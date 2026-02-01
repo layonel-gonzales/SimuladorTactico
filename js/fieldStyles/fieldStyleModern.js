@@ -4,8 +4,6 @@ function drawModernField(canvas, ctx) {
     const cssHeight = parseFloat(canvas.style.height) || canvas.height;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                      window.innerWidth <= 768 || cssWidth <= 768;
-
-    console.log(`🏟️ Dibujando campo estilo MODERNO - ${cssWidth}x${cssHeight}`);
     
     // Limpiar canvas
     ctx.clearRect(0, 0, cssWidth, cssHeight);
@@ -235,5 +233,4 @@ if (window.styleRegistry) {
         icon: '✨',
         drawFunction: drawModernField
     });
-    console.log('✅ Estilo de campo moderno registrado');
 }

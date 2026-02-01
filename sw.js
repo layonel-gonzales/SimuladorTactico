@@ -56,19 +56,16 @@ const API_ENDPOINTS = [
 
 // 📦 INSTALACIÓN DEL SERVICE WORKER
 self.addEventListener('install', (event) => {
-  console.log('🚀 SW: Instalando Service Worker v2.0.1');
   
   event.waitUntil(
     Promise.all([
       // Caché crítico inmediato con manejo de errores
       caches.open(STATIC_CACHE).then(async (cache) => {
-        console.log('📦 SW: Cacheando recursos críticos');
         return cacheResourcesSafely(cache, CRITICAL_RESOURCES);
       }),
       
       // Caché progresivo con manejo de errores
       caches.open(DYNAMIC_CACHE).then(async (cache) => {
-        console.log('📂 SW: Preparando caché dinámico');
         return cacheResourcesSafely(cache, CACHEABLE_RESOURCES.slice(0, 5));
       }),
       
@@ -89,7 +86,6 @@ async function cacheResourcesSafely(cache, resources) {
         const response = await fetch(resource);
         if (response.ok) {
           await cache.put(resource, response);
-          console.log(`✅ SW: Cacheado exitosamente: ${resource}`);
         } else {
           console.warn(`⚠️ SW: No se pudo cachear (${response.status}): ${resource}`);
         }
@@ -101,13 +97,10 @@ async function cacheResourcesSafely(cache, resources) {
   
   const successful = results.filter(result => result.status === 'fulfilled').length;
   const failed = results.filter(result => result.status === 'rejected').length;
-  
-  console.log(`📊 SW: Cache completado - Exitosos: ${successful}, Fallos: ${failed}`);
 }
 
 // 🔄 ACTIVACIÓN DEL SERVICE WORKER
 self.addEventListener('activate', (event) => {
-  console.log('✅ SW: Activando Service Worker');
   
   event.waitUntil(
     Promise.all([
@@ -142,7 +135,6 @@ self.addEventListener('fetch', (event) => {
 
 // 🔄 BACKGROUND SYNC PARA TÁCTICAS
 self.addEventListener('sync', (event) => {
-  console.log('🔄 SW: Background sync disparado:', event.tag);
   
   if (event.tag === 'sync-tactics') {
     event.waitUntil(syncPendingTactics());
@@ -155,7 +147,6 @@ self.addEventListener('sync', (event) => {
 
 // 📨 PUSH NOTIFICATIONS
 self.addEventListener('push', (event) => {
-  console.log('📨 SW: Push notification recibida');
   
   const options = {
     body: 'Tienes nuevas actualizaciones en tus tácticas colaborativas',
@@ -195,7 +186,6 @@ self.addEventListener('push', (event) => {
 
 // 🖱️ CLICK EN NOTIFICACIONES
 self.addEventListener('notificationclick', (event) => {
-  console.log('🖱️ SW: Click en notificación');
   
   event.notification.close();
   
@@ -354,8 +344,6 @@ async function handleDynamicResource(request) {
 }
 
 async function syncPendingTactics() {
-  console.log('🔄 SW: Sincronizando tácticas pendientes');
-  
   try {
     // Obtener tácticas pendientes de IndexedDB
     const pendingTactics = await getPendingTacticsFromDB();
@@ -373,7 +361,6 @@ async function syncPendingTactics() {
         
         if (response.ok) {
           await removePendingTacticFromDB(tactic.id);
-          console.log('✅ SW: Táctica sincronizada:', tactic.id);
         }
       } catch (error) {
         console.log('❌ SW: Error sincronizando táctica:', error);
@@ -385,7 +372,6 @@ async function syncPendingTactics() {
 }
 
 async function syncAnalytics() {
-  console.log('📊 SW: Sincronizando analytics');
   
   try {
     const pendingEvents = await getPendingAnalyticsFromDB();
@@ -399,7 +385,6 @@ async function syncAnalytics() {
       
       if (response.ok) {
         await clearPendingAnalyticsFromDB();
-        console.log('✅ SW: Analytics sincronizados');
       }
     }
   } catch (error) {
@@ -413,8 +398,6 @@ async function syncUserPreferences() {
 }
 
 async function handleSharedContent(request) {
-  console.log('📤 SW: Manejando contenido compartido');
-  
   const formData = await request.formData();
   const title = formData.get('title');
   const text = formData.get('text');
@@ -453,7 +436,6 @@ async function cleanOldCaches() {
   
   return Promise.all(
     oldCaches.map(cacheName => {
-      console.log('🗑️ SW: Eliminando caché antiguo:', cacheName);
       return caches.delete(cacheName);
     })
   );
@@ -482,7 +464,6 @@ async function notifyClientsOfUpdate() {
 }
 
 function setupBackgroundSync() {
-  console.log('🔄 SW: Configurando background sync');
   // El background sync se registra cuando sea necesario
   return Promise.resolve();
 }
@@ -512,5 +493,3 @@ async function saveSharedContentToDB(data) {
   // Implementar guardado de contenido compartido
   return Promise.resolve();
 }
-
-console.log('🎯 SW: Service Worker Avanzado cargado correctamente');
