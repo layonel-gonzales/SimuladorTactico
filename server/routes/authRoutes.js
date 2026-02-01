@@ -2,37 +2,36 @@
  * ==========================================
  * 🔐 AUTH ROUTES - Rutas de Autenticación
  * ==========================================
+ * Con validación de inputs y rate limiting
+ * ==========================================
  */
 
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const UserModel = require('../models/userModel');
 const { query } = require('../database');
 
+// Middleware de seguridad y validación
+const { loginLimiter, registerLimiter } = require('../middleware/security');
+const { validateRegister, validateLogin } = require('../middleware/validation');
+
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'simulador_tactico_secret_key_2024';
+// Validar que JWT_SECRET esté configurado correctamente
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+    console.warn('[Auth] ⚠️ JWT_SECRET débil o no configurado');
+}
 const JWT_EXPIRES_IN = '7d';
 
 /**
  * POST /api/auth/register - Registrar usuario
+ * Con rate limiting y validación de inputs
  */
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, validateRegister, async (req, res) => {
     try {
         const { email, password, nombre, apellido, nombreUsuario } = req.body;
-        
-        // Validaciones
-        if (!email || !password) {
-            return res.status(400).json({ 
-                error: 'Email y contraseña son requeridos' 
-            });
-        }
-        
-        if (password.length < 6) {
-            return res.status(400).json({ 
-                error: 'La contraseña debe tener al menos 6 caracteres' 
-            });
-        }
         
         // Verificar si el email ya existe
         const existingUser = await UserModel.findByEmail(email);
@@ -51,14 +50,14 @@ router.post('/register', async (req, res) => {
             nombreUsuario
         });
         
-        // Log de actividad
+        // Log de actividad (sanitizado)
         await query(`
             INSERT INTO LogActividad (UsuarioId, Accion, Descripcion, IpAddress, UserAgent)
             VALUES (@userId, 'register', 'Usuario registrado', @ip, @userAgent)
         `, {
             userId: user.UsuarioId,
-            ip: req.ip,
-            userAgent: req.get('User-Agent')
+            ip: (req.ip || '').substring(0, 45), // Limitar longitud
+            userAgent: (req.get('User-Agent') || '').substring(0, 255) // Limitar longitud
         });
         
         // Generar token
@@ -87,20 +86,17 @@ router.post('/register', async (req, res) => {
 
 /**
  * POST /api/auth/login - Iniciar sesión
+ * Con rate limiting estricto y validación
  */
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, validateLogin, async (req, res) => {
     try {
         const { email, password } = req.body;
-        
-        if (!email || !password) {
-            return res.status(400).json({ 
-                error: 'Email y contraseña son requeridos' 
-            });
-        }
         
         // Buscar usuario
         const user = await UserModel.findByEmail(email);
         if (!user) {
+            // Usar tiempo constante para prevenir timing attacks
+            await UserModel.fakePasswordCheck();
             return res.status(401).json({ 
                 error: 'Credenciales inválidas' 
             });
@@ -130,15 +126,22 @@ router.post('/login', async (req, res) => {
             VALUES (@userId, 'login', 'Inicio de sesión', @ip, @userAgent)
         `, {
             userId: user.UsuarioId,
-            ip: req.ip,
-            userAgent: req.get('User-Agent')
+            ip: (req.ip || '').substring(0, 45),
+            userAgent: (req.get('User-Agent') || '').substring(0, 255)
         });
         
-        // Generar token
+        // Generar token con claims mínimos
         const token = jwt.sign(
-            { userId: user.UsuarioId, email: user.Email },
+            { 
+                userId: user.UsuarioId, 
+                email: user.Email,
+                iat: Math.floor(Date.now() / 1000)
+            },
             JWT_SECRET,
-            { expiresIn: JWT_EXPIRES_IN }
+            { 
+                expiresIn: JWT_EXPIRES_IN,
+                issuer: 'simulador-tactico'
+            }
         );
         
         // Obtener features del plan

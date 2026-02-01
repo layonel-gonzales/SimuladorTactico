@@ -3,6 +3,7 @@
  * 🚀 SERVIDOR PRINCIPAL - SIMULADOR TÁCTICO
  * ==========================================
  * Servidor Express con SQL Server
+ * Con medidas de seguridad implementadas
  * ==========================================
  */
 
@@ -13,6 +14,16 @@ const cors = require('cors');
 const path = require('path');
 const { testConnection, closeConnection } = require('./database');
 
+// Middleware de seguridad
+const {
+    helmetConfig,
+    generalLimiter,
+    parameterPollutionProtection,
+    securityLogger,
+    sanitizeInputs,
+    additionalSecurityHeaders
+} = require('./middleware/security');
+
 // Rutas
 const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
@@ -21,21 +32,77 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// MIDDLEWARES
+// VALIDACIÓN DE CONFIGURACIÓN CRÍTICA
+// ==========================================
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.includes('CAMBIAR') || process.env.JWT_SECRET.length < 32) {
+    if (process.env.NODE_ENV === 'production') {
+        console.error('❌ FATAL: JWT_SECRET no está configurado correctamente');
+        console.error('   Genera uno con: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
+        process.exit(1);
+    } else {
+        console.warn('⚠️  ADVERTENCIA: JWT_SECRET débil o no configurado (solo permitido en desarrollo)');
+    }
+}
+
+// ==========================================
+// MIDDLEWARES DE SEGURIDAD
 // ==========================================
 
-// CORS
+// Helmet - Headers de seguridad HTTP
+app.use(helmetConfig);
+
+// Trust proxy (necesario para rate limiting detrás de proxy/load balancer)
+app.set('trust proxy', 1);
+
+// CORS - Configuración según entorno
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_URL].filter(Boolean)
+    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://localhost:8080'];
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500'],
-    credentials: true
+    origin: (origin, callback) => {
+        // Permitir requests sin origin (mobile apps, curl, etc.) solo en desarrollo
+        if (!origin && process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`[CORS] Origen bloqueado: ${origin}`);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    maxAge: 86400 // Cache preflight por 24 horas
 }));
 
-// Parsear JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Protección contra HTTP Parameter Pollution
+app.use(parameterPollutionProtection);
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname, '..')));
+// Rate limiting general
+app.use('/api/', generalLimiter);
+
+// Parsear JSON con límite de tamaño
+app.use(express.json({ limit: '10kb' })); // Limitar tamaño del body
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// Logging de seguridad (detecta patrones sospechosos)
+app.use(securityLogger);
+
+// Sanitizar inputs
+app.use(sanitizeInputs);
+
+// Headers adicionales de seguridad
+app.use(additionalSecurityHeaders);
+
+// Servir archivos estáticos con headers de seguridad
+app.use(express.static(path.join(__dirname, '..'), {
+    dotfiles: 'deny', // No servir archivos ocultos
+    index: ['index.html'],
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0
+}));
 
 // Logging de requests (desarrollo)
 if (process.env.NODE_ENV !== 'production') {

@@ -94,6 +94,15 @@ class UserModel {
     }
     
     /**
+     * Fake password check para prevenir timing attacks
+     * Simula el tiempo de verificación cuando el usuario no existe
+     */
+    static async fakePasswordCheck() {
+        const fakeHash = '$2b$10$abcdefghijklmnopqrstuvwxyz012345678901234567890';
+        await bcrypt.compare('fakepassword', fakeHash).catch(() => {});
+    }
+    
+    /**
      * Actualizar último acceso
      */
     static async updateLastAccess(userId) {

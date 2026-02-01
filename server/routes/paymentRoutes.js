@@ -2,6 +2,8 @@
  * ==========================================
  * 💳 PAYMENT ROUTES - Rutas de Pagos
  * ==========================================
+ * Con validación de inputs y rate limiting
+ * ==========================================
  */
 
 const express = require('express');
@@ -9,6 +11,10 @@ const PaymentModel = require('../models/paymentModel');
 const UserModel = require('../models/userModel');
 const { authenticateToken } = require('./authRoutes');
 const { query } = require('../database');
+
+// Middleware de seguridad y validación
+const { paymentLimiter } = require('../middleware/security');
+const { validatePaymentMethod, validateSubscription } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -40,8 +46,9 @@ router.get('/methods', authenticateToken, async (req, res) => {
 
 /**
  * POST /api/payments/methods - Agregar método de pago
+ * Con rate limiting y validación
  */
-router.post('/methods', authenticateToken, async (req, res) => {
+router.post('/methods', authenticateToken, paymentLimiter, validatePaymentMethod, async (req, res) => {
     try {
         const {
             tipoMetodoId, ultimosDigitos, marcaTarjeta, nombreTitular,
@@ -90,16 +97,11 @@ router.get('/subscription', authenticateToken, async (req, res) => {
 
 /**
  * POST /api/payments/subscribe - Crear suscripción / Upgrade
+ * Con rate limiting y validación
  */
-router.post('/subscribe', authenticateToken, async (req, res) => {
+router.post('/subscribe', authenticateToken, paymentLimiter, validateSubscription, async (req, res) => {
     try {
         const { planId, metodoPagoId } = req.body;
-        
-        if (!planId || !metodoPagoId) {
-            return res.status(400).json({
-                error: 'planId y metodoPagoId son requeridos'
-            });
-        }
         
         // Obtener precio del plan
         const plansResult = await query(`
