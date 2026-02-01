@@ -18,11 +18,11 @@ const helmetConfig = helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://js.stripe.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "blob:", "https:"],
-            connectSrc: ["'self'", "http://localhost:*", "https://api.stripe.com"],
+            connectSrc: ["'self'", "http://localhost:*", "https://api.stripe.com", "https://cdn.jsdelivr.net"],
             frameSrc: ["'self'", "https://js.stripe.com"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null

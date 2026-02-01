@@ -537,6 +537,165 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- COMPARTIR IMAGEN DEL CAMPO ---
+    const sharePitchBtn = document.getElementById('share-pitch-btn');
+    if (sharePitchBtn) {
+        sharePitchBtn.addEventListener('click', async () => {
+            try {
+                console.log('[Main] Iniciando captura de imagen del campo...');
+                
+                const pitchContainer = document.getElementById('pitch-container');
+                const footballFieldCanvas = document.getElementById('football-field');
+                const drawingCanvasEl = document.getElementById('drawing-canvas');
+                
+                if (!pitchContainer || !footballFieldCanvas) {
+                    throw new Error('No se encontró el contenedor del campo');
+                }
+                
+                // Mostrar indicador de carga
+                sharePitchBtn.disabled = true;
+                const originalIcon = sharePitchBtn.innerHTML;
+                sharePitchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                let resultCanvas;
+                
+                // Método 1: Usar html2canvas si está disponible (captura TODO incluyendo tokens)
+                if (typeof html2canvas !== 'undefined') {
+                    console.log('[Main] Usando html2canvas para captura completa...');
+                    
+                    resultCanvas = await html2canvas(pitchContainer, {
+                        backgroundColor: null,
+                        scale: window.devicePixelRatio || 1,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        // Ignorar elementos que no queremos en la captura
+                        ignoreElements: (element) => {
+                            return element.classList?.contains('center-logo-watermark');
+                        }
+                    });
+                } else {
+                    // Método 2: Fallback manual combinando canvases
+                    console.log('[Main] html2canvas no disponible, usando método manual...');
+                    
+                    resultCanvas = document.createElement('canvas');
+                    const ctx = resultCanvas.getContext('2d');
+                    const dpr = window.devicePixelRatio || 1;
+                    
+                    resultCanvas.width = footballFieldCanvas.width;
+                    resultCanvas.height = footballFieldCanvas.height;
+                    
+                    // Dibujar campo
+                    ctx.drawImage(footballFieldCanvas, 0, 0);
+                    
+                    // Dibujar líneas
+                    if (drawingCanvasEl) {
+                        ctx.drawImage(drawingCanvasEl, 0, 0);
+                    }
+                    
+                    // Dibujar tokens como rectángulos con info básica
+                    const playerTokens = document.querySelectorAll('.player-token');
+                    const fieldRect = footballFieldCanvas.getBoundingClientRect();
+                    
+                    for (const token of playerTokens) {
+                        const tokenRect = token.getBoundingClientRect();
+                        const x = (tokenRect.left - fieldRect.left) * dpr;
+                        const y = (tokenRect.top - fieldRect.top) * dpr;
+                        const width = tokenRect.width * dpr;
+                        const height = tokenRect.height * dpr;
+                        
+                        // Dibujar representación del token
+                        ctx.save();
+                        
+                        // Fondo semi-transparente
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                        ctx.fillRect(x, y, width, height);
+                        
+                        // Círculo para la foto
+                        const centerX = x + width / 2;
+                        const centerY = y + height * 0.35;
+                        const radius = Math.min(width, height) * 0.25;
+                        
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Número del jugador
+                        const number = token.querySelector('.player-number')?.textContent || 
+                                       token.querySelector('.minicard-number')?.textContent || '';
+                        if (number) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = `bold ${radius}px Arial`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(number, centerX, centerY);
+                        }
+                        
+                        // Nombre del jugador
+                        const name = token.querySelector('.minicard-name')?.textContent || 
+                                     token.querySelector('.player-name')?.textContent || '';
+                        if (name) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = `bold ${height * 0.1}px Arial`;
+                            ctx.textAlign = 'center';
+                            ctx.fillText(name.substring(0, 10), centerX, y + height * 0.75);
+                        }
+                        
+                        ctx.restore();
+                    }
+                }
+                
+                // Convertir a blob
+                const blob = await new Promise(resolve => resultCanvas.toBlob(resolve, 'image/png', 1.0));
+                
+                // Intentar usar Web Share API si está disponible (móviles)
+                if (navigator.share && navigator.canShare) {
+                    try {
+                        const file = new File([blob], 'tactica.png', { type: 'image/png' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Mi Táctica de Fútbol',
+                                text: 'Creada con Simulador Táctico'
+                            });
+                            console.log('[Main] Imagen compartida exitosamente');
+                        } else {
+                            throw new Error('No se puede compartir archivos');
+                        }
+                    } catch (shareError) {
+                        // Si falla compartir, descargar
+                        console.log('[Main] Share API no disponible, descargando...');
+                        downloadImage(blob);
+                    }
+                } else {
+                    // Descargar la imagen
+                    downloadImage(blob);
+                }
+                
+                function downloadImage(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tactica_${new Date().toISOString().slice(0,10)}_${Date.now()}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    console.log('[Main] Imagen descargada exitosamente');
+                }
+                
+            } catch (error) {
+                console.error('[Main] Error al compartir imagen:', error);
+                alert('Error al generar la imagen. Por favor, intenta de nuevo.');
+            } finally {
+                // Restaurar botón
+                sharePitchBtn.disabled = false;
+                sharePitchBtn.innerHTML = '<i class="fas fa-image"></i>';
+            }
+        });
+    }
+
 
     // Inicializar UI
     uiManager.init({
@@ -581,13 +740,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         footballFieldCanvas.style.width = cssWidth + 'px';
         footballFieldCanvas.style.height = cssHeight + 'px';
         
-        // Sincronizar el drawing-canvas con las mismas dimensiones
-        if (drawingCanvas) {
-            drawingCanvas.width = canvasWidth;
-            drawingCanvas.height = canvasHeight;
-            drawingCanvas.style.width = cssWidth + 'px';
-            drawingCanvas.style.height = cssHeight + 'px';
-        }
+        // NOTA: El drawing-canvas se sincroniza a través de drawingManager.resizeCanvas()
+        // que es llamado por el UIManager en el evento resize
+        // Ya no sincronizamos aquí para evitar conflictos con el contexto escalado
         
         // Escalar el contexto para que coincida con el ratio de píxeles
         // IMPORTANTE: Limpiar transformaciones previas
@@ -621,6 +776,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         resizeFieldTimeout = setTimeout(() => {
             console.log('[Main] Redimensionando campo para:', isMobile ? 'MÓVIL' : 'ESCRITORIO');
             renderFootballField(); // Redibujar el fondo del campo
+            // Sincronizar el canvas de dibujo después de redimensionar el campo
+            if (drawingManager) {
+                drawingManager.resizeCanvas();
+            }
         }, delay);
     }
     
@@ -639,6 +798,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Ejecutar renderizado inicial del campo
     renderFootballField();
+    
+    // IMPORTANTE: Sincronizar el canvas de dibujo después del renderizado inicial
+    if (drawingManager) {
+        drawingManager.resizeCanvas();
+    }
 
     // Cargar jugadores iniciales en el modal de selección
     playerManager.renderPlayerSelectionList();

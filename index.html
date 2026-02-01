@@ -1054,6 +1054,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- html2canvas para captura de imágenes -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
     <!-- Simple Tutorial System - Reemplazo local de Shepherd.js -->
     <script src="js/libs/simple-tutorial.js"></script>
     
@@ -1110,17 +1113,7 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script src="js/pwaManager.js"></script>
     <script src="js/pwaIntegration.js"></script>
     
-    <!-- PWA VERIFICATION (Development Only) -->
-    <script>
-        // Solo cargar verificación en modo desarrollo
-        if (window.location.hostname === 'localhost' || 
-            window.location.hostname === '127.0.0.1' ||
-            window.location.search.includes('dev=true')) {
-            const script = document.createElement('script');
-            script.src = 'js/pwaVerification.js';
-            document.head.appendChild(script);
-        }
-    </script>
+    <!-- PWA VERIFICATION removido - archivo no existe -->
     
     <!-- PASO 6: Main (módulo ES6, se ejecuta después de todo) -->
     <script type="module" src="js/main.js"></script>
@@ -1176,10 +1169,7 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         // Aquí iría la lógica de tácticas avanzadas
       };
     </script>
-    <script type="module">
-        import ShareManager from './js/shareManager.js';
-        window.shareManager = new ShareManager();
-    </script>
+    <!-- ShareManager removido - funcionalidad integrada en main.js -->
     
     <!-- Sistema de estilos de cancha - Integración directa -->
     <!-- <script src="fieldStylesDirectIntegration.js"></script> -->

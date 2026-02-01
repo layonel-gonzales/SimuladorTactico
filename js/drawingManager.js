@@ -224,34 +224,32 @@ export default class DrawingManager {
     getMousePos(e) {
         const rect = this.canvas.getBoundingClientRect();
         
-        // CORRECCIÓN SIMPLIFICADA: Las coordenadas del evento ya están en CSS pixels
-        // El canvas maneja internamente el scaling con DPR, así que no necesitamos ajustar aquí
+        // El canvas tiene dimensiones internas (width/height attributes) diferentes de las CSS
+        // El contexto está escalado por DPR, así que necesitamos coordenadas en "espacio CSS"
+        // que luego el contexto escalará automáticamente
+        
+        // Coordenadas simples: posición del mouse relativa al bounding rect del canvas
         const pos = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
         
-        // Debug extendido para DevTools
-        if (this.isDeviceEmulation || (e.type === 'click' && this.deleteLineMode)) {
-            console.group('[DrawingManager] 📍 Cálculo de posición del mouse');
-            console.log('Evento:', {
-                type: e.type,
-                clientX: e.clientX,
-                clientY: e.clientY,
-                target: e.target?.id
-            });
-            console.log('Rect del canvas:', rect);
-            console.log('DPR:', window.devicePixelRatio);
-            console.log('Canvas dimensions:', {
-                cssWidth: this.canvas.style.width,
-                cssHeight: this.canvas.style.height,
-                actualWidth: this.canvas.width,
-                actualHeight: this.canvas.height
-            });
-            console.log('Posición calculada:', pos);
-            console.log('Emulación detectada:', this.isDeviceEmulation);
-            console.groupEnd();
-        }
+        // DEBUG: Siempre mostrar en consola para diagnóstico
+        console.log('[DrawingManager] getMousePos:', {
+            clientX: e.clientX,
+            clientY: e.clientY,
+            rectLeft: rect.left,
+            rectTop: rect.top,
+            rectWidth: rect.width,
+            rectHeight: rect.height,
+            canvasWidth: this.canvas.width,
+            canvasHeight: this.canvas.height,
+            cssWidth: this.canvas.style.width,
+            cssHeight: this.canvas.style.height,
+            posX: pos.x,
+            posY: pos.y,
+            dpr: window.devicePixelRatio
+        });
         
         return pos;
     }
@@ -553,58 +551,43 @@ export default class DrawingManager {
         // Obtener referencia al canvas del campo para sincronizar dimensiones
         const fieldCanvas = document.getElementById('football-field');
         
+        if (!fieldCanvas) {
+            console.warn('[DrawingManager] No se encontró football-field canvas');
+            return;
+        }
+        
         // Re-detectar emulación en cada resize (puede cambiar dinámicamente)
         this.isDeviceEmulation = this.detectDeviceEmulation();
         
-        // MEJORA: Usar devicePixelRatio para alta resolución en el canvas de dibujo
+        // Obtener las dimensiones CSS del campo (lo que se ve en pantalla)
+        const fieldRect = fieldCanvas.getBoundingClientRect();
+        const cssWidth = fieldRect.width;
+        const cssHeight = fieldRect.height;
+        
+        // Usar devicePixelRatio para alta resolución
         const dpr = window.devicePixelRatio || 1;
         
-        let cssWidth, cssHeight;
-        
-        if (fieldCanvas) {
-            // Sincronizar con las dimensiones del canvas del campo
-            cssWidth = parseFloat(fieldCanvas.style.width) || fieldCanvas.width / dpr;
-            cssHeight = parseFloat(fieldCanvas.style.height) || fieldCanvas.height / dpr;
-        } else {
-            // Fallback: calcular basado en el contenedor
-            const parent = this.canvas.parentElement;
-            const rect = parent.getBoundingClientRect();
-            const FIELD_RATIO = 105 / 68;
-            const margin = Math.min(rect.width, rect.height) * 0.01;
-            const availableWidth = rect.width - (margin * 2);
-            const availableHeight = rect.height - (margin * 2);
-            
-            if (availableWidth / availableHeight > FIELD_RATIO) {
-                cssHeight = availableHeight;
-                cssWidth = cssHeight * FIELD_RATIO;
-            } else {
-                cssWidth = availableWidth;
-                cssHeight = cssWidth / FIELD_RATIO;
-            }
-        }
-        
-        // Asegurar dimensiones mínimas
-        cssWidth = Math.max(cssWidth, 200);
-        cssHeight = Math.max(cssHeight, 130);
-        
+        // Establecer dimensiones internas del canvas (píxeles reales del dispositivo)
         this.canvas.width = Math.round(cssWidth * dpr);
         this.canvas.height = Math.round(cssHeight * dpr);
         
-        // Escalar el contexto
+        // Establecer dimensiones CSS (debe coincidir exactamente con fieldRect)
+        this.canvas.style.setProperty('width', cssWidth + 'px', 'important');
+        this.canvas.style.setProperty('height', cssHeight + 'px', 'important');
+        
+        // CRÍTICO: Resetear transformación y escalar el contexto por DPR
+        // Esto permite dibujar en coordenadas CSS y que se escalen automáticamente
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(dpr, dpr);
         
-        // Establecer el tamaño CSS
-        this.canvas.style.width = cssWidth + 'px';
-        this.canvas.style.height = cssHeight + 'px';
-        
-        // Solo redibujar si hay líneas para redibujar
+        // Redibujar líneas existentes si las hay
         if (this.lines && this.lines.length > 0) {
             this.redrawLines(); 
         }
         
         this.applyContextProperties();
-        console.log(`DrawingManager: Canvas redimensionado - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}, líneas:`, this.lines?.length || 0);
+        
+        console.log(`[DrawingManager] resizeCanvas - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, Canvas interno: ${this.canvas.width}x${this.canvas.height}, DPR: ${dpr}`);
     }
 
     // Método para habilitar/deshabilitar el dibujo de líneas

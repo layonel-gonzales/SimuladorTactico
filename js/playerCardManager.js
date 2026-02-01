@@ -52,7 +52,7 @@ class PlayerCardManager {
             // Buscar el sistema de estilos en el objeto global window
             if (window.cardStyleManager && typeof window.cardStyleManager === 'object') {
                 this.useStyleManager = true;
-                window.cardStyleManager.init();
+                // El CardStyleManager ya se inicializa en su constructor, no necesita .init()
                 console.log('🎨 Sistema de estilos de cards activado');
                 
                 // Escuchar cambios de estilo para regenerar cards existentes
