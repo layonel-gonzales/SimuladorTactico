@@ -59,19 +59,30 @@ class FreemiumController {
         if (window.paymentManager) {
             this.userPlan = await paymentManager.getCurrentUserPlan();
         } else {
-            // Plan por defecto si no hay autenticación
+            // Plan GRATUITO por defecto - valores según plan freemium v2.0
             this.userPlan = {
                 name: 'free',
                 features: {
-                    maxLines: { value: 5 },
-                    maxTactics: { value: 3 },
-                    maxAnimationDuration: { value: 10 },
-                    maxAnimationFrames: { value: 5 },
-                    maxAnimations: { value: 1 },
-                    formations: { value: ['4-4-2', '4-3-3'] },
-                    colors: { value: ['#ff0000', '#0000ff', '#00ff00'] },
-                    export: { value: 'watermark' },
+                    // Táctico
+                    maxPlayers: { value: 11 },              // Un equipo
+                    formations: { value: ['4-4-2', '4-3-3', '3-5-2'] },  // 3 formaciones
+                    maxCustomPlayers: { value: 5 },         // 5 jugadores personalizados
+                    
+                    // Dibujo
+                    maxLines: { value: 10 },                // 10 líneas
+                    colors: { value: ['#ff0000', '#0000ff', '#ffff00'] },
+                    
+                    // Animación
+                    maxAnimationFrames: { value: 5 },       // 5 frames
+                    maxAnimationDuration: { value: 15 },    // 15 segundos
                     audioRecording: { value: false },
+                    
+                    // Estilos
+                    fieldStyles: { value: ['classic', 'modern'] },
+                    cardStyles: { value: ['classic', 'fifa'] },
+                    
+                    // Exportar/Compartir
+                    export: { value: 'watermark' },
                     jsonExport: { value: false },
                     socialShare: { value: false }
                 }
@@ -185,6 +196,116 @@ class FreemiumController {
         return true;
     }
     
+    // ==========================================
+    // VERIFICACIONES DE ESTILOS
+    // ==========================================
+    
+    canUseFieldStyle(styleId) {
+        const allowedStyles = this.getFeatureValue('fieldStyles');
+        
+        // Si es 'all' o -1, permitir todos
+        if (allowedStyles === 'all' || allowedStyles === -1) {
+            return true;
+        }
+        
+        // Si es array, verificar si está incluido
+        if (Array.isArray(allowedStyles)) {
+            if (!allowedStyles.includes(styleId)) {
+                this.showUpgradeModal('field_style_limit', { requestedStyle: styleId });
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    canUseCardStyle(styleId) {
+        const allowedStyles = this.getFeatureValue('cardStyles');
+        
+        // Si es 'all' o -1, permitir todos
+        if (allowedStyles === 'all' || allowedStyles === -1) {
+            return true;
+        }
+        
+        // Si es array, verificar si está incluido
+        if (Array.isArray(allowedStyles)) {
+            if (!allowedStyles.includes(styleId)) {
+                this.showUpgradeModal('card_style_limit', { requestedStyle: styleId });
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // ==========================================
+    // VERIFICACIONES DE JUGADORES
+    // ==========================================
+    
+    canAddMorePlayers(currentCount) {
+        const maxPlayers = this.getFeatureValue('maxPlayers');
+        
+        if (maxPlayers !== -1 && currentCount >= maxPlayers) {
+            this.showUpgradeModal('players_limit', {
+                current: currentCount,
+                max: maxPlayers
+            });
+            return false;
+        }
+        
+        return true;
+    }
+    
+    canAddCustomPlayer() {
+        const currentCustomPlayers = this.getCurrentCustomPlayerCount();
+        const maxCustomPlayers = this.getFeatureValue('maxCustomPlayers');
+        
+        if (maxCustomPlayers !== -1 && currentCustomPlayers >= maxCustomPlayers) {
+            this.showUpgradeModal('custom_players_limit', {
+                current: currentCustomPlayers,
+                max: maxCustomPlayers
+            });
+            return false;
+        }
+        
+        return true;
+    }
+    
+    getCurrentCustomPlayerCount() {
+        // Integración con customPlayersManager
+        if (window.customPlayersManager && window.customPlayersManager.customPlayers) {
+            return window.customPlayersManager.customPlayers.length;
+        }
+        return 0;
+    }
+    
+    // ==========================================
+    // VERIFICACIONES DE ANIMACIÓN
+    // ==========================================
+    
+    canAddAnimationFrame() {
+        const currentFrames = this.getCurrentFrameCount();
+        const maxFrames = this.getFeatureValue('maxAnimationFrames');
+        
+        if (maxFrames !== -1 && currentFrames >= maxFrames) {
+            this.showUpgradeModal('frames_limit', {
+                current: currentFrames,
+                max: maxFrames
+            });
+            return false;
+        }
+        
+        return true;
+    }
+    
+    getCurrentFrameCount() {
+        // Integración con animationManager
+        if (window.animationManager && window.animationManager.frames) {
+            return window.animationManager.frames.length;
+        }
+        return 0;
+    }
+
     canShareToSocial() {
         const socialShare = this.getFeatureValue('socialShare');
         if (!socialShare) {
@@ -322,6 +443,72 @@ class FreemiumController {
                 ],
                 cta: 'Upgrade a Premium - $9.99/mes',
                 icon: '📱'
+            },
+            
+            // Nuevos modales para estilos y jugadores
+            field_style_limit: {
+                title: '🏟️ ¡Desbloquea Todos los Estilos de Cancha!',
+                message: 'El plan gratuito incluye solo 2 estilos de cancha.',
+                benefits: [
+                    '✅ 4 estilos de cancha profesionales',
+                    '✅ Estilo Night para presentaciones',
+                    '✅ Estilo Retro vintage',
+                    '✅ Nuevos estilos cada mes'
+                ],
+                cta: 'Upgrade a Premium - $9.99/mes',
+                icon: '🏟️'
+            },
+            
+            card_style_limit: {
+                title: '🃏 ¡Desbloquea Todos los Estilos de Tarjeta!',
+                message: 'El plan gratuito incluye solo 2 estilos de tarjeta.',
+                benefits: [
+                    '✅ 4 estilos de tarjeta profesionales',
+                    '✅ Estilo Moderno minimalista',
+                    '✅ Estilo Retro clásico',
+                    '✅ Nuevos estilos cada mes'
+                ],
+                cta: 'Upgrade a Premium - $9.99/mes',
+                icon: '🃏'
+            },
+            
+            players_limit: {
+                title: '⚽ ¡Juega con Dos Equipos!',
+                message: `Has alcanzado el límite de ${data.max} jugadores en cancha.`,
+                benefits: [
+                    '✅ 22 jugadores (dos equipos completos)',
+                    '✅ Simula partidos reales',
+                    '✅ Tácticas defensivas y ofensivas',
+                    '✅ Rivales en cancha'
+                ],
+                cta: 'Upgrade a Premium - $9.99/mes',
+                icon: '⚽'
+            },
+            
+            custom_players_limit: {
+                title: '👤 ¡Crea Jugadores Ilimitados!',
+                message: `Has alcanzado el límite de ${data.max} jugadores personalizados.`,
+                benefits: [
+                    '✅ Jugadores personalizados ilimitados',
+                    '✅ Crea tu equipo completo',
+                    '✅ Estadísticas personalizadas',
+                    '✅ Fotos de jugadores'
+                ],
+                cta: 'Upgrade a Premium - $9.99/mes',
+                icon: '👤'
+            },
+            
+            frames_limit: {
+                title: '🎬 ¡Más Frames para tus Animaciones!',
+                message: `Has alcanzado el límite de ${data.max} frames por animación.`,
+                benefits: [
+                    '✅ Frames ilimitados',
+                    '✅ Animaciones más fluidas',
+                    '✅ Tácticas complejas paso a paso',
+                    '✅ Videos profesionales'
+                ],
+                cta: 'Upgrade a Premium - $9.99/mes',
+                icon: '🎬'
             }
         };
         

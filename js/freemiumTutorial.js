@@ -16,13 +16,14 @@ class FreemiumTutorial {
                             <h3>Versión Gratuita</h3>
                             <p>Tienes acceso a:</p>
                             <ul>
-                                <li>✅ Hasta <strong>5 líneas</strong> por táctica</li>
-                                <li>✅ <strong>3 colores</strong> básicos</li>
-                                <li>✅ <strong>2 formaciones</strong> (4-4-2 y 4-3-3)</li>
-                                <li>✅ <strong>3 tácticas</strong> guardadas</li>
-                                <li>✅ Videos de <strong>10 segundos</strong></li>
+                                <li>✅ <strong>11 jugadores</strong> (un equipo)</li>
+                                <li>✅ <strong>10 líneas</strong> de dibujo</li>
+                                <li>✅ <strong>3 formaciones</strong> (4-4-2, 4-3-3, 3-5-2)</li>
+                                <li>✅ <strong>5 jugadores</strong> personalizados</li>
+                                <li>✅ Videos de <strong>15 segundos</strong></li>
+                                <li>✅ <strong>2 estilos</strong> de cancha y tarjeta</li>
                             </ul>
-                            <p><small>💡 Actualiza a Premium para desbloquear todo</small></p>
+                            <p><small>💎 Actualiza a Premium para dos equipos, todos los estilos y más</small></p>
                         </div>
                     `,
                     target: 'body',
@@ -35,12 +36,12 @@ class FreemiumTutorial {
                     title: '🎨 Límites de Dibujo',
                     content: `
                         <div class="tutorial-limits">
-                            <p>En la versión gratuita puedes dibujar hasta <strong>5 líneas</strong> por táctica.</p>
+                            <p>En la versión gratuita puedes dibujar hasta <strong>10 líneas</strong> por táctica.</p>
                             <div class="progress-demo">
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 60%"></div>
+                                    <div class="progress-fill" style="width: 30%"></div>
                                 </div>
-                                <span>3/5 líneas usadas</span>
+                                <span>3/10 líneas usadas</span>
                             </div>
                             <p><small>💎 Premium: líneas ilimitadas</small></p>
                         </div>
@@ -59,7 +60,7 @@ class FreemiumTutorial {
                             <div class="color-demo">
                                 <span class="color-dot" style="background: #ff0000;"></span> Rojo
                                 <span class="color-dot" style="background: #0000ff;"></span> Azul  
-                                <span class="color-dot" style="background: #00ff00;"></span> Verde
+                                <span class="color-dot" style="background: #ffff00;"></span> Amarillo
                             </div>
                             <p><small>💎 Premium: paleta completa de colores</small></p>
                         </div>
@@ -74,10 +75,11 @@ class FreemiumTutorial {
                     title: '⚽ Formaciones Básicas',
                     content: `
                         <div class="tutorial-formations">
-                            <p>Versión gratuita incluye 2 formaciones:</p>
+                            <p>Versión gratuita incluye 3 formaciones:</p>
                             <ul>
                                 <li>🔹 4-4-2 (Clásica)</li>
                                 <li>🔹 4-3-3 (Ofensiva)</li>
+                                <li>🔹 3-5-2 (Control del mediocampo)</li>
                             </ul>
                             <p><small>💎 Premium: 15+ formaciones profesionales</small></p>
                         </div>
@@ -94,7 +96,7 @@ class FreemiumTutorial {
                         <div class="tutorial-animation">
                             <p>En la versión gratuita:</p>
                             <ul>
-                                <li>⏱️ Máximo <strong>10 segundos</strong> de video</li>
+                                <li>⏱️ Máximo <strong>15 segundos</strong> de video</li>
                                 <li>🎞️ Hasta <strong>5 frames</strong> de animación</li>
                                 <li>🚫 Sin grabación de audio</li>
                                 <li>💧 Marca de agua en exportación</li>

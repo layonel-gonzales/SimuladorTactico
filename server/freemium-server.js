@@ -90,52 +90,81 @@ const authenticateToken = (req, res, next) => {
 // Planes y características disponibles
 const planFeatures = {
     free: {
-        maxLines: 5,
-        maxTactics: 3,
-        maxAnimationDuration: 10,
-        maxAnimationFrames: 5,
-        maxAnimations: 1,
-        formations: ['4-4-2', '4-3-3'],
-        colors: ['#ff0000', '#0000ff', '#00ff00'],
-        export: 'watermark',
-        audioRecording: false,
+        // Táctico
+        maxPlayers: 11,              // Un equipo
+        formations: ['4-4-2', '4-3-3', '3-5-2'],  // 3 formaciones básicas
+        maxCustomPlayers: 5,         // 5 jugadores personalizados
+        
+        // Dibujo
+        maxLines: 10,                // 10 líneas
+        colors: ['#ff0000', '#0000ff', '#ffff00'],  // Rojo, azul, amarillo
+        
+        // Animación
+        maxAnimationFrames: 5,       // 5 frames
+        maxAnimationDuration: 15,    // 15 segundos
+        audioRecording: false,       // Sin audio
+        
+        // Estilos
+        fieldStyles: ['classic', 'modern'],   // 2 estilos cancha
+        cardStyles: ['classic', 'fifa'],      // 2 estilos tarjeta
+        
+        // Exportar/Compartir
+        export: 'watermark',         // Con marca de agua
         jsonExport: false,
         socialShare: false,
+        
+        // Cuenta
         maxDevices: 3
     },
     premium: {
-        maxLines: -1,
-        maxTactics: -1,
-        maxAnimationDuration: 120,
-        maxAnimationFrames: -1,
-        maxAnimations: -1,
-        formations: 'all',
-        colors: 'all',
-        export: 'hd',
-        audioRecording: true,
+        // Táctico
+        maxPlayers: 22,              // Dos equipos completos
+        formations: 'all',           // Todas las formaciones (15+)
+        maxCustomPlayers: -1,        // Ilimitados
+        
+        // Dibujo
+        maxLines: -1,                // Ilimitadas
+        colors: 'all',               // Todos los colores
+        
+        // Animación
+        maxAnimationFrames: -1,      // Ilimitados
+        maxAnimationDuration: 120,   // 2 minutos
+        audioRecording: true,        // Con audio
+        
+        // Estilos
+        fieldStyles: 'all',          // Todos los estilos
+        cardStyles: 'all',           // Todos los estilos
+        
+        // Exportar/Compartir
+        export: 'hd',                // HD sin marca de agua
         jsonExport: true,
         socialShare: true,
+        
+        // Cuenta
         maxDevices: 10
     },
     pro: {
-        maxLines: -1,
-        maxTactics: -1,
-        maxAnimationDuration: -1,
-        maxAnimationFrames: -1,
-        maxAnimations: -1,
+        // Todo lo de Premium +
+        maxPlayers: 22,
         formations: 'all',
+        maxCustomPlayers: -1,
+        maxLines: -1,
         colors: 'all',
-        export: 'hd',
+        maxAnimationFrames: -1,
+        maxAnimationDuration: -1,    // Ilimitado
         audioRecording: true,
+        fieldStyles: 'all',
+        cardStyles: 'all',
+        export: 'hd',
         jsonExport: true,
         socialShare: true,
-        multipleTeams: true,
-        analytics: true,
-        collaboration: 5,
-        apiAccess: true,
-        prioritySupport: true,
-        whiteLabel: true,
-        maxDevices: -1
+        
+        // Exclusivo Pro
+        multipleTeams: true,         // Gestionar múltiples equipos
+        collaboration: 5,            // 5 usuarios colaboradores
+        apiAccess: true,             // Acceso API
+        prioritySupport: true,       // Soporte prioritario
+        maxDevices: -1               // Ilimitados
     }
 };
 

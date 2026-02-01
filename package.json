@@ -1,21 +1,29 @@
 {
-  "name": "soccer-tactics-protection",
-  "version": "1.0.0",
-  "description": "Sistema de protección para Soccer Tactics",
+  "name": "simulador-tactico",
+  "version": "2.0.0",
+  "description": "Simulador Táctico de Fútbol con sistema Freemium",
   "scripts": {
-    "start": "node server/freemium-server.js",
-    "dev": "nodemon server/freemium-server.js",
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js",
+    "start:old": "node server/freemium-server.js",
     "test": "echo \"Tests pendientes\" && exit 0",
-    "install-deps": "npm install",
-    "setup": "npm install && cp env.example .env && echo \"Configurar .env con tus claves de Stripe\""
+    "db:create": "echo 'Ejecutar database/create_database.sql en SQL Server Management Studio'",
+    "db:seed": "echo 'Ejecutar database/insert_test_data.sql en SQL Server Management Studio'",
+    "setup": "npm install && echo 'Configurar .env con credenciales de SQL Server'"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "stripe": "^11.15.0",
-    "jsonwebtoken": "^9.0.0",
-    "express-rate-limit": "^6.7.0",
-    "cors": "^2.8.5",
     "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "jsonwebtoken": "^9.0.0",
+    "msnodesqlv8": "^5.1.3",
+    "mssql": "^10.0.4",
+    "stripe": "^11.15.0",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }

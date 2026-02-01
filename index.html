@@ -74,8 +74,7 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
 <html lang="es">
 <head>
     <!-- SISTEMA FREEMIUM DE AUTENTICACIÓN - VERSION LIMPIA -->
-    <!-- 🎨 SISTEMA DE REGISTRO DE ESTILOS MODULARES -->
-    <script src="js/styleRegistry.js"></script>
+    <!-- 🎨 NOTA: styleRegistry.js se carga al final del body para evitar duplicación -->
     
     <!-- Sistema de autenticación -->
     <script src="js/freemiumAuthSystem-simple.js"></script>
@@ -520,61 +519,8 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         </div>
     </div>
 
-    <!-- ELIMINADO: Modal de detalles de jugador (player-modal) ya no se usa -->
-
     <!-- Modal para gestión de jugadores personalizados -->
     <div class="modal fade custom-z-index-modal" style="z-index: 12000;" id="custom-players-modal" tabindex="-1" aria-labelledby="customPlayersModalLabel" aria-hidden="true">
-    <script>
-    // DEBUG: Debugging de modales para identificar conflictos
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('[MODAL DEBUG] Verificando modales en el DOM...');
-        
-        const squadModal = document.getElementById('squad-selection-modal');
-        const customModal = document.getElementById('custom-players-modal');
-        
-        console.log('[MODAL DEBUG] Squad modal existe:', !!squadModal);
-        console.log('[MODAL DEBUG] Custom modal existe:', !!customModal);
-        
-        // Event listeners para debugging
-        if (squadModal) {
-            squadModal.addEventListener('show.bs.modal', function() {
-                console.log('[MODAL DEBUG] Squad modal SHOWING');
-            });
-            squadModal.addEventListener('shown.bs.modal', function() {
-                console.log('[MODAL DEBUG] Squad modal SHOWN');
-            });
-            squadModal.addEventListener('hide.bs.modal', function() {
-                console.log('[MODAL DEBUG] Squad modal HIDING');
-            });
-        }
-        
-        if (customModal) {
-            customModal.addEventListener('show.bs.modal', function() {
-                console.log('[MODAL DEBUG] Custom modal SHOWING');
-            });
-            customModal.addEventListener('shown.bs.modal', function() {
-                console.log('[MODAL DEBUG] Custom modal SHOWN');
-            });
-            customModal.addEventListener('hide.bs.modal', function() {
-                console.log('[MODAL DEBUG] Custom modal HIDING');
-            });
-        }
-    });
-    
-    // Cierra todos los modales abiertos antes de abrir uno nuevo
-    document.addEventListener('show.bs.modal', function (event) {
-        console.log('[MODAL DEBUG] Evento show.bs.modal disparado para:', event.target.id);
-        var modals = document.querySelectorAll('.modal.show');
-        console.log('[MODAL DEBUG] Modales actualmente abiertos:', modals.length);
-        modals.forEach(function(modal) {
-            console.log('[MODAL DEBUG] Cerrando modal:', modal.id);
-            var modalInstance = bootstrap.Modal.getInstance(modal);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        });
-    });
-    </script>
         <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1114,20 +1060,45 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <!-- Theme Manager para modo claro/oscuro -->
     <script src="js/themeManager.js"></script>
     
-    <!-- 🎨 SISTEMA DE REGISTRO DE ESTILOS MODULARES -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         🎨 SISTEMA MODULAR DE ESTILOS - ORDEN CORRECTO DE CARGA
+         ═══════════════════════════════════════════════════════════════════════
+         
+         1. StyleRegistry (singleton)
+         2. Archivos de estilos (se auto-registran)
+         3. Managers (ya tienen estilos disponibles)
+         4. UI de estilos
+         5. Main (módulo, ejecuta al final)
+         
+         ═══════════════════════════════════════════════════════════════════════ -->
+    
+    <!-- PASO 1: Registro central de estilos -->
     <script src="js/styleRegistry.js"></script>
     
-    <!-- 🎨 Loader de estilos modulares (carga cardStyles y fieldStyles) -->
-    <script src="js/styleLoader.js"></script>
+    <!-- PASO 2A: Estilos de campo (se registran automáticamente) -->
+    <script src="js/fieldStyles/fieldStyleClassic.js"></script>
+    <script src="js/fieldStyles/fieldStyleModern.js"></script>
+    <script src="js/fieldStyles/fieldStyleNight.js"></script>
+    <script src="js/fieldStyles/fieldStyleRetro.js"></script>
     
-    <!-- 🎨 Gestor de estilos de cards (refactorizado) -->
+    <!-- PASO 2B: Estilos de cards (se registran automáticamente) -->
+    <script src="js/cardStyles/cardStyleClassic.js"></script>
+    <script src="js/cardStyles/cardStyleModern.js"></script>
+    <script src="js/cardStyles/cardStyleFifa.js"></script>
+    <script src="js/cardStyles/cardStyleRetro.js"></script>
+    
+    <!-- PASO 3: Managers (los estilos YA están registrados) -->
     <script src="js/cardStyleManager-refactored.js"></script>
-    
-    <!-- 🏟️ Gestor de estilos de campos (refactorizado) -->
     <script src="js/fieldStyleManager-refactored.js"></script>
     
-    <!-- Player Card Manager para gestión unificada de cards -->
+    <!-- PASO 4: UI de estilos -->
+    <script src="js/fieldStyleUI.js"></script>
+    <script src="js/cardStyleUI.js"></script>
+    
+    <!-- PASO 5: Integraciones -->
+    <script src="js/fieldStyleIntegration.js"></script>
     <script src="js/playerCardManager.js"></script>
+    <script src="js/cardStyleInit.js"></script>
     
     <!-- FREEMIUM SYSTEM -->
     <script src="js/freemiumConfigManager.js"></script>
@@ -1151,13 +1122,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         }
     </script>
     
+    <!-- PASO 6: Main (módulo ES6, se ejecuta después de todo) -->
     <script type="module" src="js/main.js"></script>
-    
-    <!-- 🎨 Sistemas de UI de estilos (compatibles con nuevos managers) -->
-    <script src="js/cardStyleUI.js"></script>
-    <script src="js/fieldStyleUI.js"></script>
-    <script src="js/cardStyleInit.js"></script>
-    
+
     <!-- Indicador de estado de usuario -->
     <div id="user-status" style="position:fixed;top:10px;right:10px;z-index:9999;background:rgba(255,255,255,0.9);padding:8px 12px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:13px;display:none;">
         <i class="fas fa-user me-1"></i>

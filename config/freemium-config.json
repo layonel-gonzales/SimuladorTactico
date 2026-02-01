@@ -1,91 +1,81 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2025-07-26T00:00:00.000Z",
+  "version": "2.0.0",
+  "lastUpdated": "2026-02-01T00:00:00.000Z",
   "plans": {
     "free": {
       "name": "Gratuito",
       "price": 0,
       "description": "Plan básico para usuarios nuevos",
       "features": {
-        "maxLines": {
-          "value": 5,
-          "description": "Máximo número de líneas por táctica",
-          "type": "number",
-          "category": "drawing"
-        },
-        "maxPlayers": {
-          "value": 11,
-          "description": "Máximo número de jugadores en el campo",
-          "type": "number",
-          "category": "drawing"
-        },
-        "formations": {
-          "value": ["4-4-2", "4-3-3"],
-          "description": "Formaciones disponibles",
-          "type": "array",
-          "category": "tactical"
-        },
-        "colors": {
-          "value": ["#ff0000", "#0000ff", "#00ff00"],
-          "description": "Colores disponibles para dibujo",
-          "type": "array",
-          "category": "drawing"
-        }
+        "maxPlayers": { "value": 11, "description": "Un equipo completo", "type": "number", "category": "tactical" },
+        "formations": { "value": ["4-4-2", "4-3-3", "3-5-2"], "description": "3 formaciones básicas", "type": "array", "category": "tactical" },
+        "maxCustomPlayers": { "value": 5, "description": "5 jugadores personalizados", "type": "number", "category": "tactical" },
+        "maxLines": { "value": 10, "description": "10 líneas de dibujo", "type": "number", "category": "drawing" },
+        "colors": { "value": ["#ff0000", "#0000ff", "#ffff00"], "description": "3 colores básicos", "type": "array", "category": "drawing" },
+        "maxAnimationFrames": { "value": 5, "description": "5 frames por animación", "type": "number", "category": "animation" },
+        "maxAnimationDuration": { "value": 15, "description": "15 segundos máximo", "type": "number", "category": "animation" },
+        "audioRecording": { "value": false, "description": "Sin grabación de audio", "type": "boolean", "category": "animation" },
+        "fieldStyles": { "value": ["classic", "modern"], "description": "2 estilos de cancha", "type": "array", "category": "styles" },
+        "cardStyles": { "value": ["classic", "fifa"], "description": "2 estilos de tarjeta", "type": "array", "category": "styles" },
+        "export": { "value": "watermark", "description": "Exportación con marca de agua", "type": "string", "category": "sharing" },
+        "jsonExport": { "value": false, "description": "Sin exportación JSON", "type": "boolean", "category": "sharing" },
+        "socialShare": { "value": false, "description": "Sin compartir en redes", "type": "boolean", "category": "sharing" }
       }
     },
     "premium": {
       "name": "Premium",
       "price": 9.99,
-      "description": "Plan completo con todas las funcionalidades",
+      "description": "Plan completo para entusiastas",
       "features": {
-        "maxLines": {
-          "value": "unlimited",
-          "description": "Líneas ilimitadas por táctica",
-          "type": "string",
-          "category": "drawing"
-        },
-        "maxPlayers": {
-          "value": 22,
-          "description": "Máximo número de jugadores en el campo",
-          "type": "number",
-          "category": "drawing"
-        },
-        "formations": {
-          "value": "all",
-          "description": "Todas las formaciones disponibles",
-          "type": "string",
-          "category": "tactical"
-        },
-        "colors": {
-          "value": "all",
-          "description": "Todos los colores disponibles",
-          "type": "string",
-          "category": "drawing"
-        }
+        "maxPlayers": { "value": 22, "description": "Dos equipos completos", "type": "number", "category": "tactical" },
+        "formations": { "value": "all", "description": "Todas las formaciones (15+)", "type": "string", "category": "tactical" },
+        "maxCustomPlayers": { "value": -1, "description": "Jugadores ilimitados", "type": "number", "category": "tactical" },
+        "maxLines": { "value": -1, "description": "Líneas ilimitadas", "type": "number", "category": "drawing" },
+        "colors": { "value": "all", "description": "Todos los colores", "type": "string", "category": "drawing" },
+        "maxAnimationFrames": { "value": -1, "description": "Frames ilimitados", "type": "number", "category": "animation" },
+        "maxAnimationDuration": { "value": 120, "description": "Hasta 2 minutos", "type": "number", "category": "animation" },
+        "audioRecording": { "value": true, "description": "Grabación de audio", "type": "boolean", "category": "animation" },
+        "fieldStyles": { "value": "all", "description": "Todos los estilos de cancha", "type": "string", "category": "styles" },
+        "cardStyles": { "value": "all", "description": "Todos los estilos de tarjeta", "type": "string", "category": "styles" },
+        "export": { "value": "hd", "description": "Exportación HD sin marca de agua", "type": "string", "category": "sharing" },
+        "jsonExport": { "value": true, "description": "Exportación JSON", "type": "boolean", "category": "sharing" },
+        "socialShare": { "value": true, "description": "Compartir en redes", "type": "boolean", "category": "sharing" },
+        "maxDevices": { "value": 10, "description": "Hasta 10 dispositivos", "type": "number", "category": "account" }
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "price": 19.99,
+      "description": "Plan profesional para entrenadores",
+      "features": {
+        "maxPlayers": { "value": 22, "description": "Dos equipos completos", "type": "number", "category": "tactical" },
+        "formations": { "value": "all", "description": "Todas las formaciones", "type": "string", "category": "tactical" },
+        "maxCustomPlayers": { "value": -1, "description": "Ilimitados", "type": "number", "category": "tactical" },
+        "maxLines": { "value": -1, "description": "Ilimitadas", "type": "number", "category": "drawing" },
+        "colors": { "value": "all", "description": "Todos", "type": "string", "category": "drawing" },
+        "maxAnimationFrames": { "value": -1, "description": "Ilimitados", "type": "number", "category": "animation" },
+        "maxAnimationDuration": { "value": -1, "description": "Ilimitada", "type": "number", "category": "animation" },
+        "audioRecording": { "value": true, "description": "Con audio", "type": "boolean", "category": "animation" },
+        "fieldStyles": { "value": "all", "description": "Todos", "type": "string", "category": "styles" },
+        "cardStyles": { "value": "all", "description": "Todos", "type": "string", "category": "styles" },
+        "export": { "value": "hd", "description": "HD", "type": "string", "category": "sharing" },
+        "jsonExport": { "value": true, "description": "Sí", "type": "boolean", "category": "sharing" },
+        "socialShare": { "value": true, "description": "Sí", "type": "boolean", "category": "sharing" },
+        "multipleTeams": { "value": true, "description": "Gestión de múltiples equipos", "type": "boolean", "category": "tactical" },
+        "collaboration": { "value": 5, "description": "5 usuarios colaboradores", "type": "number", "category": "account" },
+        "apiAccess": { "value": true, "description": "Acceso a API", "type": "boolean", "category": "account" },
+        "prioritySupport": { "value": true, "description": "Soporte prioritario", "type": "boolean", "category": "account" },
+        "maxDevices": { "value": -1, "description": "Ilimitados", "type": "number", "category": "account" }
       }
     }
   },
   "categories": {
-    "drawing": {
-      "name": "Herramientas de Dibujo",
-      "icon": "🎨",
-      "description": "Limitaciones relacionadas con el sistema de dibujo"
-    },
-    "tactical": {
-      "name": "Sistema Táctico",
-      "icon": "⚽",
-      "description": "Funcionalidades tácticas y formaciones"
-    },
-    "animation": {
-      "name": "Sistema de Animación",
-      "icon": "🎬",
-      "description": "Capacidades de animación y video"
-    },
-    "sharing": {
-      "name": "Compartir y Exportar",
-      "icon": "📤",
-      "description": "Opciones para compartir y exportar tácticas"
-    }
+    "tactical": { "name": "Sistema Táctico", "icon": "⚽", "description": "Jugadores, formaciones y posiciones" },
+    "drawing": { "name": "Herramientas de Dibujo", "icon": "🎨", "description": "Líneas, colores y diseño" },
+    "animation": { "name": "Animaciones", "icon": "🎬", "description": "Videos, frames y audio" },
+    "styles": { "name": "Estilos Visuales", "icon": "🎭", "description": "Estilos de cancha y tarjetas" },
+    "sharing": { "name": "Compartir y Exportar", "icon": "📤", "description": "Exportación y redes sociales" },
+    "account": { "name": "Cuenta", "icon": "👤", "description": "Dispositivos y colaboración" }
   },
   "defaultPlan": "free",
   "gracePeriod": 7,

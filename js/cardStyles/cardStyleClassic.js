@@ -1,6 +1,16 @@
 /**
- * 🎴 ESTILO CLÁSICO PARA CARDS DE JUGADORES
- * Estilo tradicional con marco clásico
+ * ═══════════════════════════════════════════════════════════════════════
+ * 🎴 ESTILO CLÁSICO PARA CARDS DE JUGADORES - CAPA SUPERIOR (z-index: 20)
+ * ═══════════════════════════════════════════════════════════════════════
+ * 
+ * AISLAMIENTO: Este estilo SOLO genera HTML para las cards.
+ * - No modifica el Canvas del campo (CAPA z-index: 1)
+ * - Usa clases prefijadas (card-style-classic, classic-*)
+ * - Siempre flota por encima del campo
+ * 
+ * INDEPENDENCIA: Cambiar el estilo de las cards NO afecta al campo.
+ * El campo siempre permanece como base visual.
+ * ═══════════════════════════════════════════════════════════════════════
  */
 
 function createClassicCard(player, type = 'field', cardId, screenType, theme, playerId) {
