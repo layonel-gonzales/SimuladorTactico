@@ -8,26 +8,24 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    /* Altura = pantalla completa menos el menú inferior */
+    height: calc(100vh - var(--menu-height, 60px));
+    height: calc(100dvh - var(--menu-height, 60px));
     background-color: var(--pitch-green-primary);
-    background-image:
-        linear-gradient(transparent 95%, rgba(0,0,0,0.1) 95%),
-        linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 95%);
-    background-size: 100px 100px;
     z-index: var(--z-field);
     overflow: hidden;
     pointer-events: auto;
+    box-sizing: border-box;
 }
 
 /* === CANVAS DEL CAMPO Y DIBUJO === */
 #football-field, #drawing-canvas {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: block;
-    object-fit: contain;
     box-sizing: border-box;
     touch-action: none;
 }
@@ -42,18 +40,8 @@
     pointer-events: auto !important;
 }
 
-/* === ESTILOS DEL CAMPO RESPONSIVE === */
-@media (max-width: 768px) {
-    #pitch-container {
-        background-size: 50px 50px;
-    }
-}
-
-@media (min-width: 1200px) {
-    #pitch-container {
-        background-size: 120px 120px;
-    }
-}
+/* === ESTILOS DEL CAMPO === */
+/* Sin media queries - mismo comportamiento para todas las pantallas */
 
 /* === OVERLAY PARA EFECTOS === */
 .field-overlay {

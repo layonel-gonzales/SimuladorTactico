@@ -278,26 +278,56 @@ export default class BallDrawingManager {
         return this.enabled !== false; // Por defecto habilitado si no se establece
     }
     
-    // Redimensionar canvas
+    // Redimensionar canvas para sincronizar con el canvas del campo
     resizeCanvas() {
         if (!this.canvas) return;
         
-        const rect = this.canvas.parentElement.getBoundingClientRect();
+        // Obtener referencia al canvas del campo para sincronizar dimensiones
+        const fieldCanvas = document.getElementById('football-field');
         
         // MEJORA: Usar devicePixelRatio para alta resolución
         const dpr = window.devicePixelRatio || 1;
         
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
+        let cssWidth, cssHeight;
+        
+        if (fieldCanvas) {
+            // Sincronizar con las dimensiones del canvas del campo
+            cssWidth = parseFloat(fieldCanvas.style.width) || fieldCanvas.width / dpr;
+            cssHeight = parseFloat(fieldCanvas.style.height) || fieldCanvas.height / dpr;
+        } else {
+            // Fallback: calcular basado en el contenedor
+            const parent = this.canvas.parentElement;
+            const rect = parent.getBoundingClientRect();
+            const FIELD_RATIO = 105 / 68;
+            const margin = Math.min(rect.width, rect.height) * 0.01;
+            const availableWidth = rect.width - (margin * 2);
+            const availableHeight = rect.height - (margin * 2);
+            
+            if (availableWidth / availableHeight > FIELD_RATIO) {
+                cssHeight = availableHeight;
+                cssWidth = cssHeight * FIELD_RATIO;
+            } else {
+                cssWidth = availableWidth;
+                cssHeight = cssWidth / FIELD_RATIO;
+            }
+        }
+        
+        // Asegurar dimensiones mínimas
+        cssWidth = Math.max(cssWidth, 200);
+        cssHeight = Math.max(cssHeight, 130);
+        
+        this.canvas.width = Math.round(cssWidth * dpr);
+        this.canvas.height = Math.round(cssHeight * dpr);
         
         // Escalar el contexto
         if (this.ctx) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(dpr, dpr);
         }
         
         // Establecer el tamaño CSS
-        this.canvas.style.width = rect.width + 'px';
-        this.canvas.style.height = rect.height + 'px';
+        this.canvas.style.width = cssWidth + 'px';
+        this.canvas.style.height = cssHeight + 'px';
         
         // NUEVO: Restaurar pointer events después del redimensionado
         this.canvas.style.pointerEvents = this.enabled !== false ? 'auto' : 'none';
@@ -307,7 +337,6 @@ export default class BallDrawingManager {
             this.drawTrail();
         }
         
-        console.log(`[BallDrawingManager] Canvas redimensionado con DPR: ${dpr}:`, rect.width, 'x', rect.height);
-        console.log(`[BallDrawingManager] Estado después del resize - enabled: ${this.enabled !== false}`);
+        console.log(`[BallDrawingManager] Canvas redimensionado - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}`);
     }
 }

@@ -69,10 +69,12 @@ function drawModernPattern(ctx, width, height) {
 
 function drawModernFieldBorder(ctx, width, height) {
     const borderRadius = 15;
-    const x = width * 0.05;
-    const y = height * 0.1;
-    const w = width * 0.9;
-    const h = height * 0.8;
+    // Márgenes mínimos - las líneas ocupan casi todo el espacio
+    const margin = Math.max(3, width * 0.005);
+    const x = margin;
+    const y = margin;
+    const w = width - margin * 2;
+    const h = height - margin * 2;
     
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, borderRadius);
@@ -80,10 +82,11 @@ function drawModernFieldBorder(ctx, width, height) {
 }
 
 function drawModernCenterLine(ctx, width, height) {
+    const margin = Math.max(3, width * 0.005);
     // Línea central con efectos
     ctx.beginPath();
-    ctx.moveTo(width * 0.5, height * 0.1);
-    ctx.lineTo(width * 0.5, height * 0.9);
+    ctx.moveTo(width * 0.5, margin);
+    ctx.lineTo(width * 0.5, height - margin);
     ctx.stroke();
     
     // Decoración en el centro
@@ -91,7 +94,7 @@ function drawModernCenterLine(ctx, width, height) {
 }
 
 function drawModernCenterCircle(ctx, width, height, isMobile) {
-    const radius = isMobile ? Math.min(width, height) * 0.09 : Math.min(width, height) * 0.11;
+    const radius = Math.min(width, height) * 0.1;
     
     // Círculo principal
     ctx.beginPath();
@@ -111,85 +114,91 @@ function drawModernCenterCircle(ctx, width, height, isMobile) {
 }
 
 function drawModernPenaltyAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.13 : width * 0.16;
-    const areaHeight = isMobile ? height * 0.28 : height * 0.32;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.16;
+    const areaHeight = height * 0.44;
     const radius = 8;
     
-    // Área izquierda
+    // Área izquierda (empieza desde el borde)
     ctx.beginPath();
-    ctx.roundRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [0, radius, radius, 0]);
+    ctx.roundRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [0, radius, radius, 0]);
     ctx.stroke();
     
-    // Área derecha
+    // Área derecha (termina en el borde)
     ctx.beginPath();
-    ctx.roundRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [radius, 0, 0, radius]);
+    ctx.roundRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [radius, 0, 0, radius]);
     ctx.stroke();
     
     // Arcos de penalty modernos
-    const arcRadius = isMobile ? width * 0.08 : width * 0.1;
+    const penaltyDist = width * 0.105;
+    const arcRadius = width * 0.09;
     
     // Arco izquierdo
     ctx.beginPath();
-    ctx.arc(width * 0.17, height * 0.5, arcRadius, -Math.PI/3, Math.PI/3);
+    ctx.arc(margin + penaltyDist, height * 0.5, arcRadius, -Math.PI/3, Math.PI/3);
     ctx.stroke();
     
     // Arco derecho
     ctx.beginPath();
-    ctx.arc(width * 0.83, height * 0.5, arcRadius, 2*Math.PI/3, 4*Math.PI/3);
+    ctx.arc(width - margin - penaltyDist, height * 0.5, arcRadius, 2*Math.PI/3, 4*Math.PI/3);
     ctx.stroke();
 }
 
 function drawModernGoalAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.07 : width * 0.09;
-    const areaHeight = isMobile ? height * 0.16 : height * 0.19;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.055;
+    const areaHeight = height * 0.2;
     const radius = 5;
     
     // Área izquierda
     ctx.beginPath();
-    ctx.roundRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [0, radius, radius, 0]);
+    ctx.roundRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [0, radius, radius, 0]);
     ctx.stroke();
     
     // Área derecha
     ctx.beginPath();
-    ctx.roundRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [radius, 0, 0, radius]);
+    ctx.roundRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight, [radius, 0, 0, radius]);
     ctx.stroke();
 }
 
 function drawModernCornerArcs(ctx, width, height, isMobile) {
-    const radius = isMobile ? 10 : 15;
+    const margin = Math.max(3, width * 0.005);
+    const radius = Math.min(width, height) * 0.02;
     const lineWidth = ctx.lineWidth;
     ctx.lineWidth = lineWidth * 1.5;
     
-    // Esquinas con arcos más amplios
+    // Esquinas con arcos - ahora en los bordes reales
     // Superior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.1, radius, 0, Math.PI/2);
+    ctx.arc(margin, margin, radius, 0, Math.PI/2);
     ctx.stroke();
     
     // Superior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.1, radius, Math.PI/2, Math.PI);
+    ctx.arc(width - margin, margin, radius, Math.PI/2, Math.PI);
     ctx.stroke();
     
     // Inferior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.9, radius, -Math.PI/2, 0);
+    ctx.arc(margin, height - margin, radius, -Math.PI/2, 0);
     ctx.stroke();
     
     // Inferior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.9, radius, Math.PI, 3*Math.PI/2);
+    ctx.arc(width - margin, height - margin, radius, Math.PI, 3*Math.PI/2);
     ctx.stroke();
     
     ctx.lineWidth = lineWidth;
 }
 
 function drawModernPenaltySpots(ctx, width, height, isMobile) {
-    const spotSize = isMobile ? 3 : 4;
+    const margin = Math.max(3, width * 0.005);
+    const spotSize = 4;
+    const penaltyDist = width * 0.105;
     
     // Spots con forma moderna (hexagonal)
-    drawHexagonalSpot(ctx, width * 0.17, height * 0.5, spotSize);
-    drawHexagonalSpot(ctx, width * 0.83, height * 0.5, spotSize);
+    drawHexagonalSpot(ctx, margin + penaltyDist, height * 0.5, spotSize);
+    drawHexagonalSpot(ctx, width - margin - penaltyDist, height * 0.5, spotSize);
 }
 
 function drawHexagonalSpot(ctx, x, y, size) {
@@ -206,16 +215,14 @@ function drawHexagonalSpot(ctx, x, y, size) {
 }
 
 function drawTechnicalAreas(ctx, width, height, isMobile) {
-    const areaLength = isMobile ? width * 0.08 : width * 0.1;
-    const areaDepth = isMobile ? height * 0.03 : height * 0.04;
+    const margin = Math.max(3, width * 0.005);
+    const areaLength = width * 0.08;
+    const areaDepth = height * 0.03;
     
     ctx.globalAlpha = 0.6;
     
-    // Área técnica izquierda
-    ctx.strokeRect(width * 0.05 - areaDepth, height * 0.5 - areaLength/2, areaDepth, areaLength);
-    
-    // Área técnica derecha
-    ctx.strokeRect(width * 0.95, height * 0.5 - areaLength/2, areaDepth, areaLength);
+    // Área técnica izquierda (fuera del campo - no se dibuja si llega al borde)
+    // Área técnica derecha (fuera del campo - no se dibuja si llega al borde)
     
     ctx.globalAlpha = 1;
 }

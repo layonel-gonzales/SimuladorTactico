@@ -68,36 +68,38 @@ function drawRetroTexture(ctx, width, height) {
 }
 
 function drawRetroFieldBorder(ctx, width, height) {
-    // Borde simple, estilo años 50-60
-    const borderX = width * 0.08;
-    const borderY = height * 0.12;
-    const borderW = width * 0.84;
-    const borderH = height * 0.76;
+    // Borde simple, estilo años 50-60 - márgenes mínimos
+    const margin = Math.max(3, width * 0.005);
+    const borderX = margin;
+    const borderY = margin;
+    const borderW = width - margin * 2;
+    const borderH = height - margin * 2;
     
     ctx.strokeRect(borderX, borderY, borderW, borderH);
     
     // Líneas dobles vintage
     ctx.globalAlpha = 0.5;
-    ctx.strokeRect(borderX - 2, borderY - 2, borderW + 4, borderH + 4);
+    ctx.strokeRect(borderX + 2, borderY + 2, borderW - 4, borderH - 4);
     ctx.globalAlpha = 0.8;
 }
 
 function drawRetroCenterLine(ctx, width, height) {
+    const margin = Math.max(3, width * 0.005);
     // Línea central simple
     ctx.beginPath();
-    ctx.moveTo(width * 0.5, height * 0.12);
-    ctx.lineTo(width * 0.5, height * 0.88);
+    ctx.moveTo(width * 0.5, margin);
+    ctx.lineTo(width * 0.5, height - margin);
     ctx.stroke();
     
     // Marcas cada cierta distancia (estilo antiguo)
     const markSize = 3;
-    for (let i = 0.2; i <= 0.8; i += 0.1) {
+    for (let i = 0.15; i <= 0.85; i += 0.1) {
         ctx.fillRect(width * 0.5 - markSize/2, height * i - markSize/2, markSize, markSize);
     }
 }
 
 function drawRetroCenterCircle(ctx, width, height, isMobile) {
-    const radius = isMobile ? Math.min(width, height) * 0.07 : Math.min(width, height) * 0.09;
+    const radius = Math.min(width, height) * 0.08;
     
     // Círculo central simple
     ctx.beginPath();
@@ -115,95 +117,99 @@ function drawRetroCenterCircle(ctx, width, height, isMobile) {
 }
 
 function drawRetroPenaltyAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.11 : width * 0.14;
-    const areaHeight = isMobile ? height * 0.24 : height * 0.28;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.16;
+    const areaHeight = height * 0.44;
     
-    // Áreas rectangulares simples (sin arcos curvos)
-    ctx.strokeRect(width * 0.08, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
-    ctx.strokeRect(width * 0.92 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    // Áreas rectangulares simples (empieza desde el borde)
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
     
     // Marcas adicionales vintage
     const markLength = width * 0.02;
     
     // Izquierda
     ctx.beginPath();
-    ctx.moveTo(width * 0.08 + areaWidth, height * 0.5 - markLength/2);
-    ctx.lineTo(width * 0.08 + areaWidth + markLength, height * 0.5 - markLength/2);
-    ctx.lineTo(width * 0.08 + areaWidth + markLength, height * 0.5 + markLength/2);
-    ctx.lineTo(width * 0.08 + areaWidth, height * 0.5 + markLength/2);
+    ctx.moveTo(margin + areaWidth, height * 0.5 - markLength/2);
+    ctx.lineTo(margin + areaWidth + markLength, height * 0.5 - markLength/2);
+    ctx.lineTo(margin + areaWidth + markLength, height * 0.5 + markLength/2);
+    ctx.lineTo(margin + areaWidth, height * 0.5 + markLength/2);
     ctx.stroke();
     
     // Derecha
     ctx.beginPath();
-    ctx.moveTo(width * 0.92 - areaWidth, height * 0.5 - markLength/2);
-    ctx.lineTo(width * 0.92 - areaWidth - markLength, height * 0.5 - markLength/2);
-    ctx.lineTo(width * 0.92 - areaWidth - markLength, height * 0.5 + markLength/2);
-    ctx.lineTo(width * 0.92 - areaWidth, height * 0.5 + markLength/2);
+    ctx.moveTo(width - margin - areaWidth, height * 0.5 - markLength/2);
+    ctx.lineTo(width - margin - areaWidth - markLength, height * 0.5 - markLength/2);
+    ctx.lineTo(width - margin - areaWidth - markLength, height * 0.5 + markLength/2);
+    ctx.lineTo(width - margin - areaWidth, height * 0.5 + markLength/2);
     ctx.stroke();
 }
 
 function drawRetroGoalAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.05 : width * 0.07;
-    const areaHeight = isMobile ? height * 0.14 : height * 0.16;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.055;
+    const areaHeight = height * 0.2;
     
     // Áreas de gol pequeñas y simples
-    ctx.strokeRect(width * 0.08, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
-    ctx.strokeRect(width * 0.92 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
 }
 
 function drawRetroCornerFlags(ctx, width, height, isMobile) {
+    const margin = Math.max(3, width * 0.005);
     // En lugar de arcos, dibujar pequeñas banderas de corner
-    const flagHeight = isMobile ? 8 : 12;
-    const flagWidth = isMobile ? 6 : 9;
+    const flagHeight = 10;
+    const flagWidth = 7;
     
     ctx.fillStyle = '#FFFACD';
     
-    // Postes de las banderas
-    ctx.fillRect(width * 0.08 - 1, height * 0.12, 2, flagHeight);
-    ctx.fillRect(width * 0.92 - 1, height * 0.12, 2, flagHeight);
-    ctx.fillRect(width * 0.08 - 1, height * 0.88 - flagHeight, 2, flagHeight);
-    ctx.fillRect(width * 0.92 - 1, height * 0.88 - flagHeight, 2, flagHeight);
+    // Postes de las banderas en las esquinas reales
+    ctx.fillRect(margin - 1, margin, 2, flagHeight);
+    ctx.fillRect(width - margin - 1, margin, 2, flagHeight);
+    ctx.fillRect(margin - 1, height - margin - flagHeight, 2, flagHeight);
+    ctx.fillRect(width - margin - 1, height - margin - flagHeight, 2, flagHeight);
     
     // Banderas
     ctx.fillStyle = '#FF6B47'; // Color retro naranja
-    ctx.fillRect(width * 0.08 + 1, height * 0.12, flagWidth, flagHeight/2);
-    ctx.fillRect(width * 0.92 - flagWidth - 1, height * 0.12, flagWidth, flagHeight/2);
-    ctx.fillRect(width * 0.08 + 1, height * 0.88 - flagHeight/2, flagWidth, flagHeight/2);
-    ctx.fillRect(width * 0.92 - flagWidth - 1, height * 0.88 - flagHeight/2, flagWidth, flagHeight/2);
+    ctx.fillRect(margin + 1, margin, flagWidth, flagHeight/2);
+    ctx.fillRect(width - margin - flagWidth - 1, margin, flagWidth, flagHeight/2);
+    ctx.fillRect(margin + 1, height - margin - flagHeight/2, flagWidth, flagHeight/2);
+    ctx.fillRect(width - margin - flagWidth - 1, height - margin - flagHeight/2, flagWidth, flagHeight/2);
     
     ctx.fillStyle = '#FFFACD';
 }
 
 function drawRetroPenaltySpots(ctx, width, height, isMobile) {
-    const spotSize = isMobile ? 4 : 6;
+    const margin = Math.max(3, width * 0.005);
+    const spotSize = 5;
+    const penaltyDist = width * 0.105;
     
     // Spots cuadrados vintage
-    ctx.fillRect(width * 0.16 - spotSize/2, height * 0.5 - spotSize/2, spotSize, spotSize);
-    ctx.fillRect(width * 0.84 - spotSize/2, height * 0.5 - spotSize/2, spotSize, spotSize);
+    ctx.fillRect(margin + penaltyDist - spotSize/2, height * 0.5 - spotSize/2, spotSize, spotSize);
+    ctx.fillRect(width - margin - penaltyDist - spotSize/2, height * 0.5 - spotSize/2, spotSize, spotSize);
     
     // Cruces pequeñas en los spots
     ctx.globalAlpha = 0.6;
     const crossSize = 2;
-    ctx.fillRect(width * 0.16 - crossSize*2, height * 0.5 - crossSize/2, crossSize*4, crossSize);
-    ctx.fillRect(width * 0.16 - crossSize/2, height * 0.5 - crossSize*2, crossSize, crossSize*4);
-    ctx.fillRect(width * 0.84 - crossSize*2, height * 0.5 - crossSize/2, crossSize*4, crossSize);
-    ctx.fillRect(width * 0.84 - crossSize/2, height * 0.5 - crossSize*2, crossSize, crossSize*4);
+    ctx.fillRect(margin + penaltyDist - crossSize*2, height * 0.5 - crossSize/2, crossSize*4, crossSize);
+    ctx.fillRect(margin + penaltyDist - crossSize/2, height * 0.5 - crossSize*2, crossSize, crossSize*4);
+    ctx.fillRect(width - margin - penaltyDist - crossSize*2, height * 0.5 - crossSize/2, crossSize*4, crossSize);
+    ctx.fillRect(width - margin - penaltyDist - crossSize/2, height * 0.5 - crossSize*2, crossSize, crossSize*4);
     ctx.globalAlpha = 0.8;
 }
 
 function drawRetroGoalPosts(ctx, width, height, isMobile) {
-    const postWidth = isMobile ? 2 : 3;
-    const postHeight = isMobile ? height * 0.08 : height * 0.1;
+    const margin = Math.max(3, width * 0.005);
+    const postWidth = 3;
+    const postHeight = height * 0.12;
     
     ctx.fillStyle = '#F5F5DC'; // Color beige para los postes de madera
     
-    // Postes izquierda
-    ctx.fillRect(width * 0.08 - postWidth/2, height * 0.5 - postHeight/2, postWidth, postHeight);
-    ctx.fillRect(width * 0.08 - postWidth/2, height * 0.5 - postHeight/2 - postWidth, postHeight, postWidth); // Travesaño
+    // Postes izquierda (en el borde)
+    ctx.fillRect(margin - postWidth/2, height * 0.5 - postHeight/2, postWidth, postHeight);
     
-    // Postes derecha
-    ctx.fillRect(width * 0.92 - postWidth/2, height * 0.5 - postHeight/2, postWidth, postHeight);
-    ctx.fillRect(width * 0.92 - postHeight + postWidth/2, height * 0.5 - postHeight/2 - postWidth, postHeight, postWidth); // Travesaño
+    // Postes derecha (en el borde)
+    ctx.fillRect(width - margin - postWidth/2, height * 0.5 - postHeight/2, postWidth, postHeight);
     
     ctx.fillStyle = '#FFFACD';
 }

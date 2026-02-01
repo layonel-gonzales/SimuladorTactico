@@ -548,9 +548,10 @@ export default class DrawingManager {
         }, 150);
     }
     
-    // Redimensionar el canvas para que coincida con su contenedor
+    // Redimensionar el canvas para que coincida con el canvas del campo
     resizeCanvas() {
-        const rect = this.canvas.parentElement.getBoundingClientRect();
+        // Obtener referencia al canvas del campo para sincronizar dimensiones
+        const fieldCanvas = document.getElementById('football-field');
         
         // Re-detectar emulación en cada resize (puede cambiar dinámicamente)
         this.isDeviceEmulation = this.detectDeviceEmulation();
@@ -558,15 +559,44 @@ export default class DrawingManager {
         // MEJORA: Usar devicePixelRatio para alta resolución en el canvas de dibujo
         const dpr = window.devicePixelRatio || 1;
         
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
+        let cssWidth, cssHeight;
+        
+        if (fieldCanvas) {
+            // Sincronizar con las dimensiones del canvas del campo
+            cssWidth = parseFloat(fieldCanvas.style.width) || fieldCanvas.width / dpr;
+            cssHeight = parseFloat(fieldCanvas.style.height) || fieldCanvas.height / dpr;
+        } else {
+            // Fallback: calcular basado en el contenedor
+            const parent = this.canvas.parentElement;
+            const rect = parent.getBoundingClientRect();
+            const FIELD_RATIO = 105 / 68;
+            const margin = Math.min(rect.width, rect.height) * 0.01;
+            const availableWidth = rect.width - (margin * 2);
+            const availableHeight = rect.height - (margin * 2);
+            
+            if (availableWidth / availableHeight > FIELD_RATIO) {
+                cssHeight = availableHeight;
+                cssWidth = cssHeight * FIELD_RATIO;
+            } else {
+                cssWidth = availableWidth;
+                cssHeight = cssWidth / FIELD_RATIO;
+            }
+        }
+        
+        // Asegurar dimensiones mínimas
+        cssWidth = Math.max(cssWidth, 200);
+        cssHeight = Math.max(cssHeight, 130);
+        
+        this.canvas.width = Math.round(cssWidth * dpr);
+        this.canvas.height = Math.round(cssHeight * dpr);
         
         // Escalar el contexto
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(dpr, dpr);
         
         // Establecer el tamaño CSS
-        this.canvas.style.width = rect.width + 'px';
-        this.canvas.style.height = rect.height + 'px';
+        this.canvas.style.width = cssWidth + 'px';
+        this.canvas.style.height = cssHeight + 'px';
         
         // Solo redibujar si hay líneas para redibujar
         if (this.lines && this.lines.length > 0) {
@@ -574,7 +604,7 @@ export default class DrawingManager {
         }
         
         this.applyContextProperties();
-        console.log(`DrawingManager: Canvas redimensionado con DPR: ${dpr} - líneas:`, this.lines?.length || 0);
+        console.log(`DrawingManager: Canvas redimensionado - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}, líneas:`, this.lines?.length || 0);
     }
 
     // Método para habilitar/deshabilitar el dibujo de líneas

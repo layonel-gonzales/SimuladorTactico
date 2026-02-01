@@ -1,3 +1,18 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * 🏟️ ESTILO CLÁSICO DE CAMPO - CAPA BASE (z-index: 1)
+ * ═══════════════════════════════════════════════════════════════════════
+ * 
+ * AISLAMIENTO: Este estilo SOLO afecta al Canvas 2D del campo.
+ * - No modifica ningún elemento HTML
+ * - No afecta a las cards de jugadores (CAPA z-index: 20)
+ * - Usa exclusivamente ctx.* (API de Canvas)
+ * 
+ * INDEPENDENCIA: Cambiar el estilo del campo NO afecta a las cards.
+ * Las cards siempre flotan por encima del campo.
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
 // fieldStyleClassic.js - Estilo clásico de cancha
 function drawClassicField(canvas, ctx) {
     const cssWidth = parseFloat(canvas.style.width) || canvas.width;
@@ -52,18 +67,21 @@ function drawClassicGrassStripes(ctx, width, height) {
 }
 
 function drawFieldBorder(ctx, width, height) {
-    ctx.strokeRect(width * 0.05, height * 0.1, width * 0.9, height * 0.8);
+    // Márgenes mínimos - las líneas ocupan casi todo el espacio
+    const margin = Math.max(3, width * 0.005);
+    ctx.strokeRect(margin, margin, width - margin * 2, height - margin * 2);
 }
 
 function drawCenterLine(ctx, width, height) {
+    const margin = Math.max(3, width * 0.005);
     ctx.beginPath();
-    ctx.moveTo(width * 0.5, height * 0.1);
-    ctx.lineTo(width * 0.5, height * 0.9);
+    ctx.moveTo(width * 0.5, margin);
+    ctx.lineTo(width * 0.5, height - margin);
     ctx.stroke();
 }
 
 function drawCenterCircle(ctx, width, height, isMobile) {
-    const radius = isMobile ? Math.min(width, height) * 0.08 : Math.min(width, height) * 0.1;
+    const radius = Math.min(width, height) * 0.09;
     ctx.beginPath();
     ctx.arc(width * 0.5, height * 0.5, radius, 0, 2 * Math.PI);
     ctx.stroke();
@@ -75,62 +93,68 @@ function drawCenterCircle(ctx, width, height, isMobile) {
 }
 
 function drawPenaltyAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.12 : width * 0.15;
-    const areaHeight = isMobile ? height * 0.25 : height * 0.3;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.16;
+    const areaHeight = height * 0.44;
     
-    // Área izquierda
-    ctx.strokeRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    // Área izquierda (empieza desde el borde)
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
     
-    // Área derecha
-    ctx.strokeRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    // Área derecha (termina en el borde)
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
 }
 
 function drawGoalAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.06 : width * 0.08;
-    const areaHeight = isMobile ? height * 0.15 : height * 0.18;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.055;
+    const areaHeight = height * 0.2;
     
     // Área izquierda
-    ctx.strokeRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
     
     // Área derecha
-    ctx.strokeRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
 }
 
 function drawCornerArcs(ctx, width, height, isMobile) {
-    const radius = isMobile ? 8 : 12;
+    const margin = Math.max(3, width * 0.005);
+    const radius = Math.min(width, height) * 0.02;
     
     // Esquina superior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.1, radius, 0, Math.PI/2);
+    ctx.arc(margin, margin, radius, 0, Math.PI/2);
     ctx.stroke();
     
     // Esquina superior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.1, radius, Math.PI/2, Math.PI);
+    ctx.arc(width - margin, margin, radius, Math.PI/2, Math.PI);
     ctx.stroke();
     
     // Esquina inferior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.9, radius, -Math.PI/2, 0);
+    ctx.arc(margin, height - margin, radius, -Math.PI/2, 0);
     ctx.stroke();
     
     // Esquina inferior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.9, radius, Math.PI, 3*Math.PI/2);
+    ctx.arc(width - margin, height - margin, radius, Math.PI, 3*Math.PI/2);
     ctx.stroke();
 }
 
 function drawPenaltySpots(ctx, width, height, isMobile) {
-    const spotSize = isMobile ? 2 : 3;
+    const margin = Math.max(3, width * 0.005);
+    const spotSize = 3;
+    // Distancia del penalty: 11m desde la línea de gol (en un campo de 105m = ~10.5%)
+    const penaltyDist = width * 0.105;
     
     // Spot izquierdo
     ctx.beginPath();
-    ctx.arc(width * 0.17, height * 0.5, spotSize, 0, 2 * Math.PI);
+    ctx.arc(margin + penaltyDist, height * 0.5, spotSize, 0, 2 * Math.PI);
     ctx.fill();
     
     // Spot derecho
     ctx.beginPath();
-    ctx.arc(width * 0.83, height * 0.5, spotSize, 0, 2 * Math.PI);
+    ctx.arc(width - margin - penaltyDist, height * 0.5, spotSize, 0, 2 * Math.PI);
     ctx.fill();
 }
 

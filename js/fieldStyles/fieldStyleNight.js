@@ -65,22 +65,25 @@ function drawStadiumLights(ctx, width, height) {
 }
 
 function drawIlluminatedFieldBorder(ctx, width, height) {
+    // Márgenes mínimos - las líneas ocupan casi todo el espacio
+    const margin = Math.max(3, width * 0.005);
     // Borde principal con efecto neón
-    ctx.strokeRect(width * 0.05, height * 0.1, width * 0.9, height * 0.8);
+    ctx.strokeRect(margin, margin, width - margin * 2, height - margin * 2);
     
     // Borde exterior sutil
     ctx.globalAlpha = 0.3;
     ctx.lineWidth = ctx.lineWidth * 0.5;
-    ctx.strokeRect(width * 0.04, height * 0.09, width * 0.92, height * 0.82);
+    ctx.strokeRect(margin - 1, margin - 1, width - margin * 2 + 2, height - margin * 2 + 2);
     ctx.globalAlpha = 1;
     ctx.lineWidth = ctx.lineWidth * 2;
 }
 
 function drawIlluminatedCenterLine(ctx, width, height) {
+    const margin = Math.max(3, width * 0.005);
     // Línea central brillante
     ctx.beginPath();
-    ctx.moveTo(width * 0.5, height * 0.1);
-    ctx.lineTo(width * 0.5, height * 0.9);
+    ctx.moveTo(width * 0.5, margin);
+    ctx.lineTo(width * 0.5, height - margin);
     ctx.stroke();
     
     // Efecto de brillo adicional
@@ -95,7 +98,7 @@ function drawIlluminatedCenterLine(ctx, width, height) {
 }
 
 function drawIlluminatedCenterCircle(ctx, width, height, isMobile) {
-    const radius = isMobile ? Math.min(width, height) * 0.09 : Math.min(width, height) * 0.11;
+    const radius = Math.min(width, height) * 0.1;
     
     // Círculo principal
     ctx.beginPath();
@@ -124,27 +127,29 @@ function drawIlluminatedCenterCircle(ctx, width, height, isMobile) {
 }
 
 function drawIlluminatedPenaltyAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.13 : width * 0.16;
-    const areaHeight = isMobile ? height * 0.28 : height * 0.32;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.16;
+    const areaHeight = height * 0.44;
     
     // Áreas de penalty con brillo
-    ctx.strokeRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
-    ctx.strokeRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
     
     // Arcos de penalty con efecto neón
-    const arcRadius = isMobile ? width * 0.08 : width * 0.1;
+    const penaltyDist = width * 0.105;
+    const arcRadius = width * 0.09;
     
     ctx.shadowColor = '#ffff00';
     ctx.shadowBlur = 12;
     
     // Arco izquierdo
     ctx.beginPath();
-    ctx.arc(width * 0.17, height * 0.5, arcRadius, -Math.PI/3, Math.PI/3);
+    ctx.arc(margin + penaltyDist, height * 0.5, arcRadius, -Math.PI/3, Math.PI/3);
     ctx.stroke();
     
     // Arco derecho
     ctx.beginPath();
-    ctx.arc(width * 0.83, height * 0.5, arcRadius, 2*Math.PI/3, 4*Math.PI/3);
+    ctx.arc(width - margin - penaltyDist, height * 0.5, arcRadius, 2*Math.PI/3, 4*Math.PI/3);
     ctx.stroke();
     
     ctx.shadowColor = '#ffffff';
@@ -152,22 +157,24 @@ function drawIlluminatedPenaltyAreas(ctx, width, height, isMobile) {
 }
 
 function drawIlluminatedGoalAreas(ctx, width, height, isMobile) {
-    const areaWidth = isMobile ? width * 0.07 : width * 0.09;
-    const areaHeight = isMobile ? height * 0.16 : height * 0.19;
+    const margin = Math.max(3, width * 0.005);
+    const areaWidth = width * 0.055;
+    const areaHeight = height * 0.2;
     
     // Áreas de gol con brillo azul
     ctx.shadowColor = '#0088ff';
     ctx.shadowBlur = 10;
     
-    ctx.strokeRect(width * 0.05, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
-    ctx.strokeRect(width * 0.95 - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(margin, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
+    ctx.strokeRect(width - margin - areaWidth, height * 0.5 - areaHeight/2, areaWidth, areaHeight);
     
     ctx.shadowColor = '#ffffff';
     ctx.shadowBlur = 8;
 }
 
 function drawIlluminatedCornerArcs(ctx, width, height, isMobile) {
-    const radius = isMobile ? 12 : 18;
+    const margin = Math.max(3, width * 0.005);
+    const radius = Math.min(width, height) * 0.02;
     
     // Esquinas con efecto de resplandor
     ctx.shadowColor = '#ff8800';
@@ -175,22 +182,22 @@ function drawIlluminatedCornerArcs(ctx, width, height, isMobile) {
     
     // Esquina superior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.1, radius, 0, Math.PI/2);
+    ctx.arc(margin, margin, radius, 0, Math.PI/2);
     ctx.stroke();
     
     // Esquina superior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.1, radius, Math.PI/2, Math.PI);
+    ctx.arc(width - margin, margin, radius, Math.PI/2, Math.PI);
     ctx.stroke();
     
     // Esquina inferior izquierda
     ctx.beginPath();
-    ctx.arc(width * 0.05, height * 0.9, radius, -Math.PI/2, 0);
+    ctx.arc(margin, height - margin, radius, -Math.PI/2, 0);
     ctx.stroke();
     
     // Esquina inferior derecha
     ctx.beginPath();
-    ctx.arc(width * 0.95, height * 0.9, radius, Math.PI, 3*Math.PI/2);
+    ctx.arc(width - margin, height - margin, radius, Math.PI, 3*Math.PI/2);
     ctx.stroke();
     
     ctx.shadowColor = '#ffffff';
@@ -198,7 +205,9 @@ function drawIlluminatedCornerArcs(ctx, width, height, isMobile) {
 }
 
 function drawIlluminatedPenaltySpots(ctx, width, height, isMobile) {
-    const spotSize = isMobile ? 4 : 6;
+    const margin = Math.max(3, width * 0.005);
+    const spotSize = 5;
+    const penaltyDist = width * 0.105;
     
     // Spots con efecto de brillo pulsante
     const time = Date.now() * 0.004;
@@ -210,12 +219,12 @@ function drawIlluminatedPenaltySpots(ctx, width, height, isMobile) {
     
     // Spot izquierdo
     ctx.beginPath();
-    ctx.arc(width * 0.17, height * 0.5, spotSize, 0, 2 * Math.PI);
+    ctx.arc(margin + penaltyDist, height * 0.5, spotSize, 0, 2 * Math.PI);
     ctx.fill();
     
     // Spot derecho
     ctx.beginPath();
-    ctx.arc(width * 0.83, height * 0.5, spotSize, 0, 2 * Math.PI);
+    ctx.arc(width - margin - penaltyDist, height * 0.5, spotSize, 0, 2 * Math.PI);
     ctx.fill();
     
     ctx.globalAlpha = 1;

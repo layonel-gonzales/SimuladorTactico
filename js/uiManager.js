@@ -20,6 +20,20 @@ export default class UIManager {
         console.log('UIManager: Inicialización completa.');
     }
 
+    /**
+     * Obtiene las dimensiones y posición del área de juego efectiva (canvas)
+     * Esto es necesario porque el canvas está centrado dentro del pitch-container
+     */
+    getFieldRect() {
+        const canvas = document.getElementById('football-field');
+        if (canvas) {
+            return canvas.getBoundingClientRect();
+        }
+        // Fallback al contenedor si no hay canvas
+        const pitch = document.getElementById('pitch-container');
+        return pitch ? pitch.getBoundingClientRect() : null;
+    }
+
     setupCursors() {
         const drawingCanvas = document.getElementById('drawing-canvas');
         const pitchContainer = document.getElementById('pitch-container');
@@ -245,7 +259,18 @@ export default class UIManager {
             return;
         }
 
+        // Usar las dimensiones del canvas (área de juego efectiva)
+        const fieldRect = this.getFieldRect();
+        if (!fieldRect) {
+            console.error('UIManager: No se pudo obtener fieldRect para repositionPlayersOnPitch.');
+            return;
+        }
+        
         const pitchRect = pitch.getBoundingClientRect();
+        
+        // Calcular offset del canvas dentro del contenedor
+        const offsetX = fieldRect.left - pitchRect.left;
+        const offsetY = fieldRect.top - pitchRect.top;
 
         // Iterar sobre los jugadores activos y actualizar su posición
         this.state.activePlayers.forEach(player => {
@@ -257,11 +282,9 @@ export default class UIManager {
             const token = document.querySelector(`.player-token[data-player-id="${player.id}"]`);
             if (token && typeof player.x === 'number' && typeof player.y === 'number') {
                 // Las propiedades player.x y player.y ya están guardadas como porcentajes (0-100)
-                // Ahora, las aplicamos al nuevo tamaño del campo.
-                // Restamos la mitad del tamaño del token para centrarlo si las coordenadas fueran el centro.
-                // Pero como estamos guardando la esquina superior izquierda, simplemente aplicamos.
-                const newLeft = (player.x / 100) * pitchRect.width;
-                const newTop = (player.y / 100) * pitchRect.height;
+                // Ahora, las aplicamos al nuevo tamaño del campo (canvas)
+                const newLeft = offsetX + (player.x / 100) * fieldRect.width;
+                const newTop = offsetY + (player.y / 100) * fieldRect.height;
 
                 token.style.left = `${newLeft}px`;
                 token.style.top = `${newTop}px`;
@@ -353,8 +376,20 @@ export default class UIManager {
         console.log('[UIManager][DEBUG] Tokens existentes a eliminar:', existingTokens.length);
         existingTokens.forEach(el => el.remove());
 
+        // Usar las dimensiones del canvas (área de juego efectiva)
+        const fieldRect = this.getFieldRect();
         const pitchRect = pitch.getBoundingClientRect();
-        console.log('[UIManager][DEBUG] Dimensiones del pitch:', pitchRect);
+        
+        if (!fieldRect) {
+            console.error('UIManager: No se pudo obtener fieldRect para renderPlayersOnPitch.');
+            return;
+        }
+        
+        // Calcular offset del canvas dentro del contenedor
+        const offsetX = fieldRect.left - pitchRect.left;
+        const offsetY = fieldRect.top - pitchRect.top;
+        
+        console.log('[UIManager][DEBUG] Dimensiones del campo:', fieldRect, 'Offset:', offsetX, offsetY);
 
         // --- DEBUG: Mostrar todos los jugadores a renderizar ---
         console.log('[UIManager][DEBUG] Total jugadores a renderizar:', this.state.activePlayers.length);
@@ -383,9 +418,9 @@ export default class UIManager {
                 let x = player.x || 50; // default centro
                 let y = player.y || 50; // default centro
                 
-                // Convertir porcentaje a píxeles para posicionamiento
-                ball.style.left = `${(x / 100) * pitchRect.width - 16}px`; // -16 para centrar (32px/2)
-                ball.style.top = `${(y / 100) * pitchRect.height - 16}px`;   // -16 para centrar (32px/2)
+                // Convertir porcentaje a píxeles para posicionamiento (relativo al canvas)
+                ball.style.left = `${offsetX + (x / 100) * fieldRect.width - 16}px`; // -16 para centrar (32px/2)
+                ball.style.top = `${offsetY + (y / 100) * fieldRect.height - 16}px`;   // -16 para centrar (32px/2)
                 ball.style.width = '32px';
                 ball.style.height = '32px';
                 ball.style.position = 'absolute';
@@ -408,19 +443,25 @@ export default class UIManager {
                     ball.classList.add('dragging');
                     ball.style.cursor = 'grabbing';
                     const ballRect = ball.getBoundingClientRect();
-                    const pitchRect = pitch.getBoundingClientRect();
-                    const offsetX = clientX - ballRect.left;
-                    const offsetY = clientY - ballRect.top;
+                    const currentFieldRect = this.getFieldRect();
+                    const currentPitchRect = pitch.getBoundingClientRect();
+                    const currentOffsetX = currentFieldRect.left - currentPitchRect.left;
+                    const currentOffsetY = currentFieldRect.top - currentPitchRect.top;
+                    const offsetXDrag = clientX - ballRect.left;
+                    const offsetYDrag = clientY - ballRect.top;
                     const moveHandler = (moveEvent) => {
                         moveEvent.preventDefault();
                         const currentClientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
                         const currentClientY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
-                        const xPx = currentClientX - pitchRect.left - offsetX;
-                        const yPx = currentClientY - pitchRect.top - offsetY;
-                        const maxX = pitchRect.width - ball.offsetWidth;
-                        const maxY = pitchRect.height - ball.offsetHeight;
-                        ball.style.left = `${Math.max(0, Math.min(xPx, maxX))}px`;
-                        ball.style.top = `${Math.max(0, Math.min(yPx, maxY))}px`;
+                        const xPx = currentClientX - currentPitchRect.left - offsetXDrag;
+                        const yPx = currentClientY - currentPitchRect.top - offsetYDrag;
+                        const maxX = currentOffsetX + currentFieldRect.width - ball.offsetWidth;
+                        const maxY = currentOffsetY + currentFieldRect.height - ball.offsetHeight;
+                        // Limitar movimiento al área del canvas
+                        const minX = currentOffsetX;
+                        const minY = currentOffsetY;
+                        ball.style.left = `${Math.max(minX, Math.min(xPx, maxX))}px`;
+                        ball.style.top = `${Math.max(minY, Math.min(yPx, maxY))}px`;
                     };
                     const upHandler = () => {
                         console.log('UIManager: Finalizando arrastre del balón.');
@@ -434,8 +475,9 @@ export default class UIManager {
                         if (ballPlayer) {
                             const currentLeftPx = parseFloat(ball.style.left);
                             const currentTopPx = parseFloat(ball.style.top);
-                            ballPlayer.x = ((currentLeftPx + 16) / pitchRect.width) * 100; // +16 para volver al centro
-                            ballPlayer.y = ((currentTopPx + 16) / pitchRect.height) * 100;  // +16 para volver al centro
+                            // Calcular porcentaje relativo al canvas
+                            ballPlayer.x = ((currentLeftPx - currentOffsetX + 16) / currentFieldRect.width) * 100;
+                            ballPlayer.y = ((currentTopPx - currentOffsetY + 16) / currentFieldRect.height) * 100;
                             console.log(`Balón guardado en: x=${ballPlayer.x.toFixed(2)}%, y=${ballPlayer.y.toFixed(2)}%`);
                         }
                         
@@ -463,10 +505,10 @@ export default class UIManager {
             // o no hay una táctica que le asigne una), asignarle una posición por defecto
             if (typeof player.x !== 'number' || typeof player.y !== 'number') {
                 console.log(`[UIManager][DEBUG] Jugador ${player.id} sin posición, asignando posición por defecto`);
-                const initialX = (pitchRect.width / 2) - (60 / 2) + (index * 5);
-                const initialY = (pitchRect.height * 0.20);
-                player.x = (initialX / pitchRect.width) * 100;
-                player.y = (initialY / pitchRect.height) * 100;
+                const initialX = (fieldRect.width / 2) - (60 / 2) + (index * 5);
+                const initialY = (fieldRect.height * 0.20);
+                player.x = (initialX / fieldRect.width) * 100;
+                player.y = (initialY / fieldRect.height) * 100;
                 console.log(`[UIManager][DEBUG] Posición asignada: x=${player.x}%, y=${player.y}%`);
             }
 
@@ -477,8 +519,8 @@ export default class UIManager {
             if (window.playerCardManager) {
                 console.log('[UIManager][DEBUG] Usando playerCardManager para crear token');
                 token = window.playerCardManager.createPlayerCard(player, 'field');
-                token.style.left = `${(player.x / 100) * pitchRect.width}px`;
-                token.style.top = `${(player.y / 100) * pitchRect.height}px`;
+                token.style.left = `${offsetX + (player.x / 100) * fieldRect.width}px`;
+                token.style.top = `${offsetY + (player.y / 100) * fieldRect.height}px`;
                 console.log(`[UIManager][DEBUG] Token creado con playerCardManager, posicionado en ${token.style.left}, ${token.style.top}`);
             } else {
                 console.log('[UIManager][DEBUG] Usando método fallback para crear token');
@@ -486,8 +528,8 @@ export default class UIManager {
                 token = document.createElement('div');
                 token.className = 'player-token';
                 token.dataset.playerId = player.id || 'unknown';
-                token.style.left = `${(player.x / 100) * pitchRect.width}px`;
-                token.style.top = `${(player.y / 100) * pitchRect.height}px`;
+                token.style.left = `${offsetX + (player.x / 100) * fieldRect.width}px`;
+                token.style.top = `${offsetY + (player.y / 100) * fieldRect.height}px`;
                 
                 const playerName = player.name || `Jugador ${player.number || '?'}`;
                 const playerPosition = player.position || 'N/A';
@@ -545,19 +587,25 @@ export default class UIManager {
                 token.classList.add('dragging');
                 token.style.cursor = 'grabbing';
                 const tokenRect = token.getBoundingClientRect();
-                const pitchRect = pitch.getBoundingClientRect();
-                const offsetX = clientX - tokenRect.left;
-                const offsetY = clientY - tokenRect.top;
+                const currentFieldRect = this.getFieldRect();
+                const currentPitchRect = pitch.getBoundingClientRect();
+                const currentOffsetX = currentFieldRect.left - currentPitchRect.left;
+                const currentOffsetY = currentFieldRect.top - currentPitchRect.top;
+                const offsetXDrag = clientX - tokenRect.left;
+                const offsetYDrag = clientY - tokenRect.top;
                 const moveHandler = (moveEvent) => {
                     moveEvent.preventDefault();
                     const currentClientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
                     const currentClientY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
-                    const xPx = currentClientX - pitchRect.left - offsetX;
-                    const yPx = currentClientY - pitchRect.top - offsetY;
-                    const maxX = pitchRect.width - token.offsetWidth;
-                    const maxY = pitchRect.height - token.offsetHeight;
-                    token.style.left = `${Math.max(0, Math.min(xPx, maxX))}px`;
-                    token.style.top = `${Math.max(0, Math.min(yPx, maxY))}px`;
+                    const xPx = currentClientX - currentPitchRect.left - offsetXDrag;
+                    const yPx = currentClientY - currentPitchRect.top - offsetYDrag;
+                    // Limitar al área del canvas
+                    const minX = currentOffsetX;
+                    const minY = currentOffsetY;
+                    const maxX = currentOffsetX + currentFieldRect.width - token.offsetWidth;
+                    const maxY = currentOffsetY + currentFieldRect.height - token.offsetHeight;
+                    token.style.left = `${Math.max(minX, Math.min(xPx, maxX))}px`;
+                    token.style.top = `${Math.max(minY, Math.min(yPx, maxY))}px`;
                 };
                 const upHandler = () => {
                     console.log('UIManager: Finalizando arrastre de jugador.');
@@ -572,8 +620,9 @@ export default class UIManager {
                     if (player) {
                         const currentLeftPx = parseFloat(token.style.left);
                         const currentTopPx = parseFloat(token.style.top);
-                        player.x = (currentLeftPx / pitchRect.width) * 100;
-                        player.y = (currentTopPx / pitchRect.height) * 100;
+                        // Calcular porcentaje relativo al canvas
+                        player.x = ((currentLeftPx - currentOffsetX) / currentFieldRect.width) * 100;
+                        player.y = ((currentTopPx - currentOffsetY) / currentFieldRect.height) * 100;
                         console.log(`Jugador ${player.id} guardado en: x=${player.x.toFixed(2)}%, y=${player.y.toFixed(2)}%`);
                     }
                 };

@@ -15,8 +15,9 @@ import CustomPlayersManager from './customPlayersManager.js';
 import CustomPlayersUI from './customPlayersUI.js';
 import ConfigurationManager from './configurationManager.js';
 import ConfigurationUI from './configurationUI.js';
-import FieldStyleManager from './fieldStyleManager.js';
-import FieldStyleIntegration from './fieldStyleIntegration.js';
+// NOTA: FieldStyleManager y FieldStyleIntegration ahora se cargan como scripts globales
+// y están disponibles en window.fieldStyleManager y window.fieldStyleIntegration
+// Ver: fieldStyleManager-refactored.js y fieldStyleIntegration.js (cargados con <script>)
 
 // --- Simulador Táctico con dos modos principales separados ---
 // Modo 1: Dibujo de trazos usando el balón como cursor
@@ -219,18 +220,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const configurationUI = new ConfigurationUI(configurationManager, customPlayersManager, playerManager);
     window.configurationUI = configurationUI; // Hacer disponible globalmente
     
-    // === INICIALIZAR SISTEMA DE ESTILOS DE CANCHA ===
-    console.log('[Main] Inicializando sistema de estilos de cancha...');
+    // === SISTEMA DE ESTILOS DE CANCHA (MODULAR) ===
+    // NOTA: fieldStyleManager ya está disponible globalmente desde fieldStyleManager-refactored.js
+    // que se carga antes de main.js mediante <script> tag
+    console.log('[Main] Sistema de estilos de cancha:', window.fieldStyleManager ? '✅ Disponible' : '⚠️ No encontrado');
     
-    // Inicializar el gestor de estilos de cancha
-    const fieldStyleManager = new FieldStyleManager();
-    window.fieldStyleManager = fieldStyleManager; // Hacer disponible globalmente
+    // Si fieldStyleIntegration no está disponible, esperamos a que se cargue
+    if (!window.fieldStyleIntegration) {
+        console.log('[Main] Esperando a que fieldStyleIntegration esté disponible...');
+    }
     
-    // Inicializar la integración de estilos de cancha
-    const fieldStyleIntegration = new FieldStyleIntegration();
-    window.fieldStyleIntegration = fieldStyleIntegration; // Hacer disponible globalmente
-    
-    console.log('[Main] Sistema de estilos de cancha inicializado correctamente');
+    console.log('[Main] Sistema de estilos de cancha modular activo');
     
     // Conectar el botón de configuración al modal COMPLETO
     const configurationBtn = document.getElementById('configuration-btn');
@@ -562,21 +562,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         // MEJORA: Usar devicePixelRatio para alta resolución
         const dpr = window.devicePixelRatio || 1;
         
-        // Tamaño CSS (lo que ve el usuario)
-        const cssWidth = rect.width;
-        const cssHeight = rect.height;
+        // La cancha ocupa TODO el espacio disponible del contenedor
+        // Sin márgenes - las líneas del campo llegarán hasta los bordes
+        let cssWidth = rect.width;
+        let cssHeight = rect.height;
+        
+        // Asegurar dimensiones mínimas
+        cssWidth = Math.max(cssWidth, 200);
+        cssHeight = Math.max(cssHeight, 130);
         
         // Tamaño real del canvas en píxeles de dispositivo
-        const canvasWidth = cssWidth * dpr;
-        const canvasHeight = cssHeight * dpr;
+        const canvasWidth = Math.round(cssWidth * dpr);
+        const canvasHeight = Math.round(cssHeight * dpr);
         
-        // Configurar tamaños del canvas
+        // Configurar tamaños del canvas del campo
         footballFieldCanvas.width = canvasWidth;
         footballFieldCanvas.height = canvasHeight;
-        
-        // Establecer el tamaño CSS para que se muestre correctamente
         footballFieldCanvas.style.width = cssWidth + 'px';
         footballFieldCanvas.style.height = cssHeight + 'px';
+        
+        // Sincronizar el drawing-canvas con las mismas dimensiones
+        if (drawingCanvas) {
+            drawingCanvas.width = canvasWidth;
+            drawingCanvas.height = canvasHeight;
+            drawingCanvas.style.width = cssWidth + 'px';
+            drawingCanvas.style.height = cssHeight + 'px';
+        }
         
         // Escalar el contexto para que coincida con el ratio de píxeles
         // IMPORTANTE: Limpiar transformaciones previas
@@ -590,8 +601,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fallback al dibujo original si no está disponible el sistema de estilos
             drawFootballField(footballFieldCanvas, fieldCtx);
         }
-        console.log(`main.js: Campo redibujado - CSS: ${cssWidth}x${cssHeight}, Canvas: ${canvasWidth}x${canvasHeight}, DPR: ${dpr}`);
-        console.log(`main.js: Forzando redibujo completo del campo con arcos actualizados`);
+        
+        console.log(`main.js: Campo redibujado - Canvas: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}`);
     }
 
     // El UIManager ya tiene un listener para 'resize' que llama a drawingManager.resizeCanvas()
