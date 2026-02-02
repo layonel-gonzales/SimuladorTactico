@@ -371,20 +371,6 @@ export default class AnimationManager {
         return a + (b - a) * t;
     }
     
-    // Obtener posición del balón del frame
-    getBallPosFromFrame(frame) {
-        if (frame.ball && typeof frame.ball.x === 'number' && typeof frame.ball.y === 'number') {
-            return { x: frame.ball.x, y: frame.ball.y };
-        }
-        
-        if (frame.players && frame.players.length > 0) {
-            const ballPlayer = frame.players.find(p => p.isBall);
-            if (ballPlayer) return { x: ballPlayer.x, y: ballPlayer.y };
-        }
-        
-        return null;
-    }
-    
     playAnimation() {
         if (this.isPlaying || this.frames.length < 2) return;
         
@@ -799,10 +785,6 @@ export default class AnimationManager {
         return this.frames.length;
     }
     
-    getCurrentFrameIndex() {
-        return this.currentFrame;
-    }
-    
     // Nuevo método para exportar a video MP4 - CAPTURA REAL DE LA ANIMACIÓN
     async exportToVideo() {
         if (this.frames.length < 2) {
@@ -1064,80 +1046,6 @@ export default class AnimationManager {
         });
     }
 
-    // Crear canvas para el video
-    createVideoCanvas() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1280; // HD width
-        canvas.height = 720; // HD height
-        return canvas;
-    }
-
-    // Grabar frames de la animación
-    async recordAnimationFrames(ctx, canvas) {
-        const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
-        const frameDuration = (600 * 1.75) / speed; // ms por frame (igual que la animación)
-        const pauseDuration = (200 * 1.35) / speed; // pausa entre frames
-
-        // Capturar estado inicial
-        await this.captureFrameToCanvas(ctx, canvas, this.frames[0]);
-        await this.sleep(500); // Pausa inicial
-
-        // Capturar transiciones entre frames
-        for (let i = 0; i < this.frames.length - 1; i++) {
-            const fromFrame = this.frames[i];
-            const toFrame = this.frames[i + 1];
-
-            // Actualizar progreso
-            this.updateVideoProgress(((i + 1) / this.frames.length) * 100);
-
-            // Animar transición
-            await this.animateFrameForVideo(ctx, canvas, fromFrame, toFrame, frameDuration);
-            
-            // Pausa entre frames
-            await this.sleep(pauseDuration);
-        }
-
-        // Frame final estático
-        await this.sleep(1000);
-    }
-
-    // Animar transición para video
-    async animateFrameForVideo(ctx, canvas, fromFrame, toFrame, duration) {
-        const startTime = performance.now();
-        const fromPlayers = fromFrame.players.map(p => ({ ...p }));
-        const toPlayers = toFrame.players.map(p => ({ ...p }));
-
-        return new Promise((resolve) => {
-            const animate = (currentTime) => {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                // Interpolar posiciones
-                const interpolatedPlayers = fromPlayers.map((fromPlayer, idx) => {
-                    const toPlayer = toPlayers[idx];
-                    if (!toPlayer) return fromPlayer;
-
-                    return {
-                        ...fromPlayer,
-                        x: this.lerp(fromPlayer.x, toPlayer.x, progress),
-                        y: this.lerp(fromPlayer.y, toPlayer.y, progress)
-                    };
-                });
-
-                // Capturar frame interpolado
-                this.captureFrameToCanvas(ctx, canvas, { players: interpolatedPlayers });
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    resolve();
-                }
-            };
-
-            requestAnimationFrame(animate);
-        });
-    }
-
     // Capturar frame actual al canvas del video
     captureFrameToCanvas(ctx, canvas, frame) {
         // Limpiar canvas
@@ -1305,19 +1213,6 @@ export default class AnimationManager {
         ctx.font = '10px Arial';
         ctx.textAlign = 'left';
         ctx.fillText(timestamp, 20, canvas.height - 20);
-    }
-
-    // Convertir WebM a MP4 (usando FFmpeg.js o similar)
-    async convertToMP4(webmBlob) {
-        try {
-            // Para una implementación completa, aquí usarías FFmpeg.js
-            // Por ahora, descargaremos como WebM (compatible con la mayoría de navegadores modernos)
-            this.downloadVideo(webmBlob, 'webm');
-            
-        } catch (error) {
-            console.error('[AnimationManager] Error en conversión:', error);
-            this.downloadVideo(webmBlob, 'webm');
-        }
     }
 
     // Descargar video

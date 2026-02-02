@@ -315,12 +315,6 @@ export default class UIManager {
         this.updateSelectedCount();
     }
 
-    // FUNCIÓN ACTUALIZADA: Actualizar contador de jugadores seleccionados  
-    updateSelectedCountBadge(count) {
-        // Esta función ahora delega a updateSelectedCount() que ya existe
-        this.updateSelectedCount();
-    }
-
     renderPlayersOnPitch() {
         
         const pitch = document.getElementById('pitch-container');
