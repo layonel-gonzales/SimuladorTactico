@@ -38,13 +38,12 @@ const CRITICAL_RESOURCES = [
 const CACHEABLE_RESOURCES = [
   '/css/cardStyles.css',
   '/css/freemium-styles.css',
-  '/js/paymentManagerTest.js',
+  '/js/paymentManager.js',
   '/js/configurationManager.js',
   '/js/tutorialManager.js',
   '/js/themeManager.js',
   '/js/fullscreenManager.js',
-  '/js/playerCardManager.js',
-  '/js/cardStyleManager.js'
+  '/js/playerCardManager.js'
 ];
 
 // APIs que se pueden cachear

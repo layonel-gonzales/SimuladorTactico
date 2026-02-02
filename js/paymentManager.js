@@ -52,10 +52,7 @@ class PaymentManager {
             // Configurar elementos de UI
             this.setupPaymentElements();
             
-            // Mostrar indicador de modo test si corresponde
-            if (this.isTestMode) {
-                this.showTestModeIndicator();
-            }
+            // Modo test detectado automáticamente para desarrollo
             
         } catch (error) {
             console.error('[PaymentManager] ❌ Error en inicialización:', error);
@@ -419,29 +416,6 @@ class PaymentManager {
         // console.log('[PaymentManager] 🔄 Actualizando UI para plan:', this.currentPlan?.name);
     }
     
-    showTestModeIndicator() {
-        const indicator = document.createElement('div');
-        indicator.className = 'test-mode-indicator';
-        indicator.innerHTML = `
-            <div class="alert alert-warning alert-dismissible fade show position-fixed" 
-                 style="top: 10px; right: 10px; z-index: 9999; max-width: 300px;">
-                <i class="fas fa-flask"></i>
-                <strong>Modo Test</strong><br>
-                Pagos simulados activos
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        document.body.appendChild(indicator);
-        
-        // Auto-ocultar después de 5 segundos
-        setTimeout(() => {
-            const alert = indicator.querySelector('.alert');
-            if (alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }
-        }, 5000);
-    }
 }
 
 // Instancia global

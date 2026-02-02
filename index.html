@@ -38,14 +38,12 @@ function handleOrientationModal() {
   // Mostrar modal solo en vertical y en dispositivos móviles
   if (isPortrait && isMobileDevice) {
     modal.style.display = 'flex';
-    console.log('🔄 Modal de orientación mostrado - Dispositivo en vertical');
   } else {
     modal.style.display = 'none';
     // Limpiar el estado de dismissal cuando se rota a horizontal
     if (!isPortrait) {
       sessionStorage.removeItem('orientation-modal-dismissed');
     }
-    console.log('✅ Modal de orientación oculto - Dispositivo en horizontal o desktop');
   }
 }
 
@@ -55,7 +53,6 @@ function dismissOrientationModal() {
   if (modal) {
     modal.style.display = 'none';
     sessionStorage.setItem('orientation-modal-dismissed', 'true');
-    console.log('ℹ️ Usuario eligió continuar en vertical');
   }
 }
 
@@ -83,15 +80,12 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script>
         // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔄 Verificando autenticación...');
             
             const token = localStorage.getItem('auth_token');
             if (!token) {
-                console.log('❌ Usuario no autenticado, redirigiendo a login...');
                 window.location.href = 'login.html';
                 return;
             } else {
-                console.log('✅ Usuario autenticado, configurando UI...');
                 setupUserInterface();
             }
         });
@@ -116,8 +110,6 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                     };
                 }
             }
-            
-            console.log('🎯 Interfaz configurada para usuario:', userEmail);
             
             // Mostrar panel de desarrollador si está en modo desarrollo
             showDevPanelIfDevelopment();
@@ -1153,28 +1145,15 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
       // 🎯 FUNCIONES DE EJEMPLO PARA PROTEGER CARACTERÍSTICAS PREMIUM
       window.enableAdvancedAnimation = function() {
         if (!window.requirePremium('animaciones avanzadas')) return;
-        console.log('✅ Función premium habilitada: Animaciones avanzadas');
-        // Aquí iría la lógica de animaciones avanzadas
       };
       
       window.enableAdvancedSharing = function() {
         if (!window.requirePremium('compartir avanzado')) return;
-        console.log('✅ Función premium habilitada: Compartir avanzado');
-        // Aquí iría la lógica de compartir avanzado
       };
       
       window.enableAdvancedTactics = function() {
         if (!window.requirePremium('tácticas avanzadas')) return;
-        console.log('✅ Función premium habilitada: Tácticas avanzadas');
-        // Aquí iría la lógica de tácticas avanzadas
       };
     </script>
-    <!-- ShareManager removido - funcionalidad integrada en main.js -->
-    
-    <!-- Sistema de estilos de cancha - Integración directa -->
-    <!-- <script src="fieldStylesDirectIntegration.js"></script> -->
-    
-    <!-- Corrector de overflow para cards de jugadores -->
-    <!-- <script src="cardOverflowFix.js"></script> -->
 </body>
 </html>

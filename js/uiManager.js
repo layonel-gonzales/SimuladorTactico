@@ -572,9 +572,8 @@ export default class UIManager {
         if (modeSpan) {
             const mode = this.state.isDrawingMode ? 'Dibujo' : 'Arrastrar';
             modeSpan.textContent = mode;
-        } else {
-            console.warn('UIManager: Elemento #current-mode no encontrado.');
         }
+        // Elemento opcional - no mostrar warning si no existe
     }
 
     updateSelectedCount() {

@@ -104,6 +104,11 @@ app.use(express.static(path.join(__dirname, '..'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0
 }));
 
+// Ruta para favicon.ico (evitar 404)
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'img', 'favicon.png'));
+});
+
 // Logging de requests (desarrollo)
 if (process.env.NODE_ENV !== 'production') {
     app.use((req, res, next) => {

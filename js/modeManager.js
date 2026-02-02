@@ -41,14 +41,6 @@ export default class ModeManager {
         // Referencias a los nuevos contenedores unificados
         this.drawingModeControls = document.getElementById('drawing-mode-controls');
         this.animationModeControls = document.getElementById('animation-mode-controls');
-        
-        if (!this.drawingModeControls || !this.animationModeControls) {
-            console.warn('[ModeManager] ❌ No se encontraron los contenedores de controles unificados');
-            console.warn('[ModeManager] - drawingModeControls existe:', !!this.drawingModeControls);
-            console.warn('[ModeManager] - animationModeControls existe:', !!this.animationModeControls);
-        } else {
-            console.log('[ModeManager] ✅ Contenedores de controles configurados correctamente');
-        }
     }
     
     setManagers(drawingManager, ballDrawingManager, animationManager, uiManager) {
