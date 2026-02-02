@@ -77,8 +77,8 @@ class CardStyleManager {
         // Actualizar todas las cards existentes
         this.updateAllCards();
         
-        // Emitir evento personalizado
-        document.dispatchEvent(new CustomEvent('cardStyleChanged', {
+        // Emitir evento personalizado en window en lugar de document
+        window.dispatchEvent(new CustomEvent('cardStyleChanged', {
             detail: { styleId, styleName: style.name }
         }));
         
@@ -124,25 +124,55 @@ class CardStyleManager {
     }
 
     /**
-     * Actualizar todas las cards existentes en el DOM
+     * Actualizar todas las cards existentes en el DOM (canvas + plantilla)
+     * ⭐ RESET GLOBAL de todas las cards aplicando el nuevo estilo
      */
     updateAllCards() {
-        // Buscar todas las cards de jugadores en el campo
+        console.log('🔄 Actualizando todas las cards al estilo:', this.currentStyle);
+        
+        // 1️⃣ ACTUALIZAR CARDS EN CANVAS (player-token)
         const playerTokens = document.querySelectorAll('.player-token');
+        console.log(`   └─ Encontradas ${playerTokens.length} cards en canvas`);
         
         playerTokens.forEach(token => {
             const playerId = token.dataset.playerId;
             if (playerId && window.playerManager) {
                 const player = window.playerManager.getPlayerById(playerId);
                 if (player) {
-                    const newCardHtml = this.createStyledCard(player, 'field', null, 'desktop', 'dark', playerId);
-                    const cardContainer = token.querySelector('.minicard-overall, .card-content');
-                    if (cardContainer) {
-                        cardContainer.outerHTML = newCardHtml;
+                    try {
+                        // Crear la nueva card completamente
+                        const newCardHtml = this.createStyledCard(player, 'field', null, 'desktop', 'dark', playerId);
+                        // Reemplazar el contenido inner (mantener el elemento base)
+                        token.innerHTML = newCardHtml;
+                    } catch (error) {
+                        console.warn(`⚠️ Error actualizando card del jugador ${playerId}:`, error);
                     }
                 }
             }
         });
+        
+        // 2️⃣ ACTUALIZAR CARDS EN PLANTILLA/MODAL (squad-player-item)
+        const squadPlayerItems = document.querySelectorAll('.squad-player-item');
+        console.log(`   └─ Encontradas ${squadPlayerItems.length} cards en plantilla/modal`);
+        
+        squadPlayerItems.forEach(item => {
+            const playerId = item.dataset.playerId;
+            if (playerId && window.playerManager) {
+                const player = window.playerManager.getPlayerById(playerId);
+                if (player) {
+                    try {
+                        // Crear la nueva card para modo selección
+                        const newCardHtml = this.createStyledCard(player, 'selection', null, 'desktop', 'dark', playerId);
+                        // Reemplazar el contenido inner
+                        item.innerHTML = newCardHtml;
+                    } catch (error) {
+                        console.warn(`⚠️ Error actualizando card de plantilla ${playerId}:`, error);
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Actualización de cards completada');
     }
 
     /**

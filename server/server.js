@@ -13,6 +13,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { testConnection, closeConnection } = require('./database');
+const { initializeDatabase } = require('./database-init');
 
 // Middleware de seguridad
 const {
@@ -179,6 +180,14 @@ app.use((err, req, res, next) => {
 
 async function startServer() {
     try {
+        // Inicializar base de datos (crear si no existe, ejecutar scripts si es necesario)
+        console.log('[Server] Inicializando base de datos...');
+        const dbInitialized = await initializeDatabase();
+        
+        if (!dbInitialized) {
+            console.warn('[Server] ⚠️ La inicialización de la base de datos falló.');
+        }
+        
         // Probar conexión a la base de datos
         console.log('[Server] Verificando conexión a la base de datos...');
         const dbConnected = await testConnection();

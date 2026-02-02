@@ -36,7 +36,7 @@ const CRITICAL_RESOURCES = [
 
 // Archivos para caché progresivo
 const CACHEABLE_RESOURCES = [
-  '/css/cardStyles.css',
+  '/css/estilo.css',
   '/css/freemium-styles.css',
   '/js/paymentManager.js',
   '/js/configurationManager.js',
@@ -227,10 +227,12 @@ async function handleAPIRequest(request) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      // Cachear respuesta exitosa
+      // Cachear respuesta exitosa solo para GET requests
       try {
-        const cache = await caches.open(API_CACHE);
-        cache.put(request, networkResponse.clone());
+        if (request.method === 'GET') {
+          const cache = await caches.open(API_CACHE);
+          cache.put(request, networkResponse.clone());
+        }
       } catch (cacheError) {
         console.log('⚠️ SW: Error al cachear API response:', cacheError);
       }
@@ -240,10 +242,12 @@ async function handleAPIRequest(request) {
   } catch (error) {
     console.log('🌐 SW: Red no disponible, usando caché para API');
     
-    // Usar caché si la red falla
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
+    // Usar caché solo para GET requests (POST no se cachea)
+    if (request.method === 'GET') {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
     
     // Respuesta offline personalizada para APIs

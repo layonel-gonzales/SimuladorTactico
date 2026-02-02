@@ -4,20 +4,28 @@
  * ==========================================
  * Configuración y conexión a SQL Server
  * Con Autenticación de Windows (Integrated Security)
+ * Soporta múltiples cadenas de conexión por PC
  * ==========================================
  */
 
 const msnodesqlv8 = require('msnodesqlv8');
 const util = require('util');
 
-// Connection string para Autenticación de Windows
-const connectionString = 'Driver={ODBC Driver 17 for SQL Server};Server=MSI;Database=SimuladorTacticoDB;Trusted_Connection=yes;';
+// Cadenas de conexión para diferentes PCs
+// Se intenta primero la cadena actual, luego la original
+const connectionStrings = [
+    // PC actual (localhost)
+    'Driver={ODBC Driver 17 for SQL Server};Server=localhost;Database=SimuladorTacticoDB;Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes;',
+    // PC original (MSI)
+    'Driver={ODBC Driver 17 for SQL Server};Server=MSI;Database=SimuladorTacticoDB;Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes;'
+];
 
 // Promisificar funciones de msnodesqlv8
 const openAsync = util.promisify(msnodesqlv8.open);
 
 // Conexión global
 let connection = null;
+let activeConnectionString = null;
 
 /**
  * Promisificar query de una conexión
@@ -32,7 +40,7 @@ function queryAsync(conn, sql, params = []) {
 }
 
 /**
- * Obtener conexión a la base de datos
+ * Obtener conexión a la base de datos con fallback automático
  */
 async function getConnection() {
     try {
@@ -41,13 +49,33 @@ async function getConnection() {
         }
         
         console.log('[Database] Conectando a SQL Server...');
-        connection = await openAsync(connectionString);
-        console.log('[Database] ✅ Conexión establecida a SimuladorTacticoDB');
         
-        // Añadir método queryAsync a la conexión
-        connection.queryAsync = (sql, params) => queryAsync(connection, sql, params);
+        let lastError = null;
         
-        return connection;
+        // Intentar cada cadena de conexión
+        for (let i = 0; i < connectionStrings.length; i++) {
+            const connString = connectionStrings[i];
+            try {
+                console.log(`[Database] Intento ${i + 1}/${connectionStrings.length}...`);
+                connection = await openAsync(connString);
+                activeConnectionString = connString;
+                console.log('[Database] ✅ Conexión establecida a SimuladorTacticoDB');
+                
+                // Añadir método queryAsync a la conexión
+                connection.queryAsync = (sql, params) => queryAsync(connection, sql, params);
+                
+                return connection;
+            } catch (err) {
+                lastError = err;
+                console.log(`[Database] ❌ Intento ${i + 1} falló: ${err.message}`);
+                if (i < connectionStrings.length - 1) {
+                    console.log('[Database] Probando siguiente cadena de conexión...');
+                }
+            }
+        }
+        
+        // Si llegamos aquí, todas las cadenas fallaron
+        throw new Error(`No se pudo conectar con ninguna cadena de conexión. Último error: ${lastError.message}`);
     } catch (error) {
         console.error('[Database] ❌ Error de conexión:', error.message || error);
         throw error;
@@ -164,7 +192,6 @@ function createRequest() {
 }
 
 module.exports = {
-    connectionString,
     getConnection,
     closeConnection,
     query,

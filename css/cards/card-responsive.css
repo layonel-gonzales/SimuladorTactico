@@ -1,0 +1,281 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * 📱 CARD RESPONSIVE - MEDIA QUERIES Y ACCESIBILIDAD
+ * ═══════════════════════════════════════════════════════════════════════
+ * Diseño responsivo y opciones de accesibilidad para cards
+ * Aplica a todos los estilos de cards
+ */
+
+/* ===== RESPONSIVE DESIGN PARA TABLETS Y MÓVILES ===== */
+@media (max-width: 768px) {
+    /* Contenedores */
+    .player-token {
+        width: clamp(50px, 6vw, 90px);
+        height: clamp(70px, 9vw, 120px);
+    }
+
+    .squad-player-item {
+        width: clamp(50px, 6vw, 90px);
+        height: clamp(70px, 9vw, 120px);
+    }
+
+    /* Estilos Modernos */
+    .modern-card-bg,
+    .modern-selection-card {
+        border-radius: 8px;
+    }
+
+    .modern-image-frame,
+    .modern-avatar-ring {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--card-accent, #3498db);
+    }
+
+    .modern-position-badge {
+        font-size: 8px;
+        padding: 1px 4px;
+        top: 6px;
+        left: 6px;
+    }
+
+    .modern-name-text,
+    .modern-name-display {
+        font-size: 10px;
+    }
+
+    /* Estilos FIFA */
+    .fifa-card-container,
+    .fifa-selection-card {
+        border-radius: 8px;
+    }
+
+    .fifa-player-photo,
+    .fifa-image-frame {
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--card-accent, #00ff88);
+    }
+
+    .fifa-position-badge {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    .fifa-player-name,
+    .fifa-player-surname {
+        font-size: 10px;
+    }
+
+    /* Estilos Retro */
+    .retro-card-body,
+    .retro-selection-card {
+        border-radius: 6px;
+    }
+
+    .retro-photo-frame,
+    .retro-photo-border {
+        width: 40px;
+        height: 40px;
+    }
+
+    .retro-position-banner {
+        font-size: 7px;
+        top: 6px;
+    }
+
+    .retro-name,
+    .retro-name-value {
+        font-size: 10px;
+    }
+
+    .retro-skill-meter {
+        height: 10px;
+    }
+}
+
+/* ===== RESPONSIVE DESIGN PARA MÓVILES PEQUEÑOS ===== */
+@media (max-width: 480px) {
+    /* Contenedores */
+    .player-token {
+        width: clamp(45px, 5vw, 75px);
+        height: clamp(60px, 7vw, 100px);
+    }
+
+    .squad-player-item {
+        width: clamp(45px, 5vw, 75px);
+        height: clamp(60px, 7vw, 100px);
+    }
+
+    /* Elementos minicard */
+    .player-token .minicard-overall {
+        width: 16px;
+        height: 16px;
+        font-size: 0.6em;
+    }
+
+    .player-token .minicard-jersey-number {
+        width: 14px;
+        height: 14px;
+        font-size: 0.7em;
+    }
+
+    /* Estilos Modernos */
+    .modern-image-frame,
+    .modern-avatar-ring {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--card-accent, #3498db);
+    }
+
+    .modern-position-badge {
+        font-size: 7px;
+        top: 4px;
+        left: 4px;
+    }
+
+    .modern-rating-corner {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    /* Estilos FIFA */
+    .fifa-player-photo,
+    .fifa-image-frame {
+        width: 26px;
+        height: 26px;
+    }
+
+    .fifa-position-badge {
+        font-size: 9px;
+        padding: 2px 4px;
+    }
+
+    /* Estilos Retro */
+    .retro-photo-frame {
+        width: 24px;
+        height: 24px;
+    }
+
+    .retro-photo-border {
+        width: 36px;
+        height: 36px;
+    }
+
+    .retro-skill-meter {
+        height: 8px;
+    }
+}
+
+/* ===== ACCESIBILIDAD: REDUCIR ANIMACIONES ===== */
+@media (prefers-reduced-motion: reduce) {
+    .player-token,
+    .squad-player-item,
+    .player-token *,
+    .squad-player-item * {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .player-token:hover {
+        transform: none;
+        filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    }
+
+    .player-token.dragging {
+        transform: none;
+        z-index: 100;
+    }
+
+    .modern-selection-card:hover,
+    .fifa-selection-card:hover,
+    .retro-selection-card:hover {
+        transform: none;
+    }
+
+    .modern-skill-bar,
+    .fifa-stat-value,
+    .retro-skill-fill {
+        transition: none;
+    }
+}
+
+/* ===== ACCESIBILIDAD: MODO CONTRASTE ALTO ===== */
+@media (prefers-contrast: more) {
+    .player-token .minicard-overall,
+    .player-token .minicard-position,
+    .player-token .minicard-name,
+    .modern-number-display,
+    .fifa-player-number,
+    .retro-number-badge {
+        border: 1px solid currentColor;
+        font-weight: bold;
+    }
+
+    .modern-position-chip,
+    .fifa-position-badge,
+    .retro-position-value {
+        border-width: 2px;
+        font-weight: bold;
+    }
+}
+
+/* ===== ACCESIBILIDAD: MODO OSCURO FORZADO ===== */
+@media (prefers-color-scheme: dark) {
+    .player-token .minicard-position,
+    .player-token .minicard-name,
+    .player-token .minicard-overall {
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #fff;
+    }
+}
+
+/* ===== ACCESIBILIDAD: MODO CLARO FORZADO ===== */
+@media (prefers-color-scheme: light) {
+    .player-token .minicard-position,
+    .player-token .minicard-name,
+    .player-token .minicard-overall {
+        background-color: rgba(255, 255, 255, 0.95);
+        color: #000;
+    }
+}
+
+/* ===== ORIENTACIÓN: VISTA VERTICAL (MOBILE) ===== */
+@media (orientation: portrait) and (max-width: 768px) {
+    .player-token {
+        width: clamp(45px, 7vw, 80px);
+        height: clamp(65px, 10vw, 110px);
+    }
+}
+
+/* ===== ORIENTACIÓN: VISTA HORIZONTAL (LANDSCAPE) ===== */
+@media (orientation: landscape) and (max-height: 600px) {
+    .player-token {
+        height: clamp(60px, 8vh, 90px);
+    }
+
+    .squad-player-item {
+        height: clamp(120px, 12vh, 150px);
+    }
+}
+
+/* ===== PANTALLAS GRANDES (Desktop) ===== */
+@media (min-width: 1920px) {
+    .player-token {
+        width: clamp(80px, 10vw, 150px);
+        height: clamp(110px, 14vw, 200px);
+    }
+
+    .squad-player-item {
+        width: clamp(80px, 10vw, 150px);
+        height: clamp(110px, 14vw, 200px);
+    }
+
+    /* Aumentar tamaño de textos en pantallas grandes */
+    .player-token .minicard-overall,
+    .player-token .minicard-position,
+    .player-token .minicard-jersey-number {
+        font-size: 0.9em;
+    }
+}

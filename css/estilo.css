@@ -1,11 +1,11 @@
-/* ============================================
-   🎨 SIMULADOR TÁCTICO - SISTEMA DE DISEÑO UNIFICADO 
-   🌙 MODO OSCURO Y CLARO + PALETA DE COLORES
-   📱 RESPONSIVE FIRST + COMPONENTES ESTANDARIZADOS
+﻿/* ============================================
+   ðŸŽ¨ SIMULADOR TÃCTICO - SISTEMA DE DISEÃ‘O UNIFICADO 
+   ðŸŒ™ MODO OSCURO Y CLARO + PALETA DE COLORES
+   ðŸ“± RESPONSIVE FIRST + COMPONENTES ESTANDARIZADOS
    ============================================ */
 
 /* ============================================
-   🌈 VARIABLES GLOBALES Y RESET BASE
+   ðŸŒˆ VARIABLES GLOBALES Y RESET BASE
    ============================================ */
 
 /* === PALETA DE COLORES Y VARIABLES === */
@@ -34,7 +34,7 @@
     --text-primary: #ffffff;
 }
 
-/* Reset y prevención de zoom/scroll no deseado */
+/* Reset y prevenciÃ³n de zoom/scroll no deseado */
 * {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -57,7 +57,7 @@ html, body {
     background-color: var(--bg-tertiary);
 }
 
-/* === CAMPO DE FÚTBOL Y CANVAS === */
+/* === CAMPO DE FÃšTBOL Y CANVAS === */
 #pitch-container {
     position: fixed;
     top: 0;
@@ -97,125 +97,9 @@ html, body {
     pointer-events: auto !important;
 }
 
-/* === PLAYER TOKEN UNIFICADO Y RESPONSIVO === */
-.player-token {
-    position: absolute;
-    width: clamp(60px, 8vw, 110px);
-    height: clamp(80px, 11vw, 150px);
-    background-image: url('../img/marco3.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: grab;
-    z-index: var(--z-tokens);
-    transition: transform 0.2s, filter 0.2s;
-    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
-    pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    overflow: hidden; /* Evitar desbordamiento */
-    box-sizing: border-box; /* Incluir padding y border en el tamaño */
-}
+/* Estilos de player-token trasladados a: css/cards/card-base.css */
 
-.player-token:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
-}
-
-.player-token.dragging {
-    transform: scale(1.1);
-    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
-    z-index: 100;
-}
-
-.player-token .minicard-position {
-    position: absolute;
-    top: 25px;
-    right: 8px;
-    font-size: 0.75em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 1px 4px;
-    border-radius: 6px;
-    user-select: none;
-    max-width: 24px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.player-token .minicard-player-image {
-    position: absolute;
-    top: 42px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: clamp(28px, 50%, 60px);
-    height: clamp(28px, 50%, 60px);
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--text-primary, #fff);
-    box-shadow: 0 0 3px rgba(0,0,0,0.5);
-}
-
-.player-token .minicard-name {
-    position: absolute;
-    bottom: 25px;
-    left: 6px;
-    right: 6px;
-    text-align: center;
-    font-size: 0.75em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.8);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 1px 3px;
-    border-radius: 4px;
-    user-select: none;
-    max-width: calc(100% - 12px);
-}
-
-.player-token .minicard-jersey-number {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-primary, #fff);
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-}
-
-.player-token .minicard-overall {
-    position: absolute;
-    top: 27px;
-    left: 6px;
-    font-size: 0.65em;
-    font-weight: bold;
-    color: var(--color-gold, gold);
-    background-color: rgba(0, 0, 0, 0.7);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-}
-
-/* === MENÚ INFERIOR UNIFICADO - SIEMPRE VISIBLE === */
+/* === MENÃš INFERIOR UNIFICADO - SIEMPRE VISIBLE === */
 #unified-single-bottom-menu {
     position: fixed !important;
     bottom: 0 !important;
@@ -242,7 +126,7 @@ html, body {
     opacity: 1 !important;
 }
 
-/* Controles dentro del menú unificado */
+/* Controles dentro del menÃº unificado */
 #unified-single-bottom-menu .btn,
 #unified-single-bottom-menu .form-select {
     font-size: 0.8rem !important;
@@ -270,7 +154,7 @@ html, body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
-/* Botones específicos con colores preservados */
+/* Botones especÃ­ficos con colores preservados */
 #unified-single-bottom-menu .btn-primary {
     background: #007bff !important;
     color: white !important;
@@ -376,7 +260,7 @@ html, body {
     }
 }
 
-/* Botón de menú flotante */
+/* BotÃ³n de menÃº flotante */
 .menu-toggle-btn {
     position: fixed;
     top: 20px;
@@ -459,182 +343,19 @@ html, body {
 }
 
 /* Lista de jugadores en el modal */
-#squad-player-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 10px;
-}
+/* Estilos de squad-player trasladados a: css/cards/card-base.css */
+/* REMOVIDOS: Estilos conflictivos de .minicard-player-image que causaban desalineación */
+/* Ahora se usan los estilos unificados de card-base.css */
 
-/* Elementos de jugador en el modal */
-.squad-player-item {
-    position: relative;
-    width: 130px;
-    height: 168px;
-    background-image: url('../img/marco3.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.squad-player-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-}
-
-.squad-player-item.selected {
-    filter: brightness(0.7) saturate(1.1);
-    transform: scale(0.95);
-}
-
-/* Estilos específicos para las imágenes en las cards del modal de selección */
-.squad-player-item img,
-.squad-player-item .player-card-element[data-element="image"] {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* === ESTILOS DE MINICARDS === */
-.minicard-overall {
-    position: absolute;
-    top: 12px;
-    left: 4px;
-    font-size: 0.65em;
-    font-weight: bold;
-    color: var(--color-gold);
-    background-color: rgba(0, 0, 0, 0.7);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1;
-    box-sizing: border-box;
-}
-
-.minicard-position {
-    position: absolute;
-    top: 10px;
-    right: 8px;
-    font-size: 0.7em;
-    font-weight: bold;
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 1px 4px;
-    border-radius: 4px;
-    text-align: center;
-    max-width: 24px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-sizing: border-box;
-}
-
-.minicard-player-image {
-    position: absolute;
-    top: 35px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: clamp(40px, 45%, 50px);
-    height: clamp(45px, 50%, 58px);
-    object-fit: cover;
-    box-shadow: 0 0 3px rgba(0,0,0,0.5);
-    border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-.minicard-name {
-    position: absolute;
-    bottom: 18px;
-    left: 6px;
-    right: 6px;
-    text-align: center;
-    font-size: 0.55em;
-    font-weight: bold;
-    color: var(--text-primary);
-    background-color: rgba(0, 0, 0, 0.8);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 1px 3px;
-    box-sizing: border-box;
-    border-radius: 3px;
-    max-width: calc(100% - 12px);
-}
-
-.minicard-jersey-number {
-    position: absolute;
-    bottom: 38px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1em;
-    font-weight: bold;
-    color: var(--text-primary);
-    text-shadow: 0 0 3px black;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+/* DEPRECATED: Estilos de minicard removidos */
+/* Los estilos de .minicard-name y .minicard-jersey-number ahora están en css/cards/card-base.css */
+/* para mantener consistencia entre canvas y modal de selección */
 
 /* === CONTENEDORES DE CARDS - PREVENIR DESBORDAMIENTO === */
 .card-container, .player-container, [style*="marco3.png"] {
     overflow: hidden !important;
     box-sizing: border-box !important;
     position: relative !important;
-}
-
-/* Aplicar contención a cualquier elemento con background de marco */
-*[style*="marco3.png"], *[class*="minicard"], .player-token {
-    contain: layout style !important;
-    overflow: hidden !important;
-}
-
-/* Asegurar que todos los elementos absolutos estén contenidos */
-.player-token *, .minicard-container * {
-    position: absolute;
-    max-width: calc(100% - 8px) !important;
-    max-height: calc(100% - 8px) !important;
-    box-sizing: border-box !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-/* Ajustes específicos para elementos de texto */
-.minicard-name, .player-token .minicard-name {
-    max-width: calc(100% - 12px) !important;
-    left: 6px !important;
-    right: 6px !important;
-}
-
-.minicard-position, .player-token .minicard-position {
-    max-width: 28px !important;
-    right: 6px !important;
-}
-
-.minicard-overall, .player-token .minicard-overall {
-    left: 4px !important;
-    max-width: 22px !important;
 }
 
 /* === WATERMARK === */
@@ -699,15 +420,15 @@ html, body {
 }
 
 /* ============================================
-   🎨 ESTILOS PARA MODO ELIMINAR LÍNEAS
+   ðŸŽ¨ ESTILOS PARA MODO ELIMINAR LÃNEAS
    ============================================ */
 
-/* Cursor de tijeras para el modo eliminar líneas */
+/* Cursor de tijeras para el modo eliminar lÃ­neas */
 .scissors-cursor-simple {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm0 12c-1.1 0-2-.89-2-2s.89-2 2-2 2 .89 2 2-.89 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3h-3z' fill='%23dc3545'/%3E%3C/svg%3E") 12 12, auto !important;
 }
 
-/* Botón activo en modo eliminar líneas */
+/* BotÃ³n activo en modo eliminar lÃ­neas */
 #delete-line-mode.active {
     background-color: var(--color-danger) !important;
     border-color: var(--color-danger) !important;
@@ -715,7 +436,7 @@ html, body {
     box-shadow: 0 0 10px rgba(220, 53, 69, 0.5) !important;
 }
 
-/* Animación de latido para el ícono de tijeras */
+/* AnimaciÃ³n de latido para el Ã­cono de tijeras */
 @keyframes fa-beat {
     0%, 90% { transform: scale(1); }
     45% { transform: scale(1.25); }
@@ -726,7 +447,7 @@ html, body {
 }
 
 /* ============================================
-   🎓 BOTONES DE TUTORIAL FLOTANTES
+   ðŸŽ“ BOTONES DE TUTORIAL FLOTANTES
    ============================================ */
 
 .tutorial-btn {
@@ -764,7 +485,7 @@ html, body {
     white-space: nowrap;
 }
 
-/* Botón específico de tutorial de dibujo */
+/* BotÃ³n especÃ­fico de tutorial de dibujo */
 .tutorial-drawing {
     background: linear-gradient(135deg, var(--color-success), #20c997);
     color: white;
@@ -776,7 +497,7 @@ html, body {
     color: white;
 }
 
-/* Botón específico de tutorial de animación */
+/* BotÃ³n especÃ­fico de tutorial de animaciÃ³n */
 .tutorial-animation {
     background: linear-gradient(135deg, var(--color-info), #138496);
     color: white;
@@ -788,7 +509,7 @@ html, body {
     color: white;
 }
 
-/* Responsivo para móviles */
+/* Responsivo para mÃ³viles */
 @media (max-width: 768px) {
     .tutorial-btn {
         top: 15px;
@@ -813,10 +534,10 @@ html, body {
 }
 
 /* ============================================
-   🎓 ESTILOS DE TUTORIAL INTRO.JS - TEMAS MEJORADOS
+   ðŸŽ“ ESTILOS DE TUTORIAL INTRO.JS - TEMAS MEJORADOS
    ============================================ */
 
-/* Base común para todos los tooltips */
+/* Base comÃºn para todos los tooltips */
 .introjs-tooltip.customTooltip {
     min-width: 350px !important;
     max-width: 450px !important;
@@ -932,7 +653,7 @@ html, body {
     border-left-color: rgba(255, 255, 255, 0.98) !important;
 }
 
-/* Botones de navegación del tutorial mejorados */
+/* Botones de navegaciÃ³n del tutorial mejorados */
 .introjs-button {
     background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
     border: none !important;
@@ -964,7 +685,7 @@ html, body {
     color: #ffffff !important;
 }
 
-/* Botón de saltar con mejor contraste */
+/* BotÃ³n de saltar con mejor contraste */
 .introjs-skipbutton {
     background: linear-gradient(135deg, #6c757d, #495057) !important;
     color: #ffffff !important;
@@ -1002,7 +723,7 @@ html, body {
     box-shadow: 0 3px 6px rgba(13, 138, 168, 0.4) !important;
 }
 
-/* Números de paso mejorados */
+/* NÃºmeros de paso mejorados */
 .introjs-tooltip .introjs-tooltipReferenceLayer .introjs-helperNumberLayer {
     background: linear-gradient(135deg, #0d8aa8, #1fc995) !important;
     color: white !important;
@@ -1023,7 +744,7 @@ html, body {
     backdrop-filter: blur(2px) !important;
 }
 
-/* Tema claro - overlay más suave */
+/* Tema claro - overlay mÃ¡s suave */
 [data-theme="light"] .introjs-overlay {
     background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%) !important;
 }
@@ -1035,7 +756,7 @@ html, body {
     transition: all 0.3s ease !important;
 }
 
-/* Responsive para móviles */
+/* Responsive para mÃ³viles */
 @media (max-width: 768px) {
     .introjs-tooltip.customTooltip {
         min-width: 280px !important;
@@ -1052,7 +773,7 @@ html, body {
 }
 
 /* SOBRESCRIBIR ESTILOS POR DEFECTO DE INTRO.JS */
-/* Estas reglas tienen máxima especificidad para evitar conflictos */
+/* Estas reglas tienen mÃ¡xima especificidad para evitar conflictos */
 .introjs-tooltip {
     color: inherit !important;
 }
@@ -1061,7 +782,7 @@ html, body {
     color: inherit !important;
 }
 
-/* Asegurar contraste en tema claro - Máxima especificidad */
+/* Asegurar contraste en tema claro - MÃ¡xima especificidad */
 .introjs-tooltip.customTooltip.light-theme,
 .introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext,
 .introjs-tooltip.customTooltip.light-theme .introjs-tooltip-title {
@@ -1069,7 +790,7 @@ html, body {
     text-shadow: none !important;
 }
 
-/* Asegurar contraste en tema oscuro - Máxima especificidad */
+/* Asegurar contraste en tema oscuro - MÃ¡xima especificidad */
 .introjs-tooltip.customTooltip.dark-theme,
 .introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 .introjs-tooltip.customTooltip.dark-theme .introjs-tooltip-title {
@@ -1077,7 +798,7 @@ html, body {
 }
 
 /* REGLAS EXTREMAS PARA SOBRESCRIBIR INTRO.JS CSS EXTERNO */
-/* Triple especificidad con más peso que el CSS externo */
+/* Triple especificidad con mÃ¡s peso que el CSS externo */
 div.introjs-tooltip.customTooltip.light-theme div.introjs-tooltiptext,
 div.introjs-tooltip.customTooltip.light-theme .introjs-tooltiptext,
 .introjs-tooltip.customTooltip.light-theme div.introjs-tooltiptext,
@@ -1095,7 +816,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 }
 
 /* ============================================
-   🎓 ESTILOS DE TUTORIAL SHEPHERD.JS - DISEÑO PERSONALIZADO COMPLETO
+   ðŸŽ“ ESTILOS DE TUTORIAL SHEPHERD.JS - DISEÃ‘O PERSONALIZADO COMPLETO
    ============================================ */
 
 /* Tema personalizado para Shepherd.js */
@@ -1175,7 +896,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     box-shadow: 0 6px 20px rgba(13, 138, 168, 0.4) !important;
 }
 
-/* Responsive para móviles */
+/* Responsive para mÃ³viles */
 @media (max-width: 768px) {
     .shepherd-element.shepherd-theme-custom {
         max-width: 320px !important;
@@ -1189,7 +910,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 }
 
 /* ============================================
-   🎓 MODAL DE BIENVENIDA - DISEÑO MODERNO
+   ðŸŽ“ MODAL DE BIENVENIDA - DISEÃ‘O MODERNO
    ============================================ */
 
 .tutorial-modal-overlay {
@@ -1371,7 +1092,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     }
 }
 
-/* Responsive para móviles */
+/* Responsive para mÃ³viles */
 @media (max-width: 768px) {
     .tutorial-modal-container {
         width: 95vw !important;
@@ -1401,7 +1122,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 }
 
 /* ============================================
-   🎨 SISTEMA DE ESTILOS DE CANCHA - NOTIFICACIONES Y ANIMACIONES
+   ðŸŽ¨ SISTEMA DE ESTILOS DE CANCHA - NOTIFICACIONES Y ANIMACIONES
    ============================================ */
 
 /* === NOTIFICACIONES DE CAMBIO DE ESTILO === */
@@ -1427,7 +1148,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     }
 }
 
-/* === CONFIGURACIÓN DE ESTILOS DE CANCHA === */
+/* === CONFIGURACIÃ“N DE ESTILOS DE CANCHA === */
 .field-style-config {
     background: var(--bg-secondary);
     border: 1px solid var(--color-primary);
@@ -1533,7 +1254,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 }
 
 .debug-mode .field-style-config::before {
-    content: "🐛 DEBUG: Field Styles";
+    content: "ðŸ› DEBUG: Field Styles";
     position: absolute;
     top: -10px;
     right: 10px;
@@ -1613,7 +1334,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     margin-bottom: 16px;
 }
 
-/* === BOTÓN DE ESTILOS DE CANCHA === */
+/* === BOTÃ“N DE ESTILOS DE CANCHA === */
 #field-styles-btn {
     transition: all 0.3s ease;
     position: relative;
@@ -1668,7 +1389,7 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
 }
 
 #field-styles-btn.active-style::after {
-    content: '●';
+    content: 'â—';
     position: absolute;
     top: 2px;
     right: 2px;
@@ -1683,84 +1404,49 @@ div.introjs-tooltip.customTooltip.dark-theme .introjs-tooltiptext,
     100% { opacity: 1; }
 }
 
-/* === RESPONSIVE PARA CARDS DE JUGADORES === */
-@media (max-width: 768px) {
-    .player-token {
-        width: clamp(50px, 7vw, 90px) !important;
-        height: clamp(70px, 10vw, 130px) !important;
-    }
-    
-    .player-token .minicard-position {
-        font-size: 0.7em !important;
-        top: 6px !important;
-        right: 6px !important;
-        padding: 1px 3px !important;
-        max-width: 22px !important;
-    }
-    
-    .player-token .minicard-player-image {
-        width: clamp(24px, 30%, 36px) !important;
-        height: clamp(24px, 30%, 36px) !important;
-        top: 15px !important;
-    }
-    
-    .player-token .minicard-name {
-        font-size: 0.6em !important;
-        bottom: 12px !important;
-        left: 4px !important;
-        right: 4px !important;
-        padding: 1px 2px !important;
-    }
-    
-    .player-token .minicard-jersey-number {
-        font-size: 0.75em !important;
-        width: 14px !important;
-        height: 14px !important;
-        bottom: 30px !important;
-    }
-    
-    .player-token .minicard-overall {
-        font-size: 0.6em !important;
-        width: 18px !important;
-        height: 18px !important;
-        top: 10px !important;
-        left: 4px !important;
-    }
+/* Responsive para player-token trasladado a: css/cards/card-responsive.css */
+/* ============================================
+   MODAL DE SELECCIÓN DE PLANTILLA - LAYOUT HORIZONTAL
+   ============================================ */
+
+#squad-player-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
-@media (max-width: 480px) {
-    .player-token {
-        width: clamp(45px, 6vw, 80px) !important;
-        height: clamp(60px, 9vw, 110px) !important;
-    }
-    
-    .player-token .minicard-position {
-        font-size: 0.65em !important;
-        max-width: 20px !important;
-    }
-    
-    .player-token .minicard-player-image {
-        width: clamp(20px, 28%, 32px) !important;
-        height: clamp(20px, 28%, 32px) !important;
-        top: 12px !important;
-    }
-    
-    .player-token .minicard-name {
-        font-size: 0.55em !important;
-        bottom: 10px !important;
-    }
-    
-    .player-token .minicard-jersey-number {
-        font-size: 0.7em !important;
-        width: 12px !important;
-        height: 12px !important;
-        bottom: 25px !important;
-    }
-    
-    .player-token .minicard-overall {
-        font-size: 0.55em !important;
-        width: 16px !important;
-        height: 16px !important;
-        top: 8px !important;
+#squad-player-list .col-12 {
+    flex-basis: 100%;
+    width: 100%;
+    flex-grow: 0;
+}
+
+/* Las cards de jugador (.squad-player-item) se muestran lado a lado */
+#squad-player-list .player-card-wrapper.squad-player-item,
+#squad-player-list .squad-player-item {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 120px;
+    max-width: 180px;
+}
+
+/* Encabezados de categorías ocupan toda la fila */
+#squad-player-list .col-12.fw-bold {
+    flex-basis: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+/* Responsive: En móviles, reducir ancho de cards */
+@media (max-width: 768px) {
+    #squad-player-list .player-card-wrapper.squad-player-item,
+    #squad-player-list .squad-player-item {
+        min-width: 100px;
+        max-width: 140px;
     }
 }

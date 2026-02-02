@@ -183,10 +183,11 @@ export default class UIManager {
         const squadPlayerList = document.getElementById('squad-player-list');
         if (squadPlayerList) {
             squadPlayerList.addEventListener('click', (e) => {
-                const playerItem = e.target.closest('.squad-player-item');
+                // Buscar la card (puede ser .squad-player-item o .player-card-wrapper.squad-player-item)
+                const playerItem = e.target.closest('.squad-player-item') || e.target.closest('.player-card-wrapper.squad-player-item');
                 if (playerItem) {
                     // Prevenir seleccionar más de 11 jugadores
-                    const currentSelected = document.querySelectorAll('.squad-player-item.selected').length;
+                    const currentSelected = document.querySelectorAll('.squad-player-item.selected, .player-card-wrapper.selected').length;
                     if (!playerItem.classList.contains('selected') && currentSelected >= 11) {
                         alert('Solo puedes seleccionar hasta 11 jugadores.');
                         return;
@@ -273,7 +274,8 @@ export default class UIManager {
 
     getSelectedPlayers() {
         const selected = [];
-        document.querySelectorAll('.squad-player-item.selected').forEach(item => {          
+        // Buscar en ambas estructuras: .squad-player-item y .player-card-wrapper.squad-player-item
+        document.querySelectorAll('.squad-player-item.selected, .player-card-wrapper.selected').forEach(item => {          
             const playerId = item.dataset.playerId;        
             // También verificar el atributo directo
             const playerIdAttr = item.getAttribute('data-player-id');         
@@ -292,7 +294,7 @@ export default class UIManager {
     // NUEVA FUNCIÓN: Preseleccionar jugadores que ya están en el campo
     preselectActivePlayersInModal() {   
         // Primero, desseleccionar todos los jugadores
-        document.querySelectorAll('.squad-player-item').forEach(item => {
+        document.querySelectorAll('.squad-player-item, .player-card-wrapper.squad-player-item').forEach(item => {
             item.classList.remove('selected');
         });
         
@@ -303,7 +305,7 @@ export default class UIManager {
         
         // Marcar como seleccionados los jugadores que están en el campo
         activePlayerIds.forEach(playerId => {
-            const playerItem = document.querySelector(`.squad-player-item[data-player-id="${playerId}"]`);
+            const playerItem = document.querySelector(`.squad-player-item[data-player-id="${playerId}"], .player-card-wrapper[data-player-id="${playerId}"]`);
             if (playerItem) {
                 playerItem.classList.add('selected');
             } else {
@@ -573,7 +575,7 @@ export default class UIManager {
     updateSelectedCount() {
         const selectedCountSpan = document.getElementById('selected-count');
         if (selectedCountSpan) {
-            const selectedCount = document.querySelectorAll('.squad-player-item.selected').length;
+            const selectedCount = document.querySelectorAll('.squad-player-item.selected, .player-card-wrapper.selected').length;
             selectedCountSpan.textContent = `${selectedCount} seleccionados`;
 
             if (selectedCount > 11) {

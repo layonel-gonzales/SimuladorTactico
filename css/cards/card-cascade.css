@@ -1,0 +1,325 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * 🎴 CARD CASCADE - ESTILOS EN CASCADA
+ * ═══════════════════════════════════════════════════════════════════════
+ * 
+ * Sistema de estilos limpio basado en cascada
+ * Una sola clase define TODO el estilo de la card
+ * 
+ * Estructura:
+ * <div class="player-card-wrapper card-style-classic">
+ *   <div class="card-element card-overall">...</div>
+ *   <div class="card-element card-position">...</div>
+ *   <img class="card-element card-image" />
+ *   <div class="card-element card-name">...</div>
+ *   <div class="card-element card-jersey">...</div>
+ * </div>
+ * 
+ * Ventajas:
+ * - Sin conflictos de múltiples clases
+ * - Cascada clara y predecible
+ * - Fácil de mantener y actualizar
+ * - Responsive integrado en la cascada
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+/* ESTILOS BASE DE CONTENEDOR */
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+.player-card-wrapper {
+    position: relative;
+    width: clamp(60px, 8vw, 110px);
+    height: clamp(80px, 11vw, 150px);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+/* Estilos específicos por tipo de card */
+.player-card-wrapper.player-token {
+    position: absolute;
+    cursor: grab;
+    z-index: var(--z-tokens);
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    pointer-events: auto;
+}
+
+.player-card-wrapper.player-token:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+
+.player-card-wrapper.player-token.dragging {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 0, 0, 0.9));
+    z-index: 100;
+}
+
+.player-card-wrapper.squad-player-item {
+    position: relative;
+    cursor: pointer;
+    z-index: auto;
+}
+
+.player-card-wrapper.squad-player-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.player-card-wrapper.squad-player-item.selected {
+    filter: brightness(0.7) saturate(1.1);
+    transform: scale(0.95);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+/* ESTILOS BASE DE ELEMENTOS INTERNOS */
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+.card-element {
+    user-select: none;
+    position: absolute;
+}
+
+/* Overall/Rating (esquina superior izquierda) */
+.card-element.card-overall {
+    top: 27px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    font-size: 0.65em;
+    font-weight: bold;
+    color: var(--color-gold, gold);
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Posición (esquina superior derecha) */
+.card-element.card-position {
+    top: 25px;
+    right: 8px;
+    max-width: 24px;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 1px 4px;
+    border-radius: 6px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Foto del jugador (centro) */
+.card-element.card-image {
+    top: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(28px, 50%, 60px);
+    height: clamp(28px, 50%, 60px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--text-primary, #fff);
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+/* Nombre del jugador (parte inferior) */
+.card-element.card-name {
+    position: absolute;
+    bottom: 25px;
+    left: 6px;
+    right: 6px;
+    text-align: center;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.8);
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    padding: 1px 3px;
+    border-radius: 4px;
+    max-width: calc(100% - 12px);
+    max-height: 30px;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* Jersey/Dorsal (esquina inferior) */
+.card-element.card-jersey {
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-primary, #fff);
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+/* VARIANTES POR ESTILO DE CARD */
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+/* ESTILO CLÁSICO */
+.card-style-classic {
+    background-image: url('../../img/marco3.png');
+}
+
+/* ESTILO MODERNO (cuando se implemente) */
+.card-style-modern {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+/* ESTILO FIFA (cuando se implemente) */
+.card-style-fifa {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+/* ESTILO RETRO (cuando se implemente) */
+.card-style-retro {
+    background: linear-gradient(135deg, #d4a574 0%, #8b7355 100%);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN */
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .player-card-wrapper {
+        width: clamp(50px, 6vw, 90px);
+        height: clamp(70px, 9vw, 120px);
+    }
+
+    .card-element.card-overall {
+        width: 18px;
+        height: 18px;
+        font-size: 0.6em;
+        top: 24px;
+        left: 5px;
+    }
+
+    .card-element.card-position {
+        font-size: 0.7em;
+        top: 22px;
+        right: 6px;
+    }
+
+    .card-element.card-image {
+        top: 38px;
+        width: clamp(24px, 45%, 50px);
+        height: clamp(24px, 45%, 50px);
+    }
+
+    .card-element.card-name {
+        bottom: 22px;
+        font-size: 0.7em;
+        max-height: 28px;
+    }
+
+    .card-element.card-jersey {
+        bottom: 12px;
+        width: 15px;
+        height: 15px;
+        font-size: 0.75em;
+    }
+}
+
+@media (max-width: 480px) {
+    .player-card-wrapper {
+        width: clamp(45px, 5vw, 75px);
+        height: clamp(60px, 7vw, 100px);
+    }
+
+    .card-element.card-overall {
+        width: 16px;
+        height: 16px;
+        font-size: 0.55em;
+        top: 20px;
+        left: 4px;
+    }
+
+    .card-element.card-position {
+        font-size: 0.65em;
+        top: 20px;
+        right: 5px;
+    }
+
+    .card-element.card-image {
+        top: 35px;
+        width: clamp(20px, 40%, 45px);
+        height: clamp(20px, 40%, 45px);
+    }
+
+    .card-element.card-name {
+        bottom: 18px;
+        font-size: 0.65em;
+        max-height: 24px;
+    }
+
+    .card-element.card-jersey {
+        bottom: 10px;
+        width: 14px;
+        height: 14px;
+        font-size: 0.7em;
+    }
+}
+
+@media (min-width: 1920px) {
+    .player-card-wrapper {
+        width: clamp(80px, 10vw, 150px);
+        height: clamp(110px, 14vw, 200px);
+    }
+
+    .card-element.card-overall {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75em;
+        top: 32px;
+        left: 8px;
+    }
+
+    .card-element.card-position {
+        font-size: 0.85em;
+        top: 30px;
+        right: 10px;
+    }
+
+    .card-element.card-image {
+        top: 50px;
+        width: clamp(35px, 55%, 70px);
+        height: clamp(35px, 55%, 70px);
+    }
+
+    .card-element.card-name {
+        bottom: 30px;
+        font-size: 0.9em;
+        max-height: 35px;
+    }
+
+    .card-element.card-jersey {
+        bottom: 18px;
+        width: 18px;
+        height: 18px;
+        font-size: 0.9em;
+    }
+}

@@ -20,31 +20,31 @@ function createClassicCard(player, type = 'field', cardId, screenType, theme, pl
     
     if (type === 'field') {
         return `
-            <div class="minicard-overall player-card-element" 
+            <div class="card-element card-overall" 
                  data-element="overall" 
                  data-player-id="${actualPlayerId}"
                  title="Overall: ${player.rating || '85'}">
                 ${player.rating || '85'}
             </div>
-            <div class="minicard-position player-card-element" 
+            <div class="card-element card-position" 
                  data-element="position" 
                  data-player-id="${actualPlayerId}"
                  title="Posición: ${positionText}">
                 ${positionText}
             </div>
             <img src="${player.image || player.image_url || 'img/default_player.png'}" 
-                 class="minicard-player-image player-card-element" 
+                 class="card-element card-image" 
                  data-element="image" 
                  data-player-id="${actualPlayerId}"
                  alt="${playerName}"
                  title="${playerName}">
-            <div class="minicard-name player-card-element" 
+            <div class="card-element card-name" 
                  data-element="name" 
                  data-player-id="${actualPlayerId}"
                  title="Nombre: ${playerName}">
                 ${playerName}
             </div>
-            <div class="minicard-jersey-number player-card-element" 
+            <div class="card-element card-jersey" 
                  data-element="jersey" 
                  data-player-id="${actualPlayerId}"
                  title="Dorsal: ${player.jersey_number || player.number || '?'}">
@@ -53,19 +53,19 @@ function createClassicCard(player, type = 'field', cardId, screenType, theme, pl
         `;
     } else {
         return `
-            <div class="minicard-overall player-card-element" 
+            <div class="card-element card-overall" 
                  data-element="overall" 
                  data-player-id="${actualPlayerId}"
                  title="Overall: ${player.rating || '85'}">
                 ${player.rating || '85'}
             </div>
             <img src="${player.image || player.image_url || 'img/default_player.png'}" 
-                 class="player-card-element" 
+                 class="card-element card-image" 
                  data-element="image" 
                  data-player-id="${actualPlayerId}"
                  alt="${playerName}"
                  title="${playerName}">
-            <div class="player-name player-card-element" 
+            <div class="card-element card-name" 
                  data-element="name" 
                  data-player-id="${actualPlayerId}"
                  title="Nombre: ${playerName}">

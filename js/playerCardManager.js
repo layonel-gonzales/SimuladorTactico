@@ -79,7 +79,12 @@ class PlayerCardManager {
         
         // Crear elemento principal
         const cardElement = document.createElement('div');
-        cardElement.className = type === 'field' ? 'player-token' : 'squad-player-item';
+        
+        // Determinar clases base
+        const baseClass = type === 'field' ? 'player-token' : 'squad-player-item';
+        const styleClass = window.cardStyleManager ? `card-style-${window.cardStyleManager.getCurrentStyle()}` : 'card-style-classic';
+        
+        cardElement.className = `player-card-wrapper ${baseClass} ${styleClass}`;
         cardElement.dataset.playerId = player.id;
         cardElement.dataset.cardType = type;
         cardElement.dataset.cardId = cardId;
@@ -98,32 +103,33 @@ class PlayerCardManager {
         const playerOverall = this.calculateOverall(player);
         
         if (type === 'field') {
+            // Card en canvas (con todos los elementos)
             cardElement.innerHTML = `
-                <div class="minicard-overall player-card-element" 
+                <div class="card-element card-overall" 
                      data-element="overall" 
                      data-player-id="${player.id}"
                      title="Overall: ${playerOverall}">
                     ${playerOverall}
                 </div>
-                <div class="minicard-position player-card-element" 
+                <div class="card-element card-position" 
                      data-element="position" 
                      data-player-id="${player.id}"
                      title="Posición: ${playerPosition}">
                     ${playerPosition}
                 </div>
                 <img src="${playerImage}" 
-                     class="minicard-player-image player-card-element" 
+                     class="card-element card-image" 
                      data-element="image" 
                      data-player-id="${player.id}"
                      alt="${playerName}"
                      title="${playerName}">
-                <div class="minicard-name player-card-element" 
+                <div class="card-element card-name" 
                      data-element="name" 
                      data-player-id="${player.id}"
                      title="Nombre: ${playerName}">
                     ${playerName}
                 </div>
-                <div class="minicard-jersey-number player-card-element" 
+                <div class="card-element card-jersey" 
                      data-element="jersey" 
                      data-player-id="${player.id}"
                      title="Dorsal: ${playerJersey}">
@@ -131,24 +137,39 @@ class PlayerCardManager {
                 </div>
             `;
         } else {
+            // Card en modal de selección (elementos simplificados)
             cardElement.innerHTML = `
-                <div class="minicard-overall player-card-element" 
+                <div class="card-element card-overall" 
                      data-element="overall" 
                      data-player-id="${player.id}"
                      title="Overall: ${playerOverall}">
                     ${playerOverall}
                 </div>
+                <div class="card-element card-position" 
+                     data-element="position" 
+                     data-player-id="${player.id}"
+                     title="Posición: ${playerPosition}"
+                     style="display: none;">
+                    ${playerPosition}
+                </div>
                 <img src="${playerImage}" 
-                     class="player-card-element" 
+                     class="card-element card-image" 
                      data-element="image" 
                      data-player-id="${player.id}"
                      alt="${playerName}"
                      title="${playerName}">
-                <div class="player-name player-card-element" 
+                <div class="card-element card-name" 
                      data-element="name" 
                      data-player-id="${player.id}"
                      title="Nombre: ${playerName}">
                     ${playerName}
+                </div>
+                <div class="card-element card-jersey" 
+                     data-element="jersey" 
+                     data-player-id="${player.id}"
+                     title="Dorsal: ${playerJersey}"
+                     style="display: none;">
+                    ${playerJersey}
                 </div>
             `;
         }
@@ -177,107 +198,83 @@ class PlayerCardManager {
      * @returns {string} HTML de la estructura
      */
     createCardStructure(player, type, cardId, screenType) {
-        // 🎨 NUEVO: Usar CardStyleManager si está disponible
-        if (this.useStyleManager && window.cardStyleManager) {
-            try {
-                // Convertir datos del jugador al formato esperado por los estilos
-                const playerData = {
-                    number: player.jersey_number || player.number || '?',
-                    name: player.name || 'Jugador',
-                    position: player.position || '',
-                    image: player.image_url || player.image || 'img/default_player.png',
-                    rating: this.calculateOverall(player)
-                };
-                
-                const styledCard = window.cardStyleManager.createStyledCard(playerData, type, cardId, screenType);
-                return styledCard;
-            } catch (error) {
-                console.warn('⚠️ Error con sistema de estilos, usando clásico:', error);
-                // Fallback al sistema clásico
-            }
-        }
+        // 🎨 SISTEMA UNIFICADO: Generar estructura simple compatible con card-cascade.css
+        // Esto funciona independientemente del estilo actual
         
-        // 🎴 SISTEMA CLÁSICO (funcionalidad original sin cambios)
-        const overall = this.calculateOverall(player);
-        const uniquePrefix = `${screenType}-${type}`;
+        const playerName = player.name || `Jugador ${player.number || '?'}`;
+        const playerPosition = player.position || 'N/A';
+        const playerImage = player.image_url || player.image || 'img/default_player.png';
+        const playerJersey = player.jersey_number || player.number || '?';
+        const playerOverall = this.calculateOverall(player);
         
         if (type === 'field') {
+            // Card en canvas (con todos los elementos)
             return `
-                <div class="minicard-overall player-card-element" 
+                <div class="card-element card-overall" 
                      data-element="overall" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-overall-${player.id}"
-                     title="Overall: ${overall}">
-                    ${overall}
+                     title="Overall: ${playerOverall}">
+                    ${playerOverall}
                 </div>
-                <div class="minicard-position player-card-element" 
+                <div class="card-element card-position" 
                      data-element="position" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-position-${player.id}"
-                     title="Posición: ${player.position}">
-                    ${player.position}
+                     title="Posición: ${playerPosition}">
+                    ${playerPosition}
                 </div>
-                <img src="${player.image_url}" 
-                     class="minicard-player-image player-card-element" 
+                <img src="${playerImage}" 
+                     class="card-element card-image" 
                      data-element="image" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-image-${player.id}"
-                     alt="Foto de ${player.name}"
-                     title="${player.name}">
-                <div class="minicard-name player-card-element" 
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="card-element card-name" 
                      data-element="name" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-name-${player.id}"
-                     title="Nombre: ${player.name}">
-                    ${player.name}
+                     title="Nombre: ${playerName}">
+                    ${playerName}
                 </div>
-                <div class="minicard-jersey-number player-card-element" 
+                <div class="card-element card-jersey" 
                      data-element="jersey" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-jersey-${player.id}"
-                     title="Dorsal: ${player.jersey_number || '?'}">
-                    ${player.jersey_number || '?'}
+                     title="Dorsal: ${playerJersey}">
+                    ${playerJersey}
                 </div>
             `;
         } else {
-            // Card de selección (plantilla)
+            // Card en modal de selección (elementos simplificados)
             return `
-                <div class="minicard-overallSeleccion player-card-element" 
+                <div class="card-element card-overall" 
                      data-element="overall" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-overall-${player.id}"
-                     title="Overall: ${overall}">
-                    ${overall}
+                     title="Overall: ${playerOverall}">
+                    ${playerOverall}
                 </div>
-                <img src="${player.image_url}" 
-                     class="player-card-element" 
+                <div class="card-element card-position" 
+                     data-element="position" 
+                     data-player-id="${player.id}"
+                     title="Posición: ${playerPosition}"
+                     style="display: none;">
+                    ${playerPosition}
+                </div>
+                <img src="${playerImage}" 
+                     class="card-element card-image" 
                      data-element="image" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-image-${player.id}"
-                     alt="Foto de ${player.name}"
-                     title="${player.name}">
-                <div class="player-name player-card-element" 
+                     alt="${playerName}"
+                     title="${playerName}">
+                <div class="card-element card-name" 
                      data-element="name" 
-                     data-card-id="${cardId}"
                      data-player-id="${player.id}"
-                     data-screen-type="${screenType}"
-                     data-unique-id="${uniquePrefix}-name-${player.id}"
-                     title="Nombre: ${player.name}">
-                    ${player.name}
+                     title="Nombre: ${playerName}">
+                    ${playerName}
+                </div>
+                <div class="card-element card-jersey" 
+                     data-element="jersey" 
+                     data-player-id="${player.id}"
+                     title="Dorsal: ${playerJersey}"
+                     style="display: none;">
+                    ${playerJersey}
                 </div>
             `;
         }
@@ -591,6 +588,15 @@ class PlayerCardManager {
         if (!this.useStyleManager || !cardData.element) return;
         
         try {
+            // Obtener el nuevo estilo actual
+            const newStyleClass = `card-style-${window.cardStyleManager.getCurrentStyle()}`;
+            
+            // Actualizar la clase de estilo en el elemento padre
+            // Primero, remover la clase de estilo anterior
+            cardData.element.className = cardData.element.className.replace(/card-style-\w+/g, '');
+            // Luego, agregar la nueva clase de estilo
+            cardData.element.classList.add(newStyleClass);
+            
             // Crear la nueva estructura con el estilo actual
             const newStructure = this.createCardStructure(
                 cardData.player, 

@@ -205,29 +205,33 @@ class CardStyleUI {
 
     applySelectedStyle() {
         if (!this.currentSelectedStyle) {
-            console.warn('No hay estilo seleccionado');
+            console.warn('⚠️ No hay estilo seleccionado');
+            this.showNotification('Por favor selecciona un estilo', 'warning');
             return;
         }
 
         if (!window.cardStyleManager) {
-            console.error('cardStyleManager no disponible');
+            console.error('❌ cardStyleManager no disponible');
+            this.showNotification('Error: Sistema de estilos no disponible', 'danger');
             return;
         }
 
+        // Aplicar el nuevo estilo
         const success = window.cardStyleManager.setCurrentStyle(this.currentSelectedStyle);
         
         if (success) {
+            // Cerrar modal
             this.hideModal();
-            this.showNotification('Estilo de cards aplicado correctamente');
             
-            // Re-renderizar jugadores si es posible
-            if (window.uiManager && typeof window.uiManager.renderPlayersOnPitch === 'function') {
-                setTimeout(() => {
-                    window.uiManager.renderPlayersOnPitch();
-                }, 100);
-            }
+            // Mostrar notificación de éxito
+            this.showNotification('✅ Estilo aplicado correctamente a todas las cards', 'success');
+            
+            // 🔄 RESET DINÁMICO: Las cards se actualizan automáticamente
+            // El evento 'cardStyleChanged' dispara updateAllCards() internamente
+            console.log('🎴 Las cards en canvas y plantilla han sido actualizadas sin necesidad de refrescar');
+            
         } else {
-            this.showNotification('Error aplicando el estilo', 'danger');
+            this.showNotification('❌ Error al aplicar el estilo. Intenta de nuevo.', 'danger');
         }
     }
 
