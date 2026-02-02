@@ -18,7 +18,6 @@ class FieldStyleUI {
         this.createStyleButton();
         this.createStyleModal();
         this.setupEventListeners();
-        console.log('🏟️ FieldStyleUI inicializada');
     }
 
     createStyleButton() {
@@ -27,7 +26,6 @@ class FieldStyleUI {
             console.warn('⚠️ Botón field-styles-btn no encontrado');
             return;
         }
-        console.log('✅ Botón de estilos de campo conectado');
     }
 
     createStyleModal() {

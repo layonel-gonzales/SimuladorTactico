@@ -18,18 +18,13 @@ class FreemiumController {
     }
     
     async init() {
-        // console.log('[FreemiumController] Inicializando...');
         await this.loadUserPlan();
         this.setupLimitationChecks();
         this.setupProgressIndicators();
-        console.log('[FreemiumController] ✅ Plan del usuario:', this.userPlan?.name || 'free');
     }
     
     async loadUserPlan() {
         try {
-            // console.log('[FreemiumController] Cargando plan del usuario...');
-            
-            // Primero verificar si tenemos el config manager
             if (window.freemiumConfigManager) {
                 await freemiumConfigManager.loadConfig();
                 
@@ -40,8 +35,6 @@ class FreemiumController {
                     name: currentPlan.name || 'free',
                     ...currentPlan
                 };
-                
-                console.log('[FreemiumController] Plan cargado desde configuración dinámica:', this.userPlan);
             } else {
                 // Fallback al sistema anterior si no hay config manager
                 console.warn('[FreemiumController] ConfigManager no disponible, usando configuración estática');
@@ -98,8 +91,6 @@ class FreemiumController {
         const currentLines = this.getCurrentLineCount();
         const maxLines = this.getFeatureValue('maxLines');
         
-        console.log(`[FreemiumController] Verificando líneas: ${currentLines}/${maxLines}`);
-        
         if (maxLines !== -1 && currentLines >= maxLines) {
             this.showUpgradeModal('drawing_limit', {
                 current: currentLines,
@@ -115,8 +106,6 @@ class FreemiumController {
     canCreateAnimation() {
         const currentAnimations = this.getCurrentAnimationCount();
         const maxAnimations = this.getFeatureValue('maxSimultaneousAnimations');
-        
-        console.log(`[FreemiumController] Verificando animaciones: ${currentAnimations}/${maxAnimations}`);
         
         if (maxAnimations !== -1 && currentAnimations >= maxAnimations) {
             this.showUpgradeModal('animation_limit', {
@@ -345,7 +334,6 @@ class FreemiumController {
     // ==========================================
     
     showUpgradeModal(limitType, data = {}) {
-        console.log(`[FreemiumController] Mostrando modal de upgrade: ${limitType}`, data);
         
         const modalConfigs = {
             drawing_limit: {
@@ -673,9 +661,6 @@ class FreemiumController {
                 return false;
             };
         }
-        
-        // Hooks para otros managers según sea necesario
-        console.log('[FreemiumController] Limitation checks configurados');
     }
     
     // ==========================================
@@ -710,14 +695,10 @@ class FreemiumController {
     }
     
     async reloadConfiguration() {
-        // Método para recargar la configuración dinámicamente
-        console.log('[FreemiumController] Recargando configuración...');
-        
         if (window.freemiumConfigManager) {
             await freemiumConfigManager.reloadConfig();
             await this.loadUserPlan();
             this.setupProgressIndicators();
-            console.log('[FreemiumController] Configuración recargada exitosamente');
         } else {
             console.warn('[FreemiumController] ConfigManager no disponible para recarga');
         }
@@ -796,5 +777,3 @@ class FreemiumController {
 
 // Instancia global
 window.freemiumController = new FreemiumController();
-
-console.log('[FreemiumController] Módulo cargado correctamente');

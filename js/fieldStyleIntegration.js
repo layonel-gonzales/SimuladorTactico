@@ -10,14 +10,12 @@
 
 class FieldStyleIntegration {
     constructor() {
-        console.log('🔗 FieldStyleIntegration inicializado');
         this.setupEventListeners();
     }
 
     setupEventListeners() {
         // Escuchar cambios de estilo de campo
         document.addEventListener('fieldStyleChanged', (e) => {
-            console.log(`🎨 Estilo de campo cambiado a: ${e.detail.styleName}`);
             this.onFieldStyleChanged(e.detail);
         });
 

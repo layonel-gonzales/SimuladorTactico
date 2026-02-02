@@ -10,7 +10,6 @@ export default class FullscreenManager {
     init() {
         this.setupFullscreenButton();
         this.setupFullscreenEvents();
-        console.log('[FullscreenManager] Inicializado');
     }
     
     setupFullscreenButton() {
@@ -19,7 +18,6 @@ export default class FullscreenManager {
             fullscreenBtn.addEventListener('click', () => {
                 this.toggleFullscreen();
             });
-            console.log('[FullscreenManager] Botón de pantalla completa configurado');
         } else {
             console.warn('[FullscreenManager] Botón de pantalla completa no encontrado');
         }
@@ -64,8 +62,6 @@ export default class FullscreenManager {
         } else if (element.msRequestFullscreen) {
             element.msRequestFullscreen();
         }
-        
-        console.log('[FullscreenManager] Entrando en pantalla completa');
     }
     
     exitFullscreen() {
@@ -78,8 +74,6 @@ export default class FullscreenManager {
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
-        
-        console.log('[FullscreenManager] Saliendo de pantalla completa');
     }
     
     handleFullscreenChange() {
@@ -92,8 +86,6 @@ export default class FullscreenManager {
         
         this.isFullscreen = isCurrentlyFullscreen;
         this.updateButtonIcon();
-        
-        console.log(`[FullscreenManager] Estado pantalla completa: ${this.isFullscreen}`);
     }
     
     updateButtonIcon() {

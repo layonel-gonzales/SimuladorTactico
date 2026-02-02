@@ -18,7 +18,6 @@ class FreemiumConfigManager {
     }
     
     async init() {
-        console.log('[FreemiumConfigManager] Inicializando...');
         await this.loadConfig();
         this.setupAutoRefresh();
     }
@@ -29,11 +28,8 @@ class FreemiumConfigManager {
     
     async loadConfig() {
         try {
-            // console.log('[FreemiumConfigManager] Cargando configuración...');
-            
-            // Verificar si necesitamos recargar
+
             if (this.isConfigCacheValid()) {
-                // console.log('[FreemiumConfigManager] Usando configuración en caché');
                 return this.config;
             }
             
@@ -43,38 +39,21 @@ class FreemiumConfigManager {
                 response = await fetch('/api/config');
                 if (response.ok) {
                     this.config = await response.json();
-                    console.log('[FreemiumConfigManager] ✅ Configuración cargada desde servidor');
                 } else {
                     throw new Error(`Server response: ${response.status}`);
                 }
             } catch (serverError) {
-                // console.warn('[FreemiumConfigManager] Error del servidor, intentando archivo local:', serverError.message);
-                
-                // Fallback al archivo local
                 response = await fetch(this.configPath);
                 if (!response.ok) {
                     throw new Error(`Error loading local config: ${response.status}`);
                 }
                 this.config = await response.json();
-                console.log('[FreemiumConfigManager] ✅ Configuración cargada desde archivo local');
             }
             
             this.isLoaded = true;
             this.lastLoadTime = Date.now();
-            
-            // console.log('[FreemiumConfigManager] Configuración cargada:', {
-            //     version: this.config.version,
-            //     lastUpdated: this.config.lastUpdated,
-            //     plans: Object.keys(this.config.plans).length,
-            //     source: response.url.includes('/api/') ? 'servidor' : 'local'
-            // });
-            
-            // Validar configuración
             this.validateConfig();
-            
-            // Actualizar cache
-            this.updateCache();
-            
+            this.updateCache();    
             return this.config;
         } catch (error) {
             console.error('[FreemiumConfigManager] Error cargando configuración:', error);
@@ -106,8 +85,6 @@ class FreemiumConfigManager {
                 console.warn(`[FreemiumConfigManager] Plan requerido no encontrado: ${plan}`);
             }
         }
-        
-        console.log('[FreemiumConfigManager] Configuración validada correctamente');
     }
     
     updateCache() {
@@ -427,7 +404,6 @@ class FreemiumConfigManager {
     
     async saveConfig(newConfig, adminPassword) {
         try {
-            console.log('[FreemiumConfigManager] Guardando configuración...');
             
             // Validar configuración antes de enviar
             if (!newConfig.plans || !newConfig.categories) {
@@ -458,8 +434,6 @@ class FreemiumConfigManager {
             this.config = newConfig;
             this.lastLoadTime = Date.now();
             this.updateCache();
-            
-            console.log('[FreemiumConfigManager] Configuración guardada exitosamente');
             return { success: true, message: 'Configuración guardada exitosamente' };
             
         } catch (error) {
@@ -481,7 +455,6 @@ class FreemiumConfigManager {
     }
     
     async reloadConfig() {
-        console.log('[FreemiumConfigManager] Recargando configuración manualmente...');
         this.lastLoadTime = null; // Forzar recarga
         return await this.loadConfig();
     }
@@ -522,5 +495,3 @@ window.freemiumConfigManager = new FreemiumConfigManager();
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FreemiumConfigManager;
 }
-
-console.log('[FreemiumConfigManager] Módulo cargado correctamente');

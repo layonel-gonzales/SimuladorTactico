@@ -19,11 +19,6 @@
         const allReady = Object.values(status).every(v => v);
 
         if (allReady) {
-            console.log('✅ Sistema de estilos completamente inicializado');
-            console.log('   📊 Estilos de campo:', window.styleRegistry.getStats().fieldStyles);
-            console.log('   📊 Estilos de cards:', window.styleRegistry.getStats().cardStyles);
-            
-            // Notificar que todo está listo
             window.dispatchEvent(new CustomEvent('styleSystemReady'));
         } else {
             console.log('⏳ Sistema de estilos parcialmente cargado:', status);

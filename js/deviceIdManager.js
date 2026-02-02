@@ -23,7 +23,6 @@ export function getOrCreateDeviceId() {
     if (!deviceId) {
         deviceId = generateDeviceId();
         localStorage.setItem(DEVICE_ID_KEY, deviceId);
-        console.log('[DeviceId] Nuevo deviceId generado:', deviceId);
     } else {
         console.log('[DeviceId] deviceId existente:', deviceId);
     }

@@ -15,7 +15,6 @@ export default class CustomPlayersManager {
     init() {
         this.loadFromStorage();
         this.setupEventListeners();
-        console.log('[CustomPlayersManager] Inicializado con', this.customPlayers.length, 'jugadores personalizados');
     }
 
     // === GESTIÓN DE ALMACENAMIENTO ===
@@ -39,8 +38,6 @@ export default class CustomPlayersManager {
                 this.customTeams = JSON.parse(storedTeams);
             }
 
-            console.log('[CustomPlayersManager] Cargados desde localStorage:', 
-                       this.customPlayers.length, 'jugadores,', this.customTeams.length, 'equipos');
         } catch (error) {
             console.error('[CustomPlayersManager] Error cargando desde localStorage:', error);
             this.customPlayers = [];
@@ -52,7 +49,6 @@ export default class CustomPlayersManager {
         try {
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.customPlayers));
             localStorage.setItem(this.TEAMS_KEY, JSON.stringify(this.customTeams));
-            console.log('[CustomPlayersManager] Guardado en localStorage:', this.customPlayers.length, 'jugadores');
         } catch (error) {
             console.error('[CustomPlayersManager] Error guardando en localStorage:', error);
             
@@ -92,7 +88,6 @@ export default class CustomPlayersManager {
         this.customPlayers.push(newPlayer);
         this.saveToStorage();
 
-        console.log('[CustomPlayersManager] Jugador personalizado agregado:', newPlayer.name);
         return newPlayer;
     }
 
@@ -115,7 +110,6 @@ export default class CustomPlayersManager {
         this.customPlayers[playerIndex] = updatedPlayer;
         this.saveToStorage();
 
-        console.log('[CustomPlayersManager] Jugador personalizado actualizado:', updatedPlayer.name);
         return updatedPlayer;
     }
 
@@ -127,8 +121,6 @@ export default class CustomPlayersManager {
 
         const deletedPlayer = this.customPlayers.splice(playerIndex, 1)[0];
         this.saveToStorage();
-
-        console.log('[CustomPlayersManager] Jugador personalizado eliminado:', deletedPlayer.name);
         return deletedPlayer;
     }
 
@@ -207,9 +199,7 @@ export default class CustomPlayersManager {
             throw new Error('La imagen es demasiado grande (máximo 5MB)');
         }
 
-        try {
-            console.log(`[CustomPlayersManager] Procesando imagen: ${file.name} (${(file.size/1024).toFixed(1)}KB)`);
-            
+        try {     
             // Convertir imagen a base64
             const base64 = await this.fileToBase64(file);
             
@@ -226,7 +216,6 @@ export default class CustomPlayersManager {
                 console.warn('[CustomPlayersManager] Imagen procesada sigue siendo grande:', finalSize.toFixed(1), 'KB');
             }
             
-            console.log(`[CustomPlayersManager] Imagen optimizada: ${finalSize.toFixed(1)}KB (${hasTransparency ? 'PNG con transparencia' : 'JPEG'}) para jugador:`, playerId);
             return processedBase64;
         } catch (error) {
             console.error('[CustomPlayersManager] Error procesando imagen:', error);
@@ -263,13 +252,11 @@ export default class CustomPlayersManager {
                     // Verificar canal alfa (cada 4to valor en el array)
                     for (let i = 3; i < data.length; i += 4) {
                         if (data[i] < 255) { // Si hay algún pixel con transparencia
-                            console.log('[CustomPlayersManager] Transparencia detectada en la imagen');
                             resolve(true);
                             return;
                         }
                     }
-                    
-                    console.log('[CustomPlayersManager] No se detectó transparencia en la imagen');
+
                     resolve(false);
                 } catch (error) {
                     // Si hay error accediendo a los datos (CORS, etc), asumir que no hay transparencia
@@ -344,7 +331,6 @@ export default class CustomPlayersManager {
                     // Convertir a base64 con el formato y compresión apropiados
                     const result = canvas.toDataURL(config.format, config.quality);
                     
-                    console.log(`[CustomPlayersManager] Imagen procesada: ${config.targetWidth}x${config.targetHeight}, formato: ${config.format}, calidad: ${(config.quality*100)}%`);
                     resolve(result);
                 } catch (error) {
                     console.error('[CustomPlayersManager] Error en processPlayerImage:', error);
@@ -443,8 +429,6 @@ export default class CustomPlayersManager {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-
-        console.log('[CustomPlayersManager] Jugadores personalizados exportados');
     }
 
     async importCustomPlayers(file) {
@@ -485,7 +469,6 @@ export default class CustomPlayersManager {
 
             this.saveToStorage();
 
-            console.log('[CustomPlayersManager] Importados', validPlayers.length, 'jugadores personalizados');
             return {
                 imported: validPlayers.length,
                 total: importData.players.length
@@ -502,7 +485,6 @@ export default class CustomPlayersManager {
         // Escuchar cambios en el storage (sincronización entre pestañas)
         window.addEventListener('storage', (e) => {
             if (e.key === this.STORAGE_KEY || e.key === this.TEAMS_KEY) {
-                console.log('[CustomPlayersManager] Cambios detectados en otra pestaña, recargando...');
                 this.loadFromStorage();
             }
         });
@@ -548,7 +530,6 @@ export default class CustomPlayersManager {
             this.customTeams = [];
             localStorage.removeItem(this.STORAGE_KEY);
             localStorage.removeItem(this.TEAMS_KEY);
-            console.log('[CustomPlayersManager] Todos los datos personalizados eliminados');
             return true;
         }
         return false;

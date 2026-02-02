@@ -14,8 +14,6 @@ export default class ConfigurationUI {
         
         // Escuchar cambios de modo para actualizar botones de tutorial
         document.addEventListener('modeChanged', this.handleModeChange.bind(this));
-        
-        console.log('[ConfigurationUI] Inicializado correctamente');
     }
 
     init() {
@@ -741,8 +739,6 @@ export default class ConfigurationUI {
             this.updateAnimationSettings();
             this.updateGeneralSettings();
             this.updateThemeSettings();
-
-            console.log('[ConfigurationUI] Todas las configuraciones restablecidas según valores por defecto de la imagen');
         }
     }
 
@@ -751,8 +747,6 @@ export default class ConfigurationUI {
     applyPlayerCardSettings(settings) {
         // Crear o actualizar estilos CSS para controlar la visibilidad
         this.updatePlayerCardStyles(settings);
-        
-        console.log('[ConfigurationUI] Configuración de tarjetas aplicada:', settings);
     }
 
     updatePlayerCardStyles(settings) {
@@ -832,8 +826,6 @@ export default class ConfigurationUI {
         
         // Aplicar estilos inmediatamente
         this.applyTutorialButtonsStyles(showTutorialButtons);
-        
-        console.log('[ConfigurationUI] Visibilidad de botones de tutorial configurada:', showTutorialButtons);
     }
 
     applyTutorialButtonsStyles(visible) {
@@ -951,8 +943,6 @@ export default class ConfigurationUI {
             // Disparar el evento 'input' para que main.js se entere del cambio
             mainWidthPicker.dispatchEvent(new Event('input', { bubbles: true }));
         }
-        
-        console.log('[ConfigurationUI] Configuración de dibujo actualizada:', { defaultLineColor, defaultLineThickness });
     }
 
     updateDrawingToolbarVisibility() {
@@ -963,8 +953,6 @@ export default class ConfigurationUI {
         
         // Aplicar estilos inmediatamente
         this.applyDrawingToolbarStyles(showDrawingToolbar);
-        
-        console.log('[ConfigurationUI] Visibilidad de barra de herramientas de dibujo configurada:', showDrawingToolbar);
     }
 
     applyDrawingToolbarStyles(visible) {
@@ -1020,18 +1008,10 @@ export default class ConfigurationUI {
         
         // Aplicar inmediatamente las configuraciones
         this.applyAnimationSettings(animationSpeed, smoothMovements, fadeTransitions);
-        
-        console.log('[ConfigurationUI] Configuración de animación actualizada:', { 
-            animationSpeed, smoothMovements, fadeTransitions 
-        });
     }
 
     applyAnimationSettings(speed, smoothMovements, fadeTransitions) {
-        // ⚠️ CRÍTICO: No modificar el speedInput del animationManager directamente
-        // ya que puede interferir con la funcionalidad existente.
-        // En su lugar, creamos un input temporal que el animationManager pueda leer
-        
-        // Crear o actualizar un input oculto para que animationManager lo lea
+
         let hiddenSpeedInput = document.getElementById('animation-speed-hidden');
         if (!hiddenSpeedInput) {
             hiddenSpeedInput = document.createElement('input');
@@ -1103,10 +1083,6 @@ export default class ConfigurationUI {
         
         // Aplicar inmediatamente las configuraciones
         this.applyGeneralSettings();
-        
-        console.log('[ConfigurationUI] Configuración general actualizada:', { 
-            confirmActions, compactMode 
-        });
     }
 
     applyGeneralSettings() {
@@ -1193,10 +1169,6 @@ export default class ConfigurationUI {
         
         // Aplicar inmediatamente las configuraciones
         this.applyThemeSettings();
-        
-        console.log('[ConfigurationUI] Configuración de tema actualizada:', { 
-            themeMode, accentColor, highContrast 
-        });
     }
 
     applyThemeSettings() {
@@ -1555,20 +1527,13 @@ export default class ConfigurationUI {
 
         // Cargar y aplicar configuraciones de tema
         this.applyThemeSettings();
-
-        console.log('[ConfigurationUI] Configuraciones guardadas aplicadas');
     }
 
     handleConfigurationChange(event) {
-        // Manejar cambios de configuración desde otros componentes
-        console.log('[ConfigurationUI] Configuración cambiada:', event.detail);
+
     }
 
     handleModeChange(event) {
-        // Cuando cambia el modo, actualizar qué botones de tutorial se muestran
-        console.log('[ConfigurationUI] Modo cambiado:', event.detail);
-        
-        // Solo actualizar si los botones de tutorial están habilitados
         const showTutorialButtons = localStorage.getItem('showTutorialButtons');
         if (showTutorialButtons === 'true' || showTutorialButtons === null) {
             this.applyTutorialButtonsStyles(true);
@@ -1593,10 +1558,6 @@ function confirmCriticalAction(message, actionType = '') {
     }
     
     const confirmed = confirm(message);
-    
-    if (actionType) {
-        console.log(`[ConfirmActions] ${actionType} - Usuario ${confirmed ? 'confirmó' : 'canceló'} la acción`);
-    }
     
     return confirmed;
 }

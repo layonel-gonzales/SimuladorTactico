@@ -27,7 +27,6 @@ class CardStyleUI {
         this.createStyleModal();
         this.setupEventListeners();
         this.initialized = true;
-        console.log('🎴 CardStyleUI inicializada');
     }
 
     createStyleButton() {
@@ -36,7 +35,6 @@ class CardStyleUI {
             console.warn('⚠️ Botón card-style-button no encontrado en el DOM');
             return;
         }
-        console.log('✅ Botón de estilos de cards conectado');
     }
 
     createStyleModal() {
@@ -77,7 +75,6 @@ class CardStyleUI {
 
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         this.modal = document.getElementById('card-style-modal');
-        console.log('✅ Modal de estilos de cards creado');
     }
 
     populateStyleGrid() {
@@ -96,8 +93,6 @@ class CardStyleUI {
 
         const styles = window.cardStyleManager.getAvailableStyles();
         const currentStyle = window.cardStyleManager.getCurrentStyle();
-
-        console.log(`📋 Estilos disponibles: ${styles.length}, Estilo actual: ${currentStyle}`);
 
         if (styles.length === 0) {
             grid.innerHTML = '<div class="col-12 text-center text-warning">No hay estilos registrados</div>';
@@ -155,7 +150,6 @@ class CardStyleUI {
             applyBtn.disabled = false;
         }
         
-        console.log(`🎯 Estilo seleccionado: ${styleId}`);
     }
 
     setupEventListeners() {
@@ -165,7 +159,6 @@ class CardStyleUI {
             if (e.target.id === 'card-style-button' || e.target.closest('#card-style-button')) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('🔘 Click en botón de estilos de cards');
                 this.showModal();
             }
             
@@ -178,7 +171,6 @@ class CardStyleUI {
     }
 
     showModal() {
-        console.log('📂 Abriendo modal de estilos de cards...');
         
         if (!this.modal) {
             this.createStyleModal();
@@ -195,7 +187,6 @@ class CardStyleUI {
         try {
             const bsModal = new bootstrap.Modal(this.modal);
             bsModal.show();
-            console.log('✅ Modal mostrado');
         } catch (error) {
             console.error('❌ Error mostrando modal:', error);
         }
@@ -217,8 +208,6 @@ class CardStyleUI {
             console.warn('No hay estilo seleccionado');
             return;
         }
-
-        console.log(`🎨 Aplicando estilo: ${this.currentSelectedStyle}`);
 
         if (!window.cardStyleManager) {
             console.error('cardStyleManager no disponible');

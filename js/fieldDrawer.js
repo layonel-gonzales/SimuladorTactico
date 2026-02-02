@@ -7,9 +7,6 @@ export function drawFootballField(canvas, ctx) {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                      window.innerWidth <= 768 || cssWidth <= 768;
     
-    console.log(`fieldDrawer.js: Dibujando campo - CSS: ${cssWidth}x${cssHeight}, Canvas: ${canvas.width}x${canvas.height}, Móvil: ${isMobile}`);
-    
-    // Limpiar canvas
     ctx.clearRect(0, 0, cssWidth, cssHeight);
     
     // MEJORA: Césped más realista con múltiples capas
@@ -54,7 +51,6 @@ export function drawFootballField(canvas, ctx) {
     drawPenaltySpots(ctx, cssWidth, cssHeight, isMobile);
     
     // NUEVO: Dibujar arcos/porterías más realistas
-    console.log(`[fieldDrawer] Llamando a drawGoalPosts con dimensiones: ${cssWidth}x${cssHeight}, móvil: ${isMobile}`);
     drawGoalPosts(ctx, cssWidth, cssHeight, isMobile);
     
     // Esquinas del campo
@@ -132,8 +128,6 @@ function drawPenaltySpots(ctx, width, height, isMobile = false) {
     // El medio sería aproximadamente en la mitad de esa distancia
     const leftSpotX = areaWidth * 0.5;   // 50% del área = mitad entre arco y área
     const rightSpotX = width - (areaWidth * 0.5); // 50% del área desde el otro lado
-    
-    console.log(`[fieldDrawer] Puntos de penal - Izquierdo: ${leftSpotX}, Derecho: ${rightSpotX}, Área width: ${areaWidth}`);
     
     // Punto penal izquierdo (dentro del área)
     ctx.beginPath();
@@ -234,7 +228,6 @@ function drawPenaltyArea(ctx, width, height, x, side, isMobile = false) {
 
 // NUEVA: Función para dibujar arcos/porterías realistas basada en imagen de referencia
 function drawGoalPosts(ctx, width, height, isMobile = false) {
-    console.log(`[fieldDrawer] Dibujando arcos - Móvil: ${isMobile}, Dimensiones: ${width}x${height}`);
     
     // Configurar estilo de líneas para los arcos
     const originalLineWidth = ctx.lineWidth;
@@ -253,13 +246,10 @@ function drawGoalPosts(ctx, width, height, isMobile = false) {
         goalHeight = height * 0.22;  // AGRANDADO: de 0.14 a 0.22 (57% más alto)
     }
     
-    console.log(`[fieldDrawer] Dimensiones arco - Ancho: ${goalWidth}, Alto: ${goalHeight}`);
-    
     // ARCO IZQUIERDO - Como en tu imagen de referencia
     const leftGoalX = 0;
     const leftGoalY = (height - goalHeight) / 2;
     
-    console.log(`[fieldDrawer] Arco izquierdo en posición: ${leftGoalX}, ${leftGoalY}`);
     
     // Dibujar marco completo del arco izquierdo (forma cerrada como en referencia)
     ctx.beginPath();
@@ -278,8 +268,6 @@ function drawGoalPosts(ctx, width, height, isMobile = false) {
     const rightGoalX = width;
     const rightGoalY = (height - goalHeight) / 2;
     
-    console.log(`[fieldDrawer] Arco derecho en posición: ${rightGoalX}, ${rightGoalY}`);
-    
     // Dibujar marco completo del arco derecho (forma cerrada como en referencia)
     ctx.beginPath();
     // Línea vertical izquierda (línea de gol)
@@ -296,6 +284,4 @@ function drawGoalPosts(ctx, width, height, isMobile = false) {
     // Restaurar estilos originales
     ctx.lineWidth = originalLineWidth;
     ctx.strokeStyle = originalStrokeStyle;
-    
-    console.log(`[fieldDrawer] Arcos dibujados exitosamente con forma cerrada como referencia`);
 }

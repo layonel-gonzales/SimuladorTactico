@@ -40,12 +40,9 @@ export default class BallDrawingManager {
         this.setupEventListeners();
         // IMPORTANTE: Redimensionar canvas al inicializar para desktop
         this.resizeCanvas();
-        console.log('BallDrawingManager: Inicializado correctamente');
     }
     
-    setupEventListeners() {
-        console.log('[BallDrawingManager] Configurando event listeners en canvas:', this.canvas?.id);
-        
+    setupEventListeners() {     
         // Eventos para dibujar estela con el balón
         this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -77,8 +74,6 @@ export default class BallDrawingManager {
             const mouseEvent = new MouseEvent('mouseup', {});
             this.handleMouseUp(mouseEvent);
         });
-        
-        console.log('[BallDrawingManager] Event listeners configurados exitosamente');
     }
     
     handleMouseDown(e) {
@@ -95,12 +90,6 @@ export default class BallDrawingManager {
         // CRÍTICO: Solo proceder si el click fue sobre el balón
         const ballPlayer = this.getBallPlayer();
         this.clickedOnBall = ballPlayer && this.isClickOnBall(x, y, ballPlayer, rect);
-        
-        if (this.clickedOnBall) {
-            console.log('[BallDrawingManager] Balón detectado, esperando para determinar acción');
-        } else {
-            console.log('[BallDrawingManager] Click fuera del balón, ignorando');
-        }
     }
     
     handleMouseMove(e) {
@@ -115,7 +104,6 @@ export default class BallDrawingManager {
         if (distance > this.DRAG_THRESHOLD && !this.ballDragStarted && !this.isDrawingBallPath) {
             // Si se movió más del umbral, es probable que sea drag
             this.ballDragStarted = true;
-            console.log('[BallDrawingManager] Drag detectado, no activar estela');
         } else if (!this.ballDragStarted && !this.isDrawingBallPath && 
                   Date.now() - this.mouseDownTime > this.DRAW_DELAY) {
             // Si no hay drag y pasó el tiempo de espera, iniciar estela
@@ -140,10 +128,6 @@ export default class BallDrawingManager {
         // Finalizar estela
         this.isDrawingBallPath = false;
         this.drawFinalTrail();
-        
-        // CAMBIO CRÍTICO: No limpiar automáticamente las estelas
-        // Las estelas se mantendrán hasta que se dibuje una línea permanente o se limpie manualmente
-        console.log('[BallDrawingManager] Estela del balón completada (se mantiene visible)');
     }
     
     getBallPlayer() {
@@ -177,7 +161,6 @@ export default class BallDrawingManager {
             this.isDrawingBallPath = true;
             this.ballPath = [{ x: ballPixelX, y: ballPixelY }];
             this.clearCanvas();
-            console.log('[BallDrawingManager] Iniciando estela de balón', this.ballPath);
         }
     }
     
@@ -203,10 +186,6 @@ export default class BallDrawingManager {
             this.ctx.restore();
         }
         
-        // Debug periódico
-        if (this.ballPath.length % 10 === 0) {
-            console.log('[BallDrawingManager] Estela parcial:', this.ballPath.length, 'puntos');
-        }
     }
     
     drawFinalTrail() {
@@ -225,15 +204,12 @@ export default class BallDrawingManager {
             );
             this.ctx.restore();
         }
-        
-        console.log('[BallDrawingManager] Estela final:', this.ballPath.length, 'puntos');
     }
     
     clearTrail() {
         // Limpiar estela y preservar líneas permanentes automáticamente
         this.clearCanvas();
         this.ballPath = [];
-        console.log('[BallDrawingManager] Estela limpiada (líneas permanentes preservadas automáticamente)');
     }
     
     clearCanvas() {
@@ -255,7 +231,6 @@ export default class BallDrawingManager {
             this.isDrawingBallPath = false;
             this.clearTrail();
         }
-        console.log('[BallDrawingManager] Estado de drag del balón:', isDragging);
     }
     
     // Método para verificar si está dibujando (para evitar conflictos)
@@ -270,7 +245,6 @@ export default class BallDrawingManager {
             this.isDrawingBallPath = false;
             this.clearTrail();
         }
-        console.log('[BallDrawingManager] Habilitado:', enabled);
     }
     
     // Verificar si está habilitado
@@ -336,7 +310,5 @@ export default class BallDrawingManager {
         if (this.ballPath.length > 0) {
             this.drawTrail();
         }
-        
-        console.log(`[BallDrawingManager] Canvas redimensionado - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}`);
     }
 }

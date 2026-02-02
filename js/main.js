@@ -15,37 +15,24 @@ import CustomPlayersManager from './customPlayersManager.js';
 import CustomPlayersUI from './customPlayersUI.js';
 import ConfigurationManager from './configurationManager.js';
 import ConfigurationUI from './configurationUI.js';
-// NOTA: FieldStyleManager y FieldStyleIntegration ahora se cargan como scripts globales
-// y están disponibles en window.fieldStyleManager y window.fieldStyleIntegration
-// Ver: fieldStyleManager-refactored.js y fieldStyleIntegration.js (cargados con <script>)
-
-// --- Simulador Táctico con dos modos principales separados ---
-// Modo 1: Dibujo de trazos usando el balón como cursor
-// Modo 2: Crear animaciones tácticas con frames
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- GESTIÓN DE DEVICEID (FREEMIUM) ---
     const deviceId = getOrCreateDeviceId();
     window.deviceId = deviceId; // Exponer globalmente para pruebas
-    console.log('[Freemium] deviceId actual:', deviceId);
     
     // SISTEMA DE AUTENTICACIÓN: Verificar acceso antes de inicializar la aplicación
     const waitForAuthentication = () => {
         return new Promise((resolve) => {
-            console.log('[Main] Verificando sistema de autenticación...');
             
             // Si no hay sistema de autenticación, continuar
             if (!window.authSystem) {
-                console.log('[Main] No hay sistema de autenticación presente, continuando...');
                 resolve();
                 return;
             }
             
-            console.log('[Main] Sistema de autenticación encontrado, estado:', window.authSystem.isAuthenticated);
-            
             // Si ya está autenticado, continuar
             if (window.authSystem.isAuthenticated) {
-                console.log('[Main] Ya autenticado, continuando...');
                 resolve();
                 return;
             }
@@ -54,10 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             let checkCount = 0;
             const checkAuth = setInterval(() => {
                 checkCount++;
-                console.log(`[Main] Verificando autenticación (intento ${checkCount})...`);
                 
                 if (window.authSystem.isAuthenticated) {
-                    console.log('[Main] Autenticación exitosa, continuando...');
                     clearInterval(checkAuth);
                     resolve();
                 }
@@ -105,20 +90,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Estado global (debe ir antes de cualquier uso)
     // Inicializar activePlayers con los jugadores y balón desde staticPlayers
     // Asegura que siempre haya un balón en la cancha
-    function ensureBallInPlayers() {
-        // console.log('[DEBUG] Llamada a ensureBallInPlayers');
-        
+    function ensureBallInPlayers() {    
         // Si no hay activePlayers, inicializar como array vacío
         if (!state.activePlayers || !Array.isArray(state.activePlayers)) {
-            // console.log('[DEBUG] Inicializando activePlayers como array vacío');
             state.activePlayers = [];
         }
         
         // Elimina cualquier balón duplicado
         let balls = state.activePlayers.filter(p => p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball');
         if (balls.length > 1) {
-            // console.log('[DEBUG] Se encontraron balones duplicados, eliminando extras');
-            // Deja solo uno
             const first = balls[0];
             state.activePlayers = state.activePlayers.filter(p => !(p.isBall || p.type === 'ball' || p.role === 'ball' || p.id === 'ball'));
             state.activePlayers.push(first);
@@ -135,13 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 y: 50  // centro vertical
             };
             state.activePlayers.push(ballPlayer);
-            // console.log('[DEBUG] Balón agregado al centro de la cancha', ballPlayer);
         }
         // Asegura que tenga todas las propiedades y posición válida
         if (typeof ballPlayer.x !== 'number' || typeof ballPlayer.y !== 'number') {
             ballPlayer.x = 50; // centro horizontal del campo
             ballPlayer.y = 50; // centro vertical del campo
-            // console.log('[DEBUG] Balón reposicionado al centro', ballPlayer);
         }
         
         // Validar que las coordenadas están en rango válido (0-100%)
@@ -152,8 +130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         ballPlayer.isBall = true;
         ballPlayer.type = 'ball';
         ballPlayer.role = 'ball';
-        // Mensaje de depuración para ver el estado de los jugadores
-        // console.log('[DEBUG] Estado de activePlayers tras asegurar balón:', state.activePlayers);
     }
     // Estado global (debe ir antes de cualquier uso)
     const state = {
@@ -173,7 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (ballPlayerInit) {
         ballPlayerInit.x = 50; // centro en porcentaje
         ballPlayerInit.y = 50; // centro en porcentaje
-        // console.log('[DEBUG] Balón forzado al centro al cargar', ballPlayerInit);
     }
 
     // Inicialización de módulos especializados
@@ -220,18 +195,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const configurationUI = new ConfigurationUI(configurationManager, customPlayersManager, playerManager);
     window.configurationUI = configurationUI; // Hacer disponible globalmente
     
-    // === SISTEMA DE ESTILOS DE CANCHA (MODULAR) ===
-    // NOTA: fieldStyleManager ya está disponible globalmente desde fieldStyleManager-refactored.js
-    // que se carga antes de main.js mediante <script> tag
-    console.log('[Main] Sistema de estilos de cancha:', window.fieldStyleManager ? '✅ Disponible' : '⚠️ No encontrado');
-    
-    // Si fieldStyleIntegration no está disponible, esperamos a que se cargue
-    if (!window.fieldStyleIntegration) {
-        console.log('[Main] Esperando a que fieldStyleIntegration esté disponible...');
-    }
-    
-    console.log('[Main] Sistema de estilos de cancha modular activo');
-    
     // Conectar el botón de configuración al modal COMPLETO
     const configurationBtn = document.getElementById('configuration-btn');
     if (configurationBtn) {
@@ -250,40 +213,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Conectar todos los gestores
     animationManager.uiManager = uiManager;
     modeManager.setManagers(drawingManager, ballDrawingManager, animationManager, uiManager);
-
-    // --- NOTA: El modeManager ya se encarga de conectar el botón global de modo ---
-    // No necesitamos duplicar la conexión aquí
-
-    // Establecer modo inicial (dibujo) y verificar
-    // console.log('[Main] Estableciendo modo inicial...');
     modeManager.switchToMode('drawing');
     
     // Verificación adicional después de un pequeño delay
     setTimeout(() => {
-        // console.log('[Main] Verificación post-inicialización:');
-        // console.log('- Modo actual:', modeManager.currentMode);
-        // console.log('- Clases del body:', document.body.className);
-        // console.log('- Botón global de modo existe:', !!document.getElementById('global-mode-toggle'));
-        // console.log('- Botón global de plantilla existe:', !!document.getElementById('global-select-squad-btn'));
-        // console.log('- Drawing controls existe:', !!document.getElementById('drawing-mode-controls'));
-        // console.log('- Animation controls existe:', !!document.getElementById('animation-mode-controls'));
+
         
         // Agregar función global para debug de filtros
         window.debugFilters = () => {
-            // console.log('=== DEBUG DE FILTROS ===');
-            // console.log('ConfigurationManager existe:', !!configurationManager);
-            // console.log('PlayerManager existe:', !!playerManager);
             if (configurationManager) {
                 const settings = configurationManager.getAllSettings();
-                // console.log('Configuraciones actuales:', settings);
             }
             if (playerManager) {
                 const allPlayers = playerManager.getAllPlayers();
-                // console.log('Jugadores filtrados:', allPlayers.length);
             }
         };
         
-        // console.log('[Main] Debug function available: window.debugFilters()');
     }, 100);
 
     // --- Exportar animación como JSON ---
@@ -301,8 +246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            console.log('[Main] Animación exportada exitosamente');
         });
     }
 
@@ -325,7 +268,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (confirmed) {
                 try {
                     await animationManager.exportToVideo();
-                    console.log('[Main] Video exportado exitosamente');
                 } catch (error) {
                     console.error('[Main] Error al exportar video:', error);
                     alert('❌ Error al crear el video.\n\n💡 Asegúrate de:\n• Permitir captura de pantalla\n• Seleccionar esta pestaña\n• No minimizar la ventana durante la grabación');
@@ -378,7 +320,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 linkOutput.style.display = 'none';
             }, 1500);
             
-            console.log('[Main] Link generado exitosamente');
         });
     }
 
@@ -430,7 +371,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 animationManager.importAnimationData(data);
                 
                 alert('Animación importada correctamente.');
-                console.log('[Main] Animación importada desde archivo JSON');
                 
             } catch (err) {
                 alert('Error al importar animación: ' + err.message);
@@ -471,7 +411,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             animationManager.importAnimationData(data);
             
             setTimeout(() => alert('Animación cargada desde link compartido.'), 300);
-            console.log('[Main] Animación importada desde URL');
             
         } catch (err) {
             setTimeout(() => alert('Error al cargar animación desde link: ' + err.message), 300);
@@ -520,7 +459,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 // Actualizar título del botón
                 deleteLineBtn.title = 'Salir del modo borrar líneas';
-                console.log('[Main] 🔄 Modo eliminar líneas ACTIVADO');
             } else {
                 icon.classList.remove('fa-beat');
                 // Restaurar cursor normal
@@ -529,7 +467,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 // Restaurar título del botón
                 deleteLineBtn.title = 'Borrar línea específica';
-                console.log('[Main] ✅ Modo eliminar líneas DESACTIVADO');
             }
             
             // Notificar al DrawingManager
@@ -541,9 +478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sharePitchBtn = document.getElementById('share-pitch-btn');
     if (sharePitchBtn) {
         sharePitchBtn.addEventListener('click', async () => {
-            try {
-                console.log('[Main] Iniciando captura de imagen del campo...');
-                
+            try {          
                 const pitchContainer = document.getElementById('pitch-container');
                 const footballFieldCanvas = document.getElementById('football-field');
                 const drawingCanvasEl = document.getElementById('drawing-canvas');
@@ -561,7 +496,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Método 1: Usar html2canvas si está disponible (captura TODO incluyendo tokens)
                 if (typeof html2canvas !== 'undefined') {
-                    console.log('[Main] Usando html2canvas para captura completa...');
                     
                     resultCanvas = await html2canvas(pitchContainer, {
                         backgroundColor: null,
@@ -574,10 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             return element.classList?.contains('center-logo-watermark');
                         }
                     });
-                } else {
-                    // Método 2: Fallback manual combinando canvases
-                    console.log('[Main] html2canvas no disponible, usando método manual...');
-                    
+                } else {               
                     resultCanvas = document.createElement('canvas');
                     const ctx = resultCanvas.getContext('2d');
                     const dpr = window.devicePixelRatio || 1;
@@ -659,13 +590,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 title: 'Mi Táctica de Fútbol',
                                 text: 'Creada con Simulador Táctico'
                             });
-                            console.log('[Main] Imagen compartida exitosamente');
                         } else {
                             throw new Error('No se puede compartir archivos');
                         }
                     } catch (shareError) {
-                        // Si falla compartir, descargar
-                        console.log('[Main] Share API no disponible, descargando...');
                         downloadImage(blob);
                     }
                 } else {
@@ -682,11 +610,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    console.log('[Main] Imagen descargada exitosamente');
                 }
                 
             } catch (error) {
-                console.error('[Main] Error al compartir imagen:', error);
                 alert('Error al generar la imagen. Por favor, intenta de nuevo.');
             } finally {
                 // Restaurar botón
@@ -739,13 +665,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         footballFieldCanvas.height = canvasHeight;
         footballFieldCanvas.style.width = cssWidth + 'px';
         footballFieldCanvas.style.height = cssHeight + 'px';
-        
-        // NOTA: El drawing-canvas se sincroniza a través de drawingManager.resizeCanvas()
-        // que es llamado por el UIManager en el evento resize
-        // Ya no sincronizamos aquí para evitar conflictos con el contexto escalado
-        
-        // Escalar el contexto para que coincida con el ratio de píxeles
-        // IMPORTANTE: Limpiar transformaciones previas
         fieldCtx.setTransform(1, 0, 0, 1, 0, 0);
         fieldCtx.scale(dpr, dpr);
         
@@ -756,8 +675,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fallback al dibujo original si no está disponible el sistema de estilos
             drawFootballField(footballFieldCanvas, fieldCtx);
         }
-        
-        console.log(`main.js: Campo redibujado - Canvas: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, DPR: ${dpr}`);
     }
 
     // El UIManager ya tiene un listener para 'resize' que llama a drawingManager.resizeCanvas()
@@ -774,7 +691,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const delay = isMobile ? 100 : 250; // Menos delay en móviles para mejor responsividad
         
         resizeFieldTimeout = setTimeout(() => {
-            console.log('[Main] Redimensionando campo para:', isMobile ? 'MÓVIL' : 'ESCRITORIO');
             renderFootballField(); // Redibujar el fondo del campo
             // Sincronizar el canvas de dibujo después de redimensionar el campo
             if (drawingManager) {
@@ -789,7 +705,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isMobile) {
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
-                console.log('[Main] Cambio de orientación detectado');
                 handleResize();
             }, 300); // Pequeño delay para que la orientación termine de cambiar
         });
@@ -877,7 +792,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Hacer disponible globalmente para debugging y acceso desde otros módulos
         window.tutorialManager = tutorialManager;
-        console.log('[Main] 🎓 Tutorial Manager inicializado');
     }, 100);
 
     // --- FULLSCREEN MANAGER ---
@@ -887,32 +801,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Hacer disponible globalmente para debugging y acceso desde otros módulos
     window.fullscreenManager = fullscreenManager;
     window.modeManager = modeManager; // También hacer disponible el modeManager
-    
-    // NUEVA: Función de debugging simplificada
-    window.debugCanvasState = function() {
-        console.log('=== DEBUGGING CANVAS STATE ===');
-        console.log('Drawing Manager:', {
-            enabled: drawingManager.enabled,
-            deleteLineMode: drawingManager.deleteLineMode,
-            lines: drawingManager.lines?.length || 0,
-            canvasSize: `${drawingManager.canvas.width}x${drawingManager.canvas.height}`,
-            canvasStyle: `${drawingManager.canvas.style.width} x ${drawingManager.canvas.style.height}`,
-            pointerEvents: drawingManager.canvas.style.pointerEvents
-        });
-        console.log('Ball Drawing Manager:', {
-            enabled: ballDrawingManager.enabled,
-            ballPath: ballDrawingManager.ballPath?.length || 0,
-            canvasSize: `${ballDrawingManager.canvas.width}x${ballDrawingManager.canvas.height}`,
-            canvasStyle: `${ballDrawingManager.canvas.style.width} x ${ballDrawingManager.canvas.style.height}`,
-            pointerEvents: ballDrawingManager.canvas.style.pointerEvents
-        });
-        console.log('Mode Manager:', {
-            currentMode: modeManager.currentMode
-        });
-        console.log('===============================');
-    };
-    
-    console.log('[Main] 🖥️ Fullscreen Manager inicializado');
-    console.log('[Main] 🐛 Debug function available: window.debugCanvasState()');
-// Fin del bloque DOMContentLoaded
+ 
 });

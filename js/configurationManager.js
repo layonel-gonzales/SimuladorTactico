@@ -44,7 +44,6 @@ export default class ConfigurationManager {
         this.loadSettings();
         this.loadTeams();
         this.setupEventListeners();
-        console.log('[ConfigurationManager] Inicializado correctamente');
     }
 
     // === GESTIÓN DE CONFIGURACIONES ===
@@ -57,7 +56,6 @@ export default class ConfigurationManager {
                 // Combinar con configuraciones por defecto para agregar nuevas configuraciones
                 this.settings = { ...this.defaultSettings, ...parsed };
             }
-            console.log('[ConfigurationManager] Configuraciones cargadas:', this.settings);
         } catch (error) {
             console.error('[ConfigurationManager] Error cargando configuraciones:', error);
             this.settings = { ...this.defaultSettings };
@@ -67,7 +65,6 @@ export default class ConfigurationManager {
     saveSettings() {
         try {
             localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(this.settings));
-            console.log('[ConfigurationManager] Configuraciones guardadas');
         } catch (error) {
             console.error('[ConfigurationManager] Error guardando configuraciones:', error);
         }
@@ -87,7 +84,6 @@ export default class ConfigurationManager {
                 detail: { key, value, allSettings: this.settings }
             }));
             
-            console.log(`[ConfigurationManager] Configuración actualizada: ${key} = ${value}`);
             return true;
         }
         console.warn(`[ConfigurationManager] Configuración no válida: ${key}`);
@@ -103,8 +99,7 @@ export default class ConfigurationManager {
             document.dispatchEvent(new CustomEvent('settingsReset', {
                 detail: { settings: this.settings }
             }));
-            
-            console.log('[ConfigurationManager] Configuraciones restablecidas');
+
             return true;
         }
         return false;
@@ -122,7 +117,6 @@ export default class ConfigurationManager {
                     this.nextTeamId = maxId + 1;
                 }
             }
-            console.log('[ConfigurationManager] Equipos cargados:', this.customTeams.length);
         } catch (error) {
             console.error('[ConfigurationManager] Error cargando equipos:', error);
             this.customTeams = [];
@@ -132,7 +126,6 @@ export default class ConfigurationManager {
     saveTeams() {
         try {
             localStorage.setItem(this.TEAMS_KEY, JSON.stringify(this.customTeams));
-            console.log('[ConfigurationManager] Equipos guardados');
         } catch (error) {
             console.error('[ConfigurationManager] Error guardando equipos:', error);
         }
@@ -167,7 +160,6 @@ export default class ConfigurationManager {
             detail: { team: newTeam }
         }));
 
-        console.log('[ConfigurationManager] Equipo creado:', newTeam.name);
         return newTeam;
     }
 
@@ -199,7 +191,6 @@ export default class ConfigurationManager {
             detail: { team: updatedTeam }
         }));
 
-        console.log('[ConfigurationManager] Equipo actualizado:', updatedTeam.name);
         return updatedTeam;
     }
 
@@ -217,7 +208,6 @@ export default class ConfigurationManager {
             detail: { team: deletedTeam }
         }));
 
-        console.log('[ConfigurationManager] Equipo eliminado:', deletedTeam.name);
         return deletedTeam;
     }
 
@@ -304,8 +294,6 @@ export default class ConfigurationManager {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-
-        console.log('[ConfigurationManager] Configuración exportada');
     }
 
     async importConfiguration(file) {
@@ -350,7 +338,6 @@ export default class ConfigurationManager {
                 detail: { settings: this.settings, teams: this.customTeams }
             }));
 
-            console.log('[ConfigurationManager] Configuración importada');
             return { imported, settings: !!configData.settings, teams: configData.teams?.length || 0 };
 
         } catch (error) {
@@ -365,10 +352,8 @@ export default class ConfigurationManager {
         // Sincronización entre pestañas
         window.addEventListener('storage', (e) => {
             if (e.key === this.SETTINGS_KEY) {
-                console.log('[ConfigurationManager] Configuraciones actualizadas en otra pestaña');
                 this.loadSettings();
             } else if (e.key === this.TEAMS_KEY) {
-                console.log('[ConfigurationManager] Equipos actualizados en otra pestaña');
                 this.loadTeams();
             }
         });
@@ -400,14 +385,9 @@ export default class ConfigurationManager {
             this.settings = { ...this.defaultSettings };
             this.customTeams = [];
             this.nextTeamId = 1;
-            
             localStorage.removeItem(this.SETTINGS_KEY);
             localStorage.removeItem(this.TEAMS_KEY);
-            
-            // Emitir evento de limpieza
             document.dispatchEvent(new CustomEvent('configurationCleared'));
-            
-            console.log('[ConfigurationManager] Toda la configuración eliminada');
             return true;
         }
         return false;

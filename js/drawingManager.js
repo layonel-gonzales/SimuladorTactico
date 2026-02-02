@@ -56,9 +56,6 @@ export default class DrawingManager {
                 (window.innerWidth < 500 && window.devicePixelRatio > 1)
             );
                 
-            if (hasDevToolsSignals) {
-                console.log('[DrawingManager] 🔧 Device Toolbar detectado');
-            }
             return hasDevToolsSignals;
         } catch (e) {
             // Si hay error en la detección, asumir modo normal
@@ -70,10 +67,7 @@ export default class DrawingManager {
     init() {
         this.applyContextProperties();
         this.setupEventListeners();
-        // IMPORTANTE: Redimensionar canvas al inicializar para desktop
-        console.log('[DrawingManager] Estado inicial - líneas:', this.lines.length);
         this.resizeCanvas();
-        console.log('[DrawingManager] Inicializado correctamente - líneas finales:', this.lines.length);
     }
     
     // Aplica las propiedades actuales de la línea al contexto del canvas
@@ -85,12 +79,9 @@ export default class DrawingManager {
         this.ctx.lineJoin = 'round';
     }
     
-    setupEventListeners() {
-        console.log('[DrawingManager] Configurando event listeners en canvas:', this.canvas?.id);
-        
+    setupEventListeners() { 
         // Eventos de ratón
         this.canvas.addEventListener('mousedown', (e) => {
-            console.log('[DrawingManager] mousedown event triggered:', e.type, e.clientX, e.clientY);
             this.startDrawing(e);
         });
         this.canvas.addEventListener('mousemove', (e) => this.draw(e));
@@ -101,12 +92,10 @@ export default class DrawingManager {
         // Eventos táctiles para compatibilidad móvil
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            console.log('[DrawingManager] touchstart event triggered');
             const touch = e.touches[0];
             
             // CRÍTICO: Si estamos en modo eliminar, manejar como click para eliminar
             if (this.deleteLineMode) {
-                console.log('[DrawingManager] touchstart en modo eliminar - convirtiendo a click');
                 const clickEvent = new MouseEvent('click', {
                     clientX: touch.clientX,
                     clientY: touch.clientY,
@@ -144,20 +133,10 @@ export default class DrawingManager {
             e.preventDefault();
             this.stopDrawing();
         }, { passive: false });
-        
-        console.log('[DrawingManager] Event listeners configurados exitosamente');
     }
     
-    startDrawing(e) {
-        console.log('[DrawingManager] startDrawing llamado:', {
-            enabled: this.isEnabled(),
-            deleteMode: this.deleteLineMode,
-            eventType: e.type,
-            timestamp: Date.now()
-        });
-        
+    startDrawing(e) {      
         if (!this.isEnabled() || this.deleteLineMode) {
-            console.log('[DrawingManager] startDrawing cancelado - no habilitado o en modo borrar');
             return;
         }
         
@@ -180,8 +159,6 @@ export default class DrawingManager {
         // Empezar a dibujar
         this.ctx.beginPath();
         this.ctx.moveTo(pos.x, pos.y);
-        
-        console.log('[DrawingManager] Línea iniciada - Total líneas:', this.lines.length, 'Posición:', pos);
     }
     
     draw(e) {
@@ -223,33 +200,10 @@ export default class DrawingManager {
     // Obtiene las coordenadas del ratón relativas al canvas
     getMousePos(e) {
         const rect = this.canvas.getBoundingClientRect();
-        
-        // El canvas tiene dimensiones internas (width/height attributes) diferentes de las CSS
-        // El contexto está escalado por DPR, así que necesitamos coordenadas en "espacio CSS"
-        // que luego el contexto escalará automáticamente
-        
-        // Coordenadas simples: posición del mouse relativa al bounding rect del canvas
         const pos = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
-        
-        // DEBUG: Siempre mostrar en consola para diagnóstico
-        console.log('[DrawingManager] getMousePos:', {
-            clientX: e.clientX,
-            clientY: e.clientY,
-            rectLeft: rect.left,
-            rectTop: rect.top,
-            rectWidth: rect.width,
-            rectHeight: rect.height,
-            canvasWidth: this.canvas.width,
-            canvasHeight: this.canvas.height,
-            cssWidth: this.canvas.style.width,
-            cssHeight: this.canvas.style.height,
-            posX: pos.x,
-            posY: pos.y,
-            dpr: window.devicePixelRatio
-        });
         
         return pos;
     }
@@ -293,19 +247,16 @@ export default class DrawingManager {
     redrawLines() {
         if (!this.lines || this.lines.length === 0) {
             this.clearCanvas(); // Solo limpiar el canvas si no hay líneas
-            console.log('[DrawingManager] No hay líneas para redibujar');
             return;
         }
         
         this.clearCanvas();
         this.drawStoredLines();
-        console.log('[DrawingManager] Redibujando', this.lines.length, 'líneas');
     }
     
     // Dibuja solo las líneas sin limpiar el canvas (para uso externo)
     drawStoredLines() {
         if (!this.lines || this.lines.length === 0) {
-            console.log('[DrawingManager] No hay líneas almacenadas para dibujar');
             return;
         }
         
@@ -372,7 +323,6 @@ export default class DrawingManager {
             const undoneLine = this.lines.pop();
             this.undoStack.push(undoneLine);
             this.redrawLines();
-            console.log('DrawingManager: Línea deshecha (con balón)');
         }
     }
     
@@ -382,7 +332,6 @@ export default class DrawingManager {
             const redoneLine = this.undoStack.pop();
             this.lines.push(redoneLine);
             this.redrawLines();
-            console.log('DrawingManager: Línea rehecha (con balón)');
         }
     }
     
@@ -398,45 +347,23 @@ export default class DrawingManager {
             // Fallback: limpiar canvas directamente
             this.clearCanvas();
         }
-        
-        console.log('DrawingManager: Todas las líneas y balones borrados (incluyendo estelas)');
     }
     
     // Activa/desactiva el modo de borrar línea
     setDeleteLineMode(isActive) {
         this.deleteLineMode = isActive;
-        // Ya no cambiar el cursor aquí, se maneja en main.js con CSS
-        console.log('[DrawingManager] Modo eliminar línea:', isActive ? 'ACTIVADO' : 'DESACTIVADO');
     }
     
     // Maneja el click en el canvas (para borrar líneas)
-    handleCanvasClick(e) {
-        console.log('[DrawingManager] 🎯 handleCanvasClick disparado:', {
-            enabled: this.isEnabled(),
-            deleteMode: this.deleteLineMode,
-            eventType: e.type,
-            target: e.target?.id,
-            emulation: this.isDeviceEmulation,
-            canvasPointerEvents: this.canvas.style.pointerEvents,
-            timestamp: Date.now()
-        });
-        
+    handleCanvasClick(e) {     
         if (!this.isEnabled() || !this.deleteLineMode) {
-            console.log('[DrawingManager] ❌ Click ignorado - no habilitado o no en modo borrar');
             return;
         }
         
         const pos = this.getMousePos(e);
         let lineDeleted = false;
         let deletedLineIndex = -1;
-        
-        console.log('[DrawingManager] Buscando línea para eliminar en posición:', pos);
-        console.log('[DrawingManager] Estado del canvas:', {
-            rect: this.canvas.getBoundingClientRect(),
-            computedStyle: getComputedStyle(this.canvas),
-            classList: Array.from(this.canvas.classList)
-        });
-        
+
         // Buscar la línea más cercana al punto de click (incluyendo el balón)
         for (let i = this.lines.length - 1; i >= 0; i--) {
             const line = this.lines[i];
@@ -445,17 +372,14 @@ export default class DrawingManager {
             const ballTolerance = this.isDeviceEmulation ? this.ballSize * 2.5 : this.ballSize * 1.5;
             const lineTolerance = this.isDeviceEmulation ? line.properties.width + 25 : line.properties.width + 12;
             
-            console.log(`[DrawingManager] Verificando línea ${i}, tolerancias AMPLIADAS: balón=${ballTolerance}, línea=${lineTolerance}`);
-            
             // Verificar si se hizo click en el balón con tolerancia ampliada
             if (line.ballPosition) {
                 const ballDistance = Math.hypot(line.ballPosition.x - pos.x, line.ballPosition.y - pos.y);
-                console.log(`[DrawingManager] Distancia al balón: ${ballDistance} (tolerancia ampliada: ${ballTolerance})`);
+
                 if (ballDistance < ballTolerance) {
                     this.lines.splice(i, 1);
                     lineDeleted = true;
                     deletedLineIndex = i;
-                    console.log(`[DrawingManager] ✅ Línea eliminada por click en balón (tolerancia ampliada)`);
                     break;
                 }
             }
@@ -471,7 +395,6 @@ export default class DrawingManager {
                     
                     // Calcular distancia del punto click al segmento de línea
                     const segmentDistance = this.distanceToLineSegment(pos, p1, p2);
-                    console.log(`[DrawingManager] Distancia al segmento ${j}: ${segmentDistance} (tolerancia: ${lineTolerance})`);
                     
                     if (segmentDistance < lineTolerance) {
                         foundNearSegment = true;
@@ -483,7 +406,6 @@ export default class DrawingManager {
                     this.lines.splice(i, 1);
                     lineDeleted = true;
                     deletedLineIndex = i;
-                    console.log(`[DrawingManager] ✅ Línea eliminada por click cerca de segmento`);
                     break;
                 }
             }
@@ -492,17 +414,10 @@ export default class DrawingManager {
         }
         
         if (lineDeleted) {
-            // CRÍTICO: Limpiar la pila de rehacer para prevenir que las líneas borradas reaparezcan
             this.undoStack = [];
             this.redrawLines();
-            console.log(`[DrawingManager] ✂️ Línea #${deletedLineIndex} eliminada (pila de rehacer limpiada)`);
-            
-            // Mostrar feedback visual temporal
             this.showDeleteFeedback(pos);
         } else {
-            console.log('[DrawingManager] ❌ No se encontró línea para eliminar en esa posición');
-            console.log(`[DrawingManager] Total líneas disponibles: ${this.lines.length}`);
-            // Mostrar feedback de que no se encontró nada
             this.showNoDeleteFeedback(pos);
         }
     }
@@ -586,8 +501,6 @@ export default class DrawingManager {
         }
         
         this.applyContextProperties();
-        
-        console.log(`[DrawingManager] resizeCanvas - CSS: ${Math.round(cssWidth)}x${Math.round(cssHeight)}, Canvas interno: ${this.canvas.width}x${this.canvas.height}, DPR: ${dpr}`);
     }
 
     // Método para habilitar/deshabilitar el dibujo de líneas
@@ -595,14 +508,9 @@ export default class DrawingManager {
         this.enabled = enabled;
         
         if (!enabled) {
-            // Si se deshabilita, detener cualquier dibujo en progreso
             this.isDrawing = false;
-            // NO resetear deleteLineMode aquí - preservar el estado
-            // this.deleteLineMode = false; // ELIMINADO: Esto causaba que se perdiera el estado
         } else {
-            // Cuando se reactiva, restaurar el cursor apropiado
             if (this.deleteLineMode) {
-                // Si el modo eliminar está activo, asegurar que el canvas tenga el cursor correcto
                 this.canvas.classList.add('scissors-cursor-simple');
             }
         }
@@ -616,8 +524,6 @@ export default class DrawingManager {
         } else if (!enabled) {
             this.canvas.style.cursor = 'not-allowed';
         }
-        
-        console.log('DrawingManager: Habilitado:', enabled, '- Delete mode preservado:', this.deleteLineMode);
     }
     
     // Verificar si está habilitado antes de procesar eventos
@@ -627,31 +533,7 @@ export default class DrawingManager {
     
     // Función de debug para Device Toolbar
     debugDeviceToolbar() {
-        console.group('🔧 DEBUG DEVICE TOOLBAR');
-        console.log('Estado actual:', {
-            isDeviceEmulation: this.isDeviceEmulation,
-            deleteLineMode: this.deleteLineMode,
-            enabled: this.isEnabled(),
-            canvasId: this.canvas?.id,
-            linesCount: this.lines?.length || 0
-        });
-        console.log('Propiedades del navegador:', {
-            userAgent: navigator.userAgent,
-            touchStart: 'ontouchstart' in window,
-            devicePixelRatio: window.devicePixelRatio,
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight
-        });
-        console.log('Canvas estado:', {
-            pointerEvents: this.canvas.style.pointerEvents,
-            cursor: this.canvas.style.cursor,
-            classList: Array.from(this.canvas.classList),
-            rect: this.canvas.getBoundingClientRect()
-        });
-        console.log('Re-detectando emulación...');
         this.isDeviceEmulation = this.detectDeviceEmulation();
-        console.log('Nueva detección:', this.isDeviceEmulation);
-        console.groupEnd();
         
         return {
             isDeviceEmulation: this.isDeviceEmulation,

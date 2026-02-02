@@ -13,7 +13,6 @@ export default class CustomPlayersUI {
     init() {
         this.setupEventListeners();
         this.setupFormValidation();
-        console.log('[CustomPlayersUI] Inicializado correctamente');
     }
 
     setupEventListeners() {
@@ -21,8 +20,6 @@ export default class CustomPlayersUI {
         const customPlayersBtn = document.getElementById('custom-players-btn');
         if (customPlayersBtn) {
             customPlayersBtn.addEventListener('click', () => {
-                console.log('[CustomPlayersUI][DEBUG] Click en BOTÓN VERDE - Jugadores Personalizados.');
-                console.log('[CustomPlayersUI][DEBUG] Llamando a openCustomPlayersModal...');
                 this.openCustomPlayersModal();
             });
         }
@@ -145,19 +142,12 @@ export default class CustomPlayersUI {
         });
     }
 
-    openCustomPlayersModal() {
-        console.log('[CustomPlayersUI][DEBUG] Ejecutando openCustomPlayersModal...');
-        console.log('[CustomPlayersUI][DEBUG] Buscando modal custom-players-modal...');
-        
+    openCustomPlayersModal() {       
         const modalElement = document.getElementById('custom-players-modal');
-        console.log('[CustomPlayersUI][DEBUG] Modal element encontrado:', !!modalElement);
-        
+
         if (modalElement) {
             const modal = new bootstrap.Modal(modalElement);
-            console.log('[CustomPlayersUI][DEBUG] Bootstrap Modal creado, mostrando...');
             modal.show();
-            console.log('[CustomPlayersUI][DEBUG] Modal custom-players-modal mostrado.');
-            
             // Actualizar listas al abrir
             this.refreshCustomPlayersList();
             this.updateCalculatedOverall();
@@ -191,8 +181,6 @@ export default class CustomPlayersUI {
             if (this.playerManager && document.getElementById('squad-selection-modal').classList.contains('show')) {
                 this.playerManager.renderPlayerSelectionList();
             }
-
-            console.log('[CustomPlayersUI] Jugador agregado:', newPlayer.name);
             
         } catch (error) {
             console.error('[CustomPlayersUI] Error agregando jugador:', error);
@@ -246,10 +234,6 @@ export default class CustomPlayersUI {
             
             // Mostrar información de la imagen original
             const imageInfo = await this.customPlayersManager.getImageInfo(file);
-            console.log(`[CustomPlayersUI] Procesando imagen: ${imageInfo.name}`);
-            console.log(`- Dimensiones originales: ${imageInfo.width}x${imageInfo.height}px`);
-            console.log(`- Tamaño original: ${(imageInfo.size/1024).toFixed(1)}KB`);
-            console.log(`- Tipo original: ${imageInfo.type}`);
             
             // Procesar imagen
             const base64 = await this.customPlayersManager.handlePlayerPhotoUpload(file);
@@ -257,10 +241,6 @@ export default class CustomPlayersUI {
             // Calcular tamaño procesado y determinar formato final
             const processedSize = (base64.length * 3/4) / 1024;
             const finalFormat = base64.startsWith('data:image/png') ? 'PNG (con transparencia)' : 'JPEG (sin transparencia)';
-            
-            console.log(`- Formato final: ${finalFormat}`);
-            console.log(`- Tamaño optimizado: ${processedSize.toFixed(1)}KB`);
-            console.log(`- Reducción: ${(((imageInfo.size/1024) - processedSize) / (imageInfo.size/1024) * 100).toFixed(1)}%`);
             
             // Mostrar imagen optimizada
             previewImg.src = base64;

@@ -28,7 +28,6 @@ class CardStyleManager {
         this.loadSavedStyle();
         
         const stats = window.styleRegistry.getStats();
-        console.log(`✅ CardStyleManager inicializado: ${stats.cardStyles} estilos disponibles`);
         
         // Emitir evento de que está listo
         window.dispatchEvent(new CustomEvent('cardStyleManagerReady'));
@@ -74,8 +73,6 @@ class CardStyleManager {
 
         this.currentStyle = styleId;
         this.saveCurrentStyle();
-        
-        console.log(`🎴 Estilo de cards cambiado a: ${style.name}`);
         
         // Actualizar todas las cards existentes
         this.updateAllCards();
@@ -146,8 +143,6 @@ class CardStyleManager {
                 }
             }
         });
-
-        console.log(`🔄 ${playerTokens.length} cards actualizadas al estilo: ${this.currentStyle}`);
     }
 
     /**
@@ -169,7 +164,6 @@ class CardStyleManager {
             const saved = localStorage.getItem('cardStyle');
             if (saved && window.styleRegistry?.getCardStyle(saved)) {
                 this.currentStyle = saved;
-                console.log(`📂 Estilo de cards cargado: ${saved}`);
             }
         } catch (error) {
             console.warn('⚠️ No se pudo cargar el estilo guardado:', error);
@@ -219,4 +213,3 @@ class CardStyleManager {
 
 // Crear instancia global
 window.cardStyleManager = new CardStyleManager();
-console.log('✅ CardStyleManager disponible globalmente');

@@ -171,7 +171,6 @@ class FreemiumTutorial {
     
     init() {
         this.addTutorialStyles();
-        // console.log('[FreemiumTutorial] Configuración cargada');
     }
     
     addTutorialStyles() {
@@ -409,5 +408,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
 });
-
-console.log('[FreemiumTutorial] ✅ Módulo cargado correctamente');

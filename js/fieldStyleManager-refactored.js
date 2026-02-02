@@ -30,9 +30,6 @@ class FieldStyleManager {
         this.loadSavedStyle();
         
         const stats = window.styleRegistry.getStats();
-        console.log(`✅ FieldStyleManager inicializado: ${stats.fieldStyles} estilos disponibles`);
-        
-        // Emitir evento de que está listo
         window.dispatchEvent(new CustomEvent('fieldStyleManagerReady'));
     }
 
@@ -76,8 +73,6 @@ class FieldStyleManager {
 
         this.currentStyle = styleId;
         this.saveCurrentStyle();
-        
-        console.log(`🎨 Estilo de cancha cambiado a: ${style.name}`);
         
         // Redibujar la cancha inmediatamente
         this.redrawField();
@@ -154,7 +149,6 @@ class FieldStyleManager {
         this.drawField(canvas, ctx);
         
         const style = window.styleRegistry?.getFieldStyle(this.currentStyle);
-        console.log(`🎨 Campo redibujado: ${style?.name || this.currentStyle}`);
     }
 
     /**
@@ -176,7 +170,6 @@ class FieldStyleManager {
             const saved = localStorage.getItem('fieldStyle');
             if (saved && window.styleRegistry?.getFieldStyle(saved)) {
                 this.currentStyle = saved;
-                console.log(`📂 Estilo de cancha cargado: ${saved}`);
             }
         } catch (error) {
             console.warn('⚠️ No se pudo cargar el estilo guardado:', error);
@@ -226,4 +219,3 @@ class FieldStyleManager {
 
 // Crear instancia global
 window.fieldStyleManager = new FieldStyleManager();
-console.log('✅ FieldStyleManager disponible globalmente');
