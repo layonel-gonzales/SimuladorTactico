@@ -17,7 +17,6 @@ export default class OrientationManager {
         
         this.checkOrientation();
         this.setupEventListeners();
-        console.log('OrientationManager: Inicializado correctamente');
     }
     
     setupEventListeners() {
@@ -52,13 +51,6 @@ export default class OrientationManager {
         } else if (!shouldShow && this.isVisible) {
             this.hideMessage();
         }
-        
-        console.log('[OrientationManager] Estado:', {
-            isMobile,
-            isPortrait,
-            shouldShow,
-            isVisible: this.isVisible
-        });
     }
     
     isMobileDevice() {
@@ -91,7 +83,6 @@ export default class OrientationManager {
         if (navigator.vibrate) {
             navigator.vibrate([200, 100, 200]);
         }
-        console.log('[OrientationManager] Mensaje de orientación mostrado');
     }
 
     hideMessage() {
@@ -99,7 +90,6 @@ export default class OrientationManager {
         this.orientationMessage.style.display = 'none';
         this.isVisible = false;
         document.body.classList.remove('orientation-locked');
-        console.log('[OrientationManager] Mensaje de orientación oculto');
     }
     
     // Método público para forzar verificación

@@ -31,7 +31,6 @@ class PWAIntegration {
      */
     async init() {
         try {
-            // console.log('🔄 Iniciando integración PWA...');
             
             // Crear elementos de interfaz PWA
             await this.createPWAElements();
@@ -53,7 +52,6 @@ class PWAIntegration {
             this.setupFileHandling();
             
             this.isInitialized = true;
-            console.log('✅ PWA Integration: Completada correctamente');
             
         } catch (error) {
             console.error('❌ Error en integración PWA:', error);

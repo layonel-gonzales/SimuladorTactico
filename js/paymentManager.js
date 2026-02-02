@@ -41,9 +41,7 @@ class PaymentManager {
     }
 
     async init() {
-        try {
-            console.log(`[PaymentManager] 🚀 Inicializando en modo: ${this.isTestMode ? '🧪 TEST' : '🔴 PRODUCCIÓN'}`);
-            
+        try {    
             // Cargar Stripe.js dinámicamente
             await this.loadStripe();
             
@@ -58,8 +56,6 @@ class PaymentManager {
             if (this.isTestMode) {
                 this.showTestModeIndicator();
             }
-            
-            console.log('[PaymentManager] ✅ Inicializado correctamente');
             
         } catch (error) {
             console.error('[PaymentManager] ❌ Error en inicialización:', error);
@@ -82,8 +78,6 @@ class PaymentManager {
             // Inicializar Stripe con la clave correcta
             const stripeKey = this.isTestMode ? this.config.publicKeys.test : this.config.publicKeys.live;
             this.stripe = Stripe(stripeKey);
-            
-            console.log(`[PaymentManager] ✅ Stripe inicializado en modo ${this.isTestMode ? 'TEST' : 'PRODUCCIÓN'}`);
             
         } catch (error) {
             console.error('[PaymentManager] ❌ Error cargando Stripe:', error);
@@ -243,10 +237,6 @@ class PaymentManager {
         }
         
         try {
-            // En un entorno real, esto haría una llamada a tu backend
-            console.log('💳 Iniciando pago para plan:', plan.name);
-            
-            // Simular proceso de pago exitoso para desarrollo
             setTimeout(() => {
                 this.handlePaymentSuccess(planType);
             }, 2000);
@@ -260,8 +250,6 @@ class PaymentManager {
     handlePaymentSuccess(planType) {
         this.currentPlan = this.plans[planType];
         localStorage.setItem('userPlan', JSON.stringify(this.currentPlan));
-        
-        console.log('💳 Pago exitoso! Plan actual:', this.currentPlan.name);
         
         // Mostrar mensaje de éxito
         this.showSuccessMessage();
@@ -357,15 +345,12 @@ class PaymentManager {
     
     setupPaymentElements() {
         try {
-            // console.log('[PaymentManager] 🔧 Configurando elementos de pago...');
             
             // Crear botones de upgrade si no existen
             this.createUpgradeButtons();
             
             // Configurar eventos
             this.setupPaymentEvents();
-            
-            // console.log('[PaymentManager] ✅ Elementos de pago configurados');
             
         } catch (error) {
             console.error('[PaymentManager] ❌ Error configurando elementos:', error);

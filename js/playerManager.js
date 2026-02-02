@@ -105,7 +105,6 @@ export default class PlayerManager {
     }
     
     renderPlayerSelectionList() {
-        console.log('[PlayerManager] Renderizando lista de selección de jugadores...');
         
         const container = document.getElementById('squad-player-list');
         if (!container) {
@@ -117,7 +116,6 @@ export default class PlayerManager {
         
         // Obtener todos los jugadores (estáticos + personalizados) con filtros aplicados
         const allPlayers = this.getAllPlayers();
-        console.log(`[PlayerManager] Jugadores después de filtros: ${allPlayers.length}`);
         
         // Agrupar por posición
         const byPosition = {
@@ -202,30 +200,20 @@ export default class PlayerManager {
     }
     
     getPlayerById(id) {
-        console.log(`[PlayerManager] Buscando jugador con ID: ${id} (tipo: ${typeof id})`);
         
         // Buscar primero en jugadores personalizados, luego en estáticos
         if (this.customPlayersManager) {
             const customPlayer = this.customPlayersManager.getPlayerById(id, this.players);
             if (customPlayer) {
-                console.log(`[PlayerManager] Jugador encontrado en personalizados:`, customPlayer.name);
                 return customPlayer;
             }
         }
         
         const staticPlayer = this.players.find(player => {
             const match = player.id === id || player.id === String(id) || player.id === Number(id);
-            if (match) {
-                console.log(`[PlayerManager] Jugador encontrado en estáticos:`, player.name);
-            }
             return match;
         });
-        
-        if (!staticPlayer) {
-            console.warn(`[PlayerManager] Jugador con ID ${id} NO encontrado`);
-            console.log(`[PlayerManager] IDs disponibles:`, this.players.slice(0, 5).map(p => `${p.id} (${typeof p.id})`));
-        }
-        
+               
         return staticPlayer;
     }
 

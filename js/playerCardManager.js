@@ -39,7 +39,6 @@ class PlayerCardManager {
      * Inicializa el gestor de cards
      */
     init() {
-        console.log('🎴 PlayerCardManager iniciado');
         this.setupCardObserver();
         this.initializeStyleManager();
     }
@@ -52,8 +51,6 @@ class PlayerCardManager {
             // Buscar el sistema de estilos en el objeto global window
             if (window.cardStyleManager && typeof window.cardStyleManager === 'object') {
                 this.useStyleManager = true;
-                // El CardStyleManager ya se inicializa en su constructor, no necesita .init()
-                console.log('🎨 Sistema de estilos de cards activado');
                 
                 // Escuchar cambios de estilo para regenerar cards existentes
                 window.addEventListener('cardStyleChanged', (event) => {
@@ -75,10 +72,7 @@ class PlayerCardManager {
      * @param {Object} options - Opciones adicionales
      * @returns {HTMLElement} Elemento DOM de la card
      */
-    createPlayerCard(player, type = 'field', options = {}) {
-        console.log(`[PlayerCardManager][DEBUG] Creando tarjeta para jugador:`, player);
-        console.log(`[PlayerCardManager][DEBUG] Tipo: ${type}, ID del jugador: ${player.id}`);
-        
+    createPlayerCard(player, type = 'field', options = {}) {   
         const screenType = this.detectScreenType();
         const timestamp = Date.now();
         const cardId = `${type}-card-${player.id}-${screenType}-${timestamp}`;
@@ -92,17 +86,10 @@ class PlayerCardManager {
         cardElement.dataset.screenType = screenType;
         cardElement.dataset.createdAt = timestamp;
         
-        console.log(`[PlayerCardManager][DEBUG] Elemento creado con ID: ${player.id}`);
-        console.log(`[PlayerCardManager][DEBUG] Clase inicial: ${cardElement.className}`);
-        console.log(`[PlayerCardManager][DEBUG] Dataset playerId: ${cardElement.dataset.playerId}`);
-        
         // Agregar atributos de accesibilidad
         cardElement.setAttribute('role', 'button');
         cardElement.setAttribute('aria-label', `Jugador ${player.name} - ${screenType}`);
         cardElement.setAttribute('tabindex', '0');
-        
-        // USAR SIEMPRE EL SISTEMA CLÁSICO (más confiable)
-        console.log(`[PlayerCardManager][DEBUG] Usando sistema clásico para crear estructura HTML`);
         
         const playerName = player.name || `Jugador ${player.number || '?'}`;
         const playerPosition = player.position || 'N/A';
@@ -166,9 +153,6 @@ class PlayerCardManager {
             `;
         }
         
-        console.log(`[PlayerCardManager][DEBUG] HTML generado:`, cardElement.innerHTML.substring(0, 200) + '...');
-        console.log(`[PlayerCardManager][DEBUG] Card creada final:`, cardElement);
-        
         // Registrar la card
         this.registerCard(cardId, {
             element: cardElement,
@@ -206,7 +190,6 @@ class PlayerCardManager {
                 };
                 
                 const styledCard = window.cardStyleManager.createStyledCard(playerData, type, cardId, screenType);
-                console.log(`🎨 Card creada con estilo: ${window.cardStyleManager.getCurrentStyle().name}`);
                 return styledCard;
             } catch (error) {
                 console.warn('⚠️ Error con sistema de estilos, usando clásico:', error);
@@ -318,8 +301,6 @@ class PlayerCardManager {
         };
         
         this.cardElements.set(cardId, elements);
-        
-        console.log(`🎴 Card registrada: ${cardId}`, cardData);
     }
     
     /**
@@ -397,7 +378,6 @@ class PlayerCardManager {
                 break;
         }
         
-        console.log(`🔄 Actualizado ${elementType} en card ${cardId}:`, value);
     }
     
     /**
@@ -429,8 +409,6 @@ class PlayerCardManager {
                 this.updateCardElement(cardId, 'overall', newOverall);
             }
         });
-        
-        console.log(`🔄 Jugador ${playerId} actualizado en ${playerCards.length} cards`);
     }
     
     /**
@@ -465,8 +443,6 @@ class PlayerCardManager {
         for (const [cardId, cardData] of this.cardInstances) {
             this.applyGlobalConfig(cardData.element);
         }
-        
-        console.log('🔧 Configuración global actualizada:', this.globalConfig);
     }
     
     /**
@@ -481,8 +457,6 @@ class PlayerCardManager {
         
         this.cardInstances.delete(cardId);
         this.cardElements.delete(cardId);
-        
-        console.log(`🗑️ Card removida: ${cardId}`);
     }
     
     /**
@@ -597,8 +571,6 @@ class PlayerCardManager {
     onStyleChanged(styleData) {
         if (!this.useStyleManager) return;
         
-        console.log(`🎨 Cambiando estilo de cards a: ${styleData.style.name}`);
-        
         // Regenerar todas las cards existentes con el nuevo estilo
         for (const [cardId, cardData] of this.cardInstances) {
             this.refreshCardStyle(cardId, cardData);
@@ -633,7 +605,6 @@ class PlayerCardManager {
             // Actualizar cache de elementos
             this.updateElementCache(cardId, cardData.element);
             
-            console.log(`🎨 Card ${cardId} actualizada con nuevo estilo`);
         } catch (error) {
             console.warn(`⚠️ Error actualizando estilo de card ${cardId}:`, error);
         }

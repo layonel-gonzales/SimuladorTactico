@@ -49,7 +49,6 @@ class ThemeManager {
         // Escuchar cambios en la preferencia del sistema
         this.listenToSystemPreference();
         
-        console.log('✅ ThemeManager inicializado correctamente');
     }
     
     /**
@@ -98,8 +97,6 @@ class ThemeManager {
         window.dispatchEvent(new CustomEvent('themeChanged', {
             detail: { theme: theme }
         }));
-        
-        console.log(`🎨 Tema aplicado: ${theme}`);
     }
     
     /**

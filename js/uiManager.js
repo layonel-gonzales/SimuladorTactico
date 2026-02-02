@@ -17,7 +17,6 @@ export default class UIManager {
         this.setupCursors();
         this.updateModeIndicator();
         this.setupResizeListener(); // Configura el listener de redimensionamiento
-        console.log('UIManager: Inicialización completa.');
     }
 
     /**
@@ -75,7 +74,6 @@ export default class UIManager {
     }
 
     setupEventListeners() {
-        console.log('UIManager: Configurando Event Listeners...');
 
         // --- Eventos principales de la aplicación ---
 
@@ -83,11 +81,8 @@ export default class UIManager {
         const globalSelectSquadBtn = document.getElementById('global-select-squad-btn');
         if (globalSelectSquadBtn) {
             globalSelectSquadBtn.addEventListener('click', () => {
-                console.log('[UIManager][DEBUG] Click en BOTÓN AZUL - Seleccionar Plantilla (botón global).');
-                console.log('[UIManager][DEBUG] Abriendo modal squad-selection-modal...');
                 const modal = new bootstrap.Modal(document.getElementById('squad-selection-modal'));
                 modal.show();
-                console.log('[UIManager][DEBUG] Modal squad-selection-modal mostrado.');
             });
         } else {
             console.warn('UIManager: Botón global de plantilla #global-select-squad-btn no encontrado.');
@@ -97,7 +92,6 @@ export default class UIManager {
         const selectSquadBtn = document.getElementById('select-squad-btn');
         if (selectSquadBtn) {
             selectSquadBtn.addEventListener('click', () => {
-                console.log('UIManager: Click en Seleccionar Plantilla (botón legacy).');
                 const modal = new bootstrap.Modal(document.getElementById('squad-selection-modal'));
                 modal.show();
             });
@@ -106,31 +100,18 @@ export default class UIManager {
         const confirmSquadBtn = document.getElementById('confirm-squad-btn');
         if (confirmSquadBtn) {
             confirmSquadBtn.addEventListener('click', () => {
-                console.log('UIManager: Click en Confirmar Plantilla.');
                 const selectedPlayers = this.getSelectedPlayers();
-
-                // NUEVA LÓGICA: Mantener persistencia en lugar de reemplazar
-                console.log('UIManager: Jugadores seleccionados en modal:', selectedPlayers);
-                console.log('UIManager: Jugadores actualmente en campo:', this.state.activePlayers.map(p => p && p.id ? p.id : 'ID inválido'));
-
                 // Filtrar para no más de 11 jugadores
                 const playersToActivate = selectedPlayers.slice(0, 11);
 
                 // Mapear los IDs seleccionados a objetos de jugador
-                console.log('[DEBUG] Mapeando jugadores - IDs a buscar:', playersToActivate);
                 this.state.activePlayers = playersToActivate.map(id => {
                     const player = this.playerManager.getPlayerById(id);
-                    console.log(`[DEBUG] Buscando jugador ID ${id} (${typeof id}):`, player ? player.name : 'NO ENCONTRADO');
                     return player;
                 }).filter(player => player !== null && player !== undefined); // Filtrar nulls y undefined
 
-                console.log('[DEBUG] Jugadores mapeados exitosamente:', this.state.activePlayers.map(p => ({ id: p.id, name: p.name })));
-
-                console.log('UIManager: Nuevos jugadores activos:', this.state.activePlayers.map(p => p && p.name ? p.name : 'Jugador sin nombre'));
-
                 // Verificar si hay una animación pendiente de importar
                 if (window.pendingAnimationData) {
-                    console.log('UIManager: Importando animación pendiente...');
                     const data = window.pendingAnimationData;
                     
                     // Primero cargar los jugadores seleccionados
@@ -183,7 +164,6 @@ export default class UIManager {
         const clearCanvasBtn = document.getElementById('clear-canvas');
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', () => {
-                console.log('UIManager: Click en Borrar Dibujo.');
                 
                 // Confirmar acción crítica si está habilitado
                 const shouldProceed = window.confirmCriticalAction && 
@@ -221,7 +201,6 @@ export default class UIManager {
         const squadSelectionModal = document.getElementById('squad-selection-modal');
         if (squadSelectionModal) {
             squadSelectionModal.addEventListener('shown.bs.modal', () => {
-                console.log('UIManager: Modal de selección de jugadores abierto - Actualizando lista...');
                 // Actualizar la lista de jugadores con filtros aplicados
                 if (this.playerManager && typeof this.playerManager.renderPlayerSelectionList === 'function') {
                     this.playerManager.renderPlayerSelectionList();
@@ -244,7 +223,6 @@ export default class UIManager {
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                console.log('UIManager: Ventana redimensionada. Reposicionando jugadores...');
                 this.repositionPlayersOnPitch(); // Reposiciona los jugadores existentes
                 this.drawingManager.resizeCanvas(); // También redimensionar el canvas de dibujo
             }, 250); // Espera 250ms después de que el redimensionamiento se detenga
@@ -295,21 +273,12 @@ export default class UIManager {
 
     getSelectedPlayers() {
         const selected = [];
-        document.querySelectorAll('.squad-player-item.selected').forEach(item => {
-            console.log('[DEBUG] Item completo:', item);
-            console.log('[DEBUG] item.dataset:', item.dataset);
-            console.log('[DEBUG] Todas las data attributes:', Object.keys(item.dataset));
-            
-            const playerId = item.dataset.playerId;
-            console.log('[DEBUG] Item seleccionado - dataset.playerId:', playerId, 'tipo:', typeof playerId);
-            
+        document.querySelectorAll('.squad-player-item.selected').forEach(item => {          
+            const playerId = item.dataset.playerId;        
             // También verificar el atributo directo
-            const playerIdAttr = item.getAttribute('data-player-id');
-            console.log('[DEBUG] getAttribute data-player-id:', playerIdAttr);
-            
+            const playerIdAttr = item.getAttribute('data-player-id');         
             // Usar el que esté disponible
             const finalId = playerId || playerIdAttr;
-            console.log('[DEBUG] ID final a usar:', finalId);
             
             if (finalId) {
                 // Convertir a número si es necesario
@@ -317,14 +286,11 @@ export default class UIManager {
                 selected.push(id);
             }
         });
-        console.log('[DEBUG] IDs seleccionados final:', selected);
         return selected;
     }
 
     // NUEVA FUNCIÓN: Preseleccionar jugadores que ya están en el campo
-    preselectActivePlayersInModal() {
-        console.log('UIManager: Preseleccionando jugadores activos en el modal...');
-        
+    preselectActivePlayersInModal() {   
         // Primero, desseleccionar todos los jugadores
         document.querySelectorAll('.squad-player-item').forEach(item => {
             item.classList.remove('selected');
@@ -334,15 +300,12 @@ export default class UIManager {
         const activePlayerIds = this.state.activePlayers
             .filter(player => player && !player.isBall && player.id !== 'ball') // Excluir el balón
             .map(player => player.id);
-            
-        console.log('UIManager: Jugadores activos a preseleccionar:', activePlayerIds);
         
         // Marcar como seleccionados los jugadores que están en el campo
         activePlayerIds.forEach(playerId => {
             const playerItem = document.querySelector(`.squad-player-item[data-player-id="${playerId}"]`);
             if (playerItem) {
                 playerItem.classList.add('selected');
-                console.log(`UIManager: Jugador ${playerId} marcado como seleccionado`);
             } else {
                 console.warn(`UIManager: No se encontró el item para el jugador ${playerId}`);
             }
@@ -350,8 +313,6 @@ export default class UIManager {
         
         // Actualizar contador visual
         this.updateSelectedCount();
-        
-        console.log(`UIManager: ${activePlayerIds.length} jugadores preseleccionados en el modal`);
     }
 
     // FUNCIÓN ACTUALIZADA: Actualizar contador de jugadores seleccionados  
@@ -361,7 +322,6 @@ export default class UIManager {
     }
 
     renderPlayersOnPitch() {
-        console.log('[UIManager][DEBUG] === INICIO renderPlayersOnPitch ===');
         
         const pitch = document.getElementById('pitch-container');
         if (!pitch) {
@@ -369,11 +329,8 @@ export default class UIManager {
             return;
         }
         
-        console.log('[UIManager][DEBUG] Pitch container encontrado:', pitch);
-        
         // Eliminar jugadores y balones existentes antes de volver a renderizar
         const existingTokens = pitch.querySelectorAll('.player-token, .ball-token');
-        console.log('[UIManager][DEBUG] Tokens existentes a eliminar:', existingTokens.length);
         existingTokens.forEach(el => el.remove());
 
         // Usar las dimensiones del canvas (área de juego efectiva)
@@ -388,23 +345,14 @@ export default class UIManager {
         // Calcular offset del canvas dentro del contenedor
         const offsetX = fieldRect.left - pitchRect.left;
         const offsetY = fieldRect.top - pitchRect.top;
-        
-        console.log('[UIManager][DEBUG] Dimensiones del campo:', fieldRect, 'Offset:', offsetX, offsetY);
-
-        // --- DEBUG: Mostrar todos los jugadores a renderizar ---
-        console.log('[UIManager][DEBUG] Total jugadores a renderizar:', this.state.activePlayers.length);
-        console.log('[UIManager][DEBUG] Jugadores a renderizar:', this.state.activePlayers);
 
         this.state.activePlayers.forEach((player, index) => {
-            console.log(`[UIManager][DEBUG] Procesando jugador ${index}:`, player);
             
             // Si el jugador es el balón, solo dibujarlo en modo animación
             if (player.isBall || player.type === 'ball' || player.role === 'ball' || player.id === 'ball') {
-                console.log('[UIManager][DEBUG] Es un balón, verificando modo...');
                 // Solo mostrar el balón en modo animación
                 const currentMode = this.modeManager ? this.modeManager.currentMode : 'drawing';
                 if (currentMode !== 'animation') {
-                    console.log('[UIManager] Balón omitido - solo se muestra en modo animación');
                     return; // Saltar renderizado del balón en modo dibujo
                 }
                 
@@ -431,7 +379,6 @@ export default class UIManager {
                 // Agregar eventos de drag para el balón
                 const startDragBall = (e) => {
                     if (this.state.isDrawingMode) return;
-                    console.log('UIManager: Iniciando arrastre del balón.', e.type);
                     
                     // Notificar que se está arrastrando para evitar conflicto con estela
                     if (window.main && window.main.setBallDragStarted) {
@@ -464,7 +411,6 @@ export default class UIManager {
                         ball.style.top = `${Math.max(minY, Math.min(yPx, maxY))}px`;
                     };
                     const upHandler = () => {
-                        console.log('UIManager: Finalizando arrastre del balón.');
                         document.removeEventListener('mousemove', moveHandler);
                         document.removeEventListener('mouseup', upHandler);
                         document.removeEventListener('touchmove', moveHandler);
@@ -478,7 +424,6 @@ export default class UIManager {
                             // Calcular porcentaje relativo al canvas
                             ballPlayer.x = ((currentLeftPx - currentOffsetX + 16) / currentFieldRect.width) * 100;
                             ballPlayer.y = ((currentTopPx - currentOffsetY + 16) / currentFieldRect.height) * 100;
-                            console.log(`Balón guardado en: x=${ballPlayer.x.toFixed(2)}%, y=${ballPlayer.y.toFixed(2)}%`);
                         }
                         
                         // Restablecer estado de drag después de un tiempo
@@ -497,33 +442,25 @@ export default class UIManager {
                 ball.addEventListener('touchstart', startDragBall, { passive: false });
                 
                 pitch.appendChild(ball);
-                console.log('[UIManager][DEBUG] Balón renderizado en', x, y, '% -> píxeles:', ball.style.left, ball.style.top);
                 return;
             }
 
             // Si el jugador no tiene posiciones (x,y) definidas (por ejemplo, es la primera vez que se añade
             // o no hay una táctica que le asigne una), asignarle una posición por defecto
             if (typeof player.x !== 'number' || typeof player.y !== 'number') {
-                console.log(`[UIManager][DEBUG] Jugador ${player.id} sin posición, asignando posición por defecto`);
                 const initialX = (fieldRect.width / 2) - (60 / 2) + (index * 5);
                 const initialY = (fieldRect.height * 0.20);
                 player.x = (initialX / fieldRect.width) * 100;
                 player.y = (initialY / fieldRect.height) * 100;
-                console.log(`[UIManager][DEBUG] Posición asignada: x=${player.x}%, y=${player.y}%`);
             }
-
-            console.log(`[UIManager][DEBUG] Creando token para jugador ${player.id} en posición x=${player.x}%, y=${player.y}%`);
             
             // Crear token usando el sistema unificado
             let token;
             if (window.playerCardManager) {
-                console.log('[UIManager][DEBUG] Usando playerCardManager para crear token');
                 token = window.playerCardManager.createPlayerCard(player, 'field');
                 token.style.left = `${offsetX + (player.x / 100) * fieldRect.width}px`;
                 token.style.top = `${offsetY + (player.y / 100) * fieldRect.height}px`;
-                console.log(`[UIManager][DEBUG] Token creado con playerCardManager, posicionado en ${token.style.left}, ${token.style.top}`);
             } else {
-                console.log('[UIManager][DEBUG] Usando método fallback para crear token');
                 // Fallback al método anterior
                 token = document.createElement('div');
                 token.className = 'player-token';
@@ -569,19 +506,11 @@ export default class UIManager {
                         ${playerJersey}
                     </div>
                 `;
-                console.log(`[UIManager][DEBUG] Token creado con fallback method, posicionado en ${token.style.left}, ${token.style.top}`);
             }
-
-            // ELIMINADO: Ya no se abre el menú de jugador al hacer doble clic
-            // token.addEventListener('dblclick', () => {
-            //     console.log('UIManager: Doble clic en jugador', player.id);
-            //     this.showPlayerCard(player.id);
-            // });
 
             // Eventos para arrastrar (Touch events para móvil)
             const startDrag = (e) => {
                 if (this.state.isDrawingMode) return;
-                console.log('UIManager: Iniciando arrastre de jugador.', e.type);
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 token.classList.add('dragging');
@@ -608,7 +537,6 @@ export default class UIManager {
                     token.style.top = `${Math.max(minY, Math.min(yPx, maxY))}px`;
                 };
                 const upHandler = () => {
-                    console.log('UIManager: Finalizando arrastre de jugador.');
                     document.removeEventListener('mousemove', moveHandler);
                     document.removeEventListener('mouseup', upHandler);
                     document.removeEventListener('touchmove', moveHandler);
@@ -623,7 +551,6 @@ export default class UIManager {
                         // Calcular porcentaje relativo al canvas
                         player.x = ((currentLeftPx - currentOffsetX) / currentFieldRect.width) * 100;
                         player.y = ((currentTopPx - currentOffsetY) / currentFieldRect.height) * 100;
-                        console.log(`Jugador ${player.id} guardado en: x=${player.x.toFixed(2)}%, y=${player.y.toFixed(2)}%`);
                     }
                 };
                 document.addEventListener('mousemove', moveHandler);
@@ -632,29 +559,9 @@ export default class UIManager {
                 document.addEventListener('touchend', upHandler);
             };
             token.addEventListener('mousedown', startDrag);
-            token.addEventListener('touchstart', startDrag, { passive: false });
-            
-            console.log(`[UIManager][DEBUG] Agregando token al pitch para jugador ${player.id}:`, token);
-            console.log(`[UIManager][DEBUG] Token className: ${token.className}`);
-            console.log(`[UIManager][DEBUG] Token style.left: ${token.style.left}`);
-            console.log(`[UIManager][DEBUG] Token style.top: ${token.style.top}`);
-            console.log(`[UIManager][DEBUG] Token innerHTML preview:`, token.innerHTML.substring(0, 200));
-            console.log(`[UIManager][DEBUG] Token computedStyle display:`, window.getComputedStyle(token).display);
-            console.log(`[UIManager][DEBUG] Token computedStyle position:`, window.getComputedStyle(token).position);
-            console.log(`[UIManager][DEBUG] Token computedStyle visibility:`, window.getComputedStyle(token).visibility);
-            console.log(`[UIManager][DEBUG] Pitch element:`, pitch);
-            console.log(`[UIManager][DEBUG] Pitch children before adding:`, pitch.children.length);
-            
+            token.addEventListener('touchstart', startDrag, { passive: false });          
             pitch.appendChild(token);
-            
-            console.log(`[UIManager][DEBUG] Token agregado exitosamente al pitch`);
-            console.log(`[UIManager][DEBUG] Pitch children after adding:`, pitch.children.length);
-            console.log(`[UIManager][DEBUG] Token en DOM:`, document.contains(token));
-            console.log(`[UIManager][DEBUG] Token offsetParent:`, token.offsetParent);
-            console.log(`[UIManager][DEBUG] Token getBoundingClientRect:`, token.getBoundingClientRect());
         });
-        
-        console.log('[UIManager][DEBUG] === FIN renderPlayersOnPitch ===');
     }
 
     // ELIMINADO: Método showPlayerCard ya no se usa
@@ -665,7 +572,6 @@ export default class UIManager {
         if (modeSpan) {
             const mode = this.state.isDrawingMode ? 'Dibujo' : 'Arrastrar';
             modeSpan.textContent = mode;
-            console.log('UIManager: Indicador de modo actualizado a', mode);
         } else {
             console.warn('UIManager: Elemento #current-mode no encontrado.');
         }
@@ -684,7 +590,6 @@ export default class UIManager {
                 selectedCountSpan.classList.remove('bg-danger');
                 selectedCountSpan.classList.add('bg-success');
             }
-            console.log('UIManager: Contador de seleccionados actualizado a', selectedCount);
         } else {
             console.warn('UIManager: Elemento #selected-count no encontrado.');
         }

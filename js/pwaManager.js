@@ -24,7 +24,6 @@ class PWAManager {
     }
 
     async init() {
-        console.log('🚀 PWA Manager: Inicializando funcionalidades avanzadas');
         
         // Registrar Service Worker
         await this.registerServiceWorker();
@@ -49,8 +48,6 @@ class PWAManager {
         
         // Verificar parámetros de URL
         this.handleURLParams();
-        
-        console.log('✅ PWA Manager: Inicialización completa');
     }
 
     // 📦 REGISTRO DE SERVICE WORKER
@@ -61,8 +58,6 @@ class PWAManager {
                     scope: '/',
                     updateViaCache: 'none'
                 });
-
-                console.log('✅ Service Worker registrado correctamente');
 
                 // Escuchar actualizaciones
                 registration.addEventListener('updatefound', () => {
@@ -155,12 +150,7 @@ class PWAManager {
     async promptInstall() {
         if (this.deferredPrompt) {
             this.deferredPrompt.prompt();
-            const result = await this.deferredPrompt.userChoice;
-            
-            if (result.outcome === 'accepted') {
-                console.log('✅ PWA instalada por el usuario');
-            }
-            
+            const result = await this.deferredPrompt.userChoice;     
             this.deferredPrompt = null;
             this.hideInstallButton();
         }
@@ -399,7 +389,6 @@ class PWAManager {
         await Promise.all(
             cacheNames.map(cacheName => caches.delete(cacheName))
         );
-        console.log('✅ Cache cleared');
     }
 
     // 📊 ESTADO Y DEBUG

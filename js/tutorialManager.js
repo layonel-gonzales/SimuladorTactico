@@ -17,12 +17,7 @@ export default class TutorialManager {
     }
     
     init() {
-        // El sistema simple siempre está disponible
-        console.log('[TutorialManager] ✅ Sistema de tutorial simple cargado');
         this.setupTutorialButton();
-        
-        // NO auto-iniciar tutorial - remover modal de bienvenida
-        // El tutorial solo se iniciará cuando el usuario haga clic en los botones
     }
 
     // Método para esperar a que Shepherd esté disponible
@@ -50,12 +45,10 @@ export default class TutorialManager {
 
     // Cargar Shepherd.js manualmente si no está disponible
     loadShepherdManually() {
-        console.log('[TutorialManager] 🔄 Intentando cargar Shepherd.js manualmente...');
         
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/shepherd.js@12.0.6/dist/js/shepherd.min.js';
         script.onload = () => {
-            console.log('[TutorialManager] ✅ Shepherd.js cargado manualmente');
             this.setupTutorialButton();
             if (this.isFirstVisit) {
                 setTimeout(() => this.showWelcomeDialog(), 1000);
@@ -82,11 +75,8 @@ export default class TutorialManager {
         const tutorialDrawingBtn = document.getElementById('start-tutorial-drawing-btn');
         const tutorialAnimationBtn = document.getElementById('start-tutorial-animation-btn');
         
-        console.log('[TutorialManager] Configurando botones de tutorial...');
-        
         if (tutorialDrawingBtn) {
             tutorialDrawingBtn.addEventListener('click', (e) => {
-                console.log('[TutorialManager] Iniciando tutorial de dibujo');
                 e.preventDefault();
                 e.stopPropagation();
                 this.startTutorial('drawing');
@@ -95,7 +85,6 @@ export default class TutorialManager {
         
         if (tutorialAnimationBtn) {
             tutorialAnimationBtn.addEventListener('click', (e) => {
-                console.log('[TutorialManager] Iniciando tutorial de animación');
                 e.preventDefault();
                 e.stopPropagation();
                 this.startTutorial('animation');
@@ -131,8 +120,6 @@ export default class TutorialManager {
     }
     
     startTutorial(mode = 'drawing') {
-        // El sistema simple siempre está disponible
-        console.log(`[TutorialManager] 🚀 Iniciando tutorial para modo: ${mode}`);
         
         // Limpiar tutorial anterior si existe
         if (this.currentTour) {
@@ -149,8 +136,6 @@ export default class TutorialManager {
                 }
             }
         });
-        
-        console.log(`[TutorialManager] Iniciando tutorial de ${mode}`);
         
         if (mode === 'drawing') {
             this.setupDrawingTutorial();
@@ -711,8 +696,6 @@ export default class TutorialManager {
     }
     
     showWelcomeDialog() {
-        console.log('[TutorialManager] 🎉 Mostrando modal de bienvenida');
-
         // Modal de bienvenida (mantenemos el diseño anterior)
         const modalHTML = `
             <div id="modern-tutorial-modal" class="tutorial-modal-overlay">

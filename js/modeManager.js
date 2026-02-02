@@ -20,25 +20,18 @@ export default class ModeManager {
     init() {
         this.setupModeToggle();
         this.setupControlGroups();
-        console.log('ModeManager: Inicializado en modo', this.currentMode);
     }
     
     setupModeToggle() {
-        // Configurar el botón global de modo (siempre visible)
-        console.log('[ModeManager] Buscando botón global de modo...');
         this.globalModeToggle = document.getElementById('global-mode-toggle');
         
         if (this.globalModeToggle) {
             this.globalModeToggle.addEventListener('click', () => {
-                console.log('[ModeManager] Click detectado en botón global de modo');
                 this.toggleMode();
             });
-            console.log('[ModeManager] ✅ Botón GLOBAL de modo conectado correctamente');
+
         } else {
             console.error('[ModeManager] ❌ ERROR: No se encontró el botón global de modo #global-mode-toggle en el HTML');
-            // Verificar qué elementos están disponibles
-            console.log('[ModeManager] Elementos disponibles:', 
-                Array.from(document.querySelectorAll('[id*="mode"]')).map(el => el.id));
         }
         
         this.updateModeToggleUI();
@@ -48,9 +41,6 @@ export default class ModeManager {
         // Referencias a los nuevos contenedores unificados
         this.drawingModeControls = document.getElementById('drawing-mode-controls');
         this.animationModeControls = document.getElementById('animation-mode-controls');
-        
-        console.log('[ModeManager] DEBUG - drawingModeControls:', this.drawingModeControls);
-        console.log('[ModeManager] DEBUG - animationModeControls:', this.animationModeControls);
         
         if (!this.drawingModeControls || !this.animationModeControls) {
             console.warn('[ModeManager] ❌ No se encontraron los contenedores de controles unificados');
@@ -75,16 +65,12 @@ export default class ModeManager {
     }
     
     toggleMode() {
-        console.log('[ModeManager] 🔄 toggleMode() llamado - Modo actual:', this.currentMode);
         const newMode = this.currentMode === 'drawing' ? 'animation' : 'drawing';
-        console.log('[ModeManager] 🔄 Cambiando a modo:', newMode);
         this.switchToMode(newMode);
     }
     
     switchToMode(mode) {
         if (mode === this.currentMode) return;
-        
-        console.log(`ModeManager: Cambiando de ${this.currentMode} a ${mode}`);
         
         // Desactivar modo anterior
         this.deactivateCurrentMode();
@@ -105,7 +91,6 @@ export default class ModeManager {
             }
         }));
         
-        console.log(`ModeManager: Modo activo: ${this.currentMode}`);
     }
     
     deactivateCurrentMode() {
@@ -161,7 +146,6 @@ export default class ModeManager {
                 this.uiManager.renderPlayersOnPitch();
             }
             
-            console.log('[ModeManager] ✅ Modo DIBUJO activado - Cancha limpia, balón oculto');
             
         } else if (this.currentMode === 'animation') {
             // LIMPIAR CANCHA al pasar a modo animación
@@ -184,7 +168,6 @@ export default class ModeManager {
                 this.uiManager.renderPlayersOnPitch();
             }
             
-            console.log('[ModeManager] ✅ Modo ANIMACIÓN activado - Cancha limpia, balón visible en centro');
         }
     }
     
@@ -211,24 +194,16 @@ export default class ModeManager {
             }
         }
         
-        console.log(`[ModeManager] UI del botón global actualizada para modo: ${this.currentMode}`);
     }
     
     updateControlsVisibility() {
-        console.log(`[ModeManager] 🔄 Actualizando controles para modo: ${this.currentMode}`);
-        
-        // DEBUG: Verificar que los elementos existan
-        console.log('[ModeManager] DEBUG - drawingModeControls:', this.drawingModeControls);
-        console.log('[ModeManager] DEBUG - animationModeControls:', this.animationModeControls);
         
         // Controlar visibilidad de botones de tutorial
         this.updateTutorialButtonsVisibility();
         
         // Usar JavaScript directo para forzar el cambio visual
         if (this.drawingModeControls && this.animationModeControls) {
-            if (this.currentMode === 'drawing') {
-                console.log('[ModeManager] 🎨 Activando modo DIBUJO');
-                
+            if (this.currentMode === 'drawing') {           
                 // FORZAR cambio con JavaScript directo - DOBLE SEGURIDAD
                 this.drawingModeControls.style.display = 'flex';
                 this.drawingModeControls.style.visibility = 'visible';
@@ -241,9 +216,7 @@ export default class ModeManager {
                 this.animationModeControls.classList.remove('visible');
                 this.animationModeControls.classList.add('hidden');
                 
-            } else {
-                console.log('[ModeManager] 🎬 Activando modo ANIMACIÓN');
-                
+            } else {        
                 // FORZAR cambio con JavaScript directo - DOBLE SEGURIDAD
                 this.animationModeControls.style.display = 'flex';
                 this.animationModeControls.style.visibility = 'visible';
@@ -257,23 +230,11 @@ export default class ModeManager {
                 this.drawingModeControls.classList.add('hidden');
             }
             
-            // DEBUG: Verificar los estilos aplicados
-            console.log('[ModeManager] DEBUG - Estilos después del cambio:');
-            console.log('- drawingModeControls display:', this.drawingModeControls.style.display);
-            console.log('- drawingModeControls visibility:', this.drawingModeControls.style.visibility);
-            console.log('- animationModeControls display:', this.animationModeControls.style.display);
-            console.log('- animationModeControls visibility:', this.animationModeControls.style.visibility);
-            console.log('- drawingModeControls classes:', this.drawingModeControls.className);
-            console.log('- animationModeControls classes:', this.animationModeControls.className);
-            
         } else {
             console.error('[ModeManager] ❌ ERROR: No se pudieron encontrar los contenedores de controles');
             console.error('[ModeManager] - drawingModeControls:', this.drawingModeControls);
             console.error('[ModeManager] - animationModeControls:', this.animationModeControls);
         }
-        
-        // Ya no necesitamos actualizar label del modo (no hay label visible)
-        console.log(`[ModeManager] ✅ Controles actualizados para modo: ${this.currentMode}`);
     }
     
     updateTutorialButtonsVisibility() {
@@ -305,7 +266,6 @@ export default class ModeManager {
                     animationTutorialBtn.style.display = 'none';
                 }
                 
-                console.log('[ModeManager] 📚 Modo DIBUJO activo');
             } else {
                 // Mostrar tutorial de animación solo si el usuario no lo ha configurado como oculto
                 if (animationUserConfig !== 'false') {
@@ -321,7 +281,6 @@ export default class ModeManager {
                     drawingTutorialBtn.style.display = 'none';
                 }
                 
-                console.log('[ModeManager] 📚 Modo ANIMACIÓN activo');
             }
         } else {
             console.warn('[ModeManager] ❌ No se encontraron los botones de tutorial');
@@ -365,7 +324,6 @@ export default class ModeManager {
     
     // NUEVA: Función para limpiar completamente la cancha
     clearPitch() {
-        console.log('[ModeManager] 🧹 Limpiando cancha...');
         
         // Limpiar todas las líneas dibujadas
         if (this.drawingManager && typeof this.drawingManager.clearAllLines === 'function') {
@@ -388,16 +346,12 @@ export default class ModeManager {
         const pitch = document.getElementById('pitch-container');
         if (pitch) {
             pitch.querySelectorAll('.player-token, .ball-token').forEach(el => el.remove());
-            console.log('[ModeManager] 🧹 Tokens de jugadores y balones eliminados del DOM');
         }
         
-        console.log('[ModeManager] ✅ Cancha limpiada completamente');
     }
     
     // NUEVA: Función para asegurar que el balón esté en el centro
     ensureBallAtCenter() {
-        console.log('[ModeManager] ⚽ Posicionando balón en el centro...');
-        
         // Acceder al estado global de jugadores activos desde main.js
         if (window.main && window.main.state && window.main.state.activePlayers) {
             const ballPlayer = window.main.state.activePlayers.find(p => 
@@ -407,7 +361,6 @@ export default class ModeManager {
             if (ballPlayer) {
                 ballPlayer.x = 50; // centro horizontal (50%)
                 ballPlayer.y = 50; // centro vertical (50%)
-                console.log('[ModeManager] ✅ Balón posicionado en el centro (50%, 50%)');
             } else {
                 console.log('[ModeManager] ⚠️ No se encontró el balón en activePlayers');
             }
@@ -419,8 +372,6 @@ export default class ModeManager {
     // NUEVA: Función para restaurar el estado visual del modo eliminar líneas
     restoreDeleteLineMode() {
         if (!this.drawingManager || !this.drawingManager.deleteLineMode) return;
-        
-        console.log('[ModeManager] 🔧 Restaurando estado visual del modo eliminar líneas...');
         
         // Buscar el botón de eliminar líneas
         const deleteLineBtn = document.getElementById('delete-line-mode');
@@ -438,14 +389,12 @@ export default class ModeManager {
             
             // Restaurar título del botón
             deleteLineBtn.title = 'Salir del modo borrar líneas';
-            
-            console.log('[ModeManager] ✅ Botón de eliminar líneas restaurado');
+
         }
         
         if (drawingCanvas) {
             // Restaurar cursor de tijeras
             drawingCanvas.classList.add('scissors-cursor-simple');
-            console.log('[ModeManager] ✅ Cursor de tijeras restaurado');
         }
     }
 }
