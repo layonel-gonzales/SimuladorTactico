@@ -317,6 +317,7 @@ html, body {
 /* === MODALES === */
 #squad-selection-modal.modal,
 #custom-players-modal.modal,
+#configuration-modal.modal,
 #player-modal.modal {
     z-index: var(--z-modal) !important;
 }

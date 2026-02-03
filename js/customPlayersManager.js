@@ -67,6 +67,16 @@ export default class CustomPlayersManager {
             throw new Error('Datos del jugador incompletos o inválidos');
         }
 
+        // Obtener equipo por defecto si no se proporciona
+        let teamId = playerData.teamId;
+        if (!teamId && window.teamsManager) {
+            const lastTeamId = localStorage.getItem('lastUsedTeamId');
+            const defaultTeam = lastTeamId 
+                ? window.teamsManager.getTeamById(lastTeamId)
+                : window.teamsManager.getNextTeam();
+            teamId = defaultTeam ? defaultTeam.id : 'team-001';
+        }
+
         const newPlayer = {
             id: this.nextPlayerId++,
             jersey_number: playerData.jersey_number || this.getNextJerseyNumber(),
@@ -80,7 +90,10 @@ export default class CustomPlayersManager {
             physical: parseInt(playerData.physical) || 70,
             image_url: playerData.image_url || 'img/default_player.png',
             team: playerData.team || 'custom',
+            teamId: teamId,
+            overall: playerData.overall || this.calculateOverall(playerData),
             isCustom: true,
+            isDefault: playerData.isDefault || false,
             created_at: new Date().toISOString(),
             created_by: 'user'
         };
@@ -88,7 +101,19 @@ export default class CustomPlayersManager {
         this.customPlayers.push(newPlayer);
         this.saveToStorage();
 
+        // Notificar a teamsUI si está disponible
+        if (window.teamsUI && window.teamsUI.onPlayerAdded) {
+            window.teamsUI.onPlayerAdded(newPlayer);
+        }
+
         return newPlayer;
+    }
+
+    /**
+     * Alias de addCustomPlayer para mayor compatibilidad
+     */
+    addPlayer(playerData) {
+        return this.addCustomPlayer(playerData);
     }
 
     editCustomPlayer(playerId, updatedData) {
@@ -113,6 +138,13 @@ export default class CustomPlayersManager {
         return updatedPlayer;
     }
 
+    /**
+     * Alias de editCustomPlayer para compatibilidad
+     */
+    updatePlayer(playerId, updatedData) {
+        return this.editCustomPlayer(playerId, updatedData);
+    }
+
     deleteCustomPlayer(playerId) {
         const playerIndex = this.customPlayers.findIndex(p => p.id === playerId);
         if (playerIndex === -1) {
@@ -122,6 +154,35 @@ export default class CustomPlayersManager {
         const deletedPlayer = this.customPlayers.splice(playerIndex, 1)[0];
         this.saveToStorage();
         return deletedPlayer;
+    }
+
+    /**
+     * Obtiene un jugador por ID
+     */
+    getPlayer(playerId) {
+        return this.customPlayers.find(p => p.id === playerId);
+    }
+
+    /**
+     * Obtiene todos los jugadores
+     */
+    getPlayers() {
+        return [...this.customPlayers];
+    }
+
+    /**
+     * Calcula el overall basado en los atributos
+     */
+    calculateOverall(playerData) {
+        const attributes = [
+            playerData.pace || 70,
+            playerData.shooting || 70,
+            playerData.passing || 70,
+            playerData.dribbling || 70,
+            playerData.defending || 70,
+            playerData.physical || 70
+        ];
+        return Math.round(attributes.reduce((a, b) => a + b) / attributes.length);
     }
 
     // === OBTENER JUGADORES COMBINADOS ===

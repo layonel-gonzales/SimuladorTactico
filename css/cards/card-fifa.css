@@ -1,152 +1,250 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * ⚽ CARD FIFA - ESTILO FIFA
+ * ⚽ CARD FIFA - ESTILO FIFA MEJORADO
  * ═══════════════════════════════════════════════════════════════════════
- * Estilo inspirado en cartas FIFA con colores de rareza
- * Aplica a .card-style-fifa y todas las clases .fifa-*
+ * Diseño realista basado en tarjetas FIFA UltimateTeam
+ * Mantiene la estructura de .card-element pero con estilos FIFA auténticos
  */
 
-/* ===== CONTENEDOR PRINCIPAL DEL ESTILO FIFA ===== */
-.card-style-fifa {
-    font-family: 'Arial', sans-serif;
-    color: var(--card-primary, #1a1a1a);
-}
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* CONTENEDOR PRINCIPAL CARD FIFA */
+/* ═══════════════════════════════════════════════════════════════════════ */
 
-/* ===== COLORES DE RAREZA FIFA ===== */
-.fifa-gold {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #1a1a1a;
-}
-
-.fifa-silver {
-    background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
-    color: #1a1a1a;
-}
-
-.fifa-bronze {
-    background: linear-gradient(135deg, #CD7F32, #B8860B);
-    color: white;
-}
-
-.fifa-common {
-    background: linear-gradient(135deg, #4A4A4A, #2A2A2A);
-    color: white;
-}
-
-/* ===== CARD FIFA PARA CAMPO (.player-token) ===== */
-.fifa-card-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+.player-card-wrapper.card-style-fifa {
+    /* Fondo base con gradiente FIFA */
+    background: linear-gradient(135deg, #0a1428 0%, #1a2332 50%, #0a1428 100%);
+    border: 2px solid rgba(255, 200, 0, 0.6);
     border-radius: 8px;
-    overflow: hidden;
-    border: 2px solid var(--card-accent, #00ff88);
+    
+    /* Efecto de brillo en bordes */
+    box-shadow: 
+        inset 0 0 8px rgba(255, 200, 0, 0.3),
+        0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.fifa-card-background {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 20%, rgba(0,255,136,0.1) 0%, transparent 50%),
-        linear-gradient(45deg, transparent 30%, rgba(0,255,136,0.05) 30%, rgba(0,255,136,0.05) 32%, transparent 32%);
-}
-
-.fifa-rating-corner {
+.player-card-wrapper.card-style-fifa::before {
+    content: '';
     position: absolute;
-    top: 6px;
-    left: 6px;
-    width: 24px;
-    height: 30px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.05) 20%,
+        rgba(255, 255, 255, 0.05) 40%,
+        transparent 40%
+    );
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* ELEMENTOS INTERNOS - ESTILO FIFA */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.player-card-wrapper.card-style-fifa .card-element {
+    z-index: 2;
+}
+
+/* Overall/Rating - Esquina Superior Izquierda (estilo FIFA) */
+.player-card-wrapper.card-style-fifa .card-element.card-overall {
+    top: 5px;
+    left: 4px;
+    width: 28px;
+    height: 32px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #f0c419 100%);
+    border: 2px solid #8b7500;
     border-radius: 4px;
+    color: #1a1a1a;
+    font-size: 0.85em;
+    font-weight: 900;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
 }
 
-.fifa-rating-number {
-    font-size: 11px;
-    line-height: 1;
-    margin-bottom: 1px;
-}
-
-.fifa-position-text {
-    font-size: 7px;
-    line-height: 1;
-}
-
-.fifa-player-photo {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -55%);
-    width: 34px;
-    height: 34px;
+/* Posición - Esquina Superior Derecha (estilo FIFA) */
+.player-card-wrapper.card-style-fifa .card-element.card-position {
+    top: 8px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    border: 1px solid #0066aa;
     border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid var(--card-accent, #00ff88);
-    background: #1a1a1a;
-}
-
-.fifa-player-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.fifa-player-details {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
-    right: 0;
-    text-align: center;
-}
-
-.fifa-player-name {
-    color: var(--card-accent, #00ff88);
-    font-size: 8px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 1px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-}
-
-.fifa-player-number {
     color: white;
-    font-size: 10px;
+    font-size: 0.6em;
     font-weight: bold;
-    background: var(--card-accent, #00ff88);
-    display: inline-block;
-    width: 16px;
-    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    text-transform: uppercase;
+}
+
+/* Foto del jugador - Centro (estilo FIFA) */
+.player-card-wrapper.card-style-fifa .card-element.card-image {
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(32px, 55%, 65px);
+    height: clamp(32px, 55%, 65px);
     border-radius: 50%;
-    line-height: 16px;
-    color: #1a1a1a;
+    object-fit: cover;
+    border: 3px solid #ffd700;
+    box-shadow: 
+        0 0 8px rgba(255, 215, 0, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.6),
+        inset 0 0 4px rgba(255, 215, 0, 0.2);
 }
 
-.fifa-card-accent {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--card-accent, #00ff88), #00cc6a);
-}
-
-/* ===== CARD FIFA PARA SELECCIÓN (.squad-player-item) ===== */
-.fifa-selection-card {
-    background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-radius: 12px;
-    padding: 12px;
-    border: 2px solid var(--card-accent, #00ff88);
-    position: relative;
+/* Nombre del jugador - Parte inferior */
+.player-card-wrapper.card-style-fifa .card-element.card-name {
+    bottom: 30px;
+    left: 4px;
+    right: 4px;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    text-transform: uppercase;
+    line-height: 1.1;
+    max-height: 22px;
     overflow: hidden;
-    transition: all 0.3s ease;
+    text-overflow: ellipsis;
 }
+
+/* Dorsal/Jersey - Parte muy inferior */
+.player-card-wrapper.card-style-fifa .card-element.card-jersey {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    background: #ffd700;
+    border: 1px solid #8b7500;
+    border-radius: 3px;
+    color: #1a1a1a;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* ESTADO HOVER Y SELECCIÓN */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.player-card-wrapper.card-style-fifa.player-token:hover {
+    background: linear-gradient(135deg, #1a2844 0%, #2a3850 50%, #1a2844 100%);
+    box-shadow: 
+        inset 0 0 12px rgba(255, 200, 0, 0.5),
+        0 6px 15px rgba(255, 215, 0, 0.4);
+    border-color: rgba(255, 215, 0, 1);
+}
+
+.player-card-wrapper.card-style-fifa.player-token.dragging {
+    background: linear-gradient(135deg, #2a3855 0%, #3a4865 50%, #2a3855 100%);
+    box-shadow: 
+        inset 0 0 15px rgba(255, 215, 0, 0.6),
+        0 8px 20px rgba(255, 215, 0, 0.5);
+}
+
+.player-card-wrapper.card-style-fifa.squad-player-item.selected {
+    background: linear-gradient(135deg, #1a4428 0%, #2a6440 50%, #1a4428 100%);
+    border-color: rgba(76, 175, 80, 0.8);
+    box-shadow: 
+        inset 0 0 12px rgba(76, 175, 80, 0.4),
+        0 0 15px rgba(76, 175, 80, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* VARIANTES DE RAREZA FIFA */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+/* Gold/Special Cards */
+.player-card-wrapper.card-style-fifa.fifa-gold {
+    background: linear-gradient(135deg, #2a2010 0%, #3a2a20 50%, #2a2010 100%);
+    border-color: rgba(255, 215, 0, 0.9);
+}
+
+.player-card-wrapper.card-style-fifa.fifa-gold::before {
+    background: linear-gradient(
+        45deg,
+        transparent 15%,
+        rgba(255, 215, 0, 0.1) 15%,
+        rgba(255, 215, 0, 0.1) 30%,
+        transparent 30%
+    );
+}
+
+/* Silver/Uncommon Cards */
+.player-card-wrapper.card-style-fifa.fifa-silver {
+    background: linear-gradient(135deg, #1a1a22 0%, #2a2a32 50%, #1a1a22 100%);
+    border-color: rgba(192, 192, 192, 0.7);
+}
+
+.player-card-wrapper.card-style-fifa.fifa-silver .card-element.card-overall {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #a8a8a8 100%);
+    border-color: #808080;
+}
+
+.player-card-wrapper.card-style-fifa.fifa-silver .card-element.card-image {
+    border-color: #c0c0c0;
+}
+
+/* Bronze/Common Cards */
+.player-card-wrapper.card-style-fifa.fifa-bronze {
+    background: linear-gradient(135deg, #221410 0%, #321a10 50%, #221410 100%);
+    border-color: rgba(205, 127, 50, 0.7);
+}
+
+.player-card-wrapper.card-style-fifa.fifa-bronze .card-element.card-overall {
+    background: linear-gradient(135deg, #cd7f32 0%, #e6a761 50%, #b8860b 100%);
+    border-color: #8b4513;
+    color: white;
+}
+
+.player-card-wrapper.card-style-fifa.fifa-bronze .card-element.card-image {
+    border-color: #cd7f32;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .player-card-wrapper.card-style-fifa {
+        border-width: 1.5px;
+    }
+    
+    .player-card-wrapper.card-style-fifa .card-element.card-overall {
+        width: 24px;
+        height: 28px;
+        font-size: 0.75em;
+    }
+    
+    .player-card-wrapper.card-style-fifa .card-element.card-position {
+        width: 18px;
+        height: 18px;
+        font-size: 0.5em;
+    }
+    
+    .player-card-wrapper.card-style-fifa .card-element.card-jersey {
+        width: 18px;
+        height: 18px;
+        font-size: 0.7em;
+    }
+}
+
 
 .fifa-selection-card:hover {
     transform: translateY(-3px);

@@ -13,6 +13,30 @@ export default class CustomPlayersUI {
     init() {
         this.setupEventListeners();
         this.setupFormValidation();
+        this.setupTeamSelector();
+    }
+
+    /**
+     * Carga dinámicamente el combobox de equipos
+     */
+    setupTeamSelector() {
+        const teamSelect = document.getElementById('player-team');
+        if (!teamSelect || !window.teamsManager) return;
+
+        // Cargar equipos
+        const teams = window.teamsManager.getAllTeams();
+        
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.id;
+            option.textContent = `${team.icon} ${team.name}`;
+            teamSelect.appendChild(option);
+        });
+
+        // Seleccionar el primer equipo por defecto
+        if (teams.length > 0) {
+            teamSelect.value = teams[0].id;
+        }
     }
 
     setupEventListeners() {
@@ -146,14 +170,24 @@ export default class CustomPlayersUI {
         const modalElement = document.getElementById('custom-players-modal');
 
         if (modalElement) {
+            // Crear una nueva instancia cada vez (igual que configurationUI)
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
+            
             // Actualizar listas al abrir
             this.refreshCustomPlayersList();
             this.updateCalculatedOverall();
         } else {
             console.error('[CustomPlayersUI][ERROR] No se encontró el modal custom-players-modal');
         }
+    }
+
+    /**
+     * Abre el modal para agregar un jugador
+     * Alias de openCustomPlayersModal() para compatibilidad
+     */
+    showAddPlayerModal() {
+        this.openCustomPlayersModal();
     }
 
     async handleAddPlayer() {
@@ -193,6 +227,7 @@ export default class CustomPlayersUI {
             name: document.getElementById('player-name').value.trim(),
             jersey_number: parseInt(document.getElementById('player-jersey').value) || undefined,
             position: document.getElementById('player-position').value,
+            teamId: document.getElementById('player-team').value, // Nuevo: incluir equipo
             pace: parseInt(document.getElementById('player-pace').value) || 70,
             shooting: parseInt(document.getElementById('player-shooting').value) || 70,
             passing: parseInt(document.getElementById('player-passing').value) || 70,

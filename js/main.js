@@ -68,6 +68,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Inicializar el gestor de jugadores personalizados
     const customPlayersManager = new CustomPlayersManager();
+    
+    // Hacer disponible globalmente para sistemas de equipos
+    window.customPlayersManager = customPlayersManager;
+
+    // ✅ CARGAR AUTOMÁTICAMENTE los 22 jugadores por defecto al iniciar
+    // Se ejecuta cuando defaultPlayersData está disponible
+    if (window.defaultPlayersData) {
+        window.defaultPlayersData.loadDefaultPlayers().then(result => {
+            if (result.loaded) {
+                console.log(`✅ Sistema de jugadores por defecto inicializado: ${result.total} jugadores`);
+            }
+        }).catch(err => {
+            console.error('❌ Error cargando jugadores por defecto:', err);
+        });
+    } else {
+        // Si defaultPlayersData no está listo, esperar un poco y reintentar
+        setTimeout(() => {
+            if (window.defaultPlayersData) {
+                window.defaultPlayersData.loadDefaultPlayers();
+            }
+        }, 200);
+    }
 
     // Inicializar el gestor de configuración
     const configurationManager = new ConfigurationManager(customPlayersManager);
@@ -203,6 +225,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
+    // NOTA: El botón custom-players-btn se conecta en customPlayersUI.setupEventListeners()
+    // No agregar listener aquí para evitar duplicados
+    
     // Inicializar sistema de estilos de cancha después de un delay
     setTimeout(() => {
         if (window.fieldStylesDirectIntegration) {
@@ -228,6 +253,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const allPlayers = playerManager.getAllPlayers();
             }
         };
+        
+        // Botón de gestión de almacenamiento local
+        const storageBtn = document.getElementById('storage-management-btn');
+        if (storageBtn && window.localStorageUI) {
+            storageBtn.addEventListener('click', () => {
+                window.localStorageUI.show();
+            });
+        }
+
+        // Botón de gestión de equipos
+        const teamsBtn = document.getElementById('teams-management-btn');
+        if (teamsBtn && window.teamsUI) {
+            teamsBtn.addEventListener('click', () => {
+                window.teamsUI.showCreateTeamModal();
+            });
+        }
+
         
     }, 100);
 

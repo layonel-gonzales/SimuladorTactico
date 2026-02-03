@@ -1,83 +1,197 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * ✨ CARD MODERN - ESTILO MODERNO
+ * ✨ CARD MODERN - ESTILO MODERNO MEJORADO
  * ═══════════════════════════════════════════════════════════════════════
- * Diseño limpio y contemporáneo para cards de jugadores
- * Aplica a .card-style-modern y todas las clases .modern-*
+ * Diseño limpio, contemporáneo y minimalista
+ * Mantiene la estructura de .card-element pero con estilos modernos
  */
 
-/* ===== CONTENEDOR PRINCIPAL DEL ESTILO MODERNO ===== */
-.card-style-modern {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--card-primary, #2c3e50);
-}
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* CONTENEDOR PRINCIPAL CARD MODERNA */
+/* ═══════════════════════════════════════════════════════════════════════ */
 
-/* ===== CARD MODERNA PARA CAMPO (.player-token) ===== */
-.modern-card-bg {
-    position: relative;
-    width: 100%;
-    height: 100%;
+.player-card-wrapper.card-style-modern {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+    border: 2px solid rgba(52, 152, 219, 0.4);
     border-radius: 12px;
-    overflow: hidden;
-    background: linear-gradient(135deg, var(--card-secondary, #ecf0f1) 0%, #bdc3c7 100%);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.modern-gradient-overlay {
+.player-card-wrapper.card-style-modern::before {
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, var(--card-accent, #3498db) 30%, var(--card-accent, #3498db) 32%, transparent 32%);
-    opacity: 0.1;
+    background: linear-gradient(
+        135deg,
+        rgba(52, 152, 219, 0.05) 0%,
+        transparent 50%
+    );
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 1;
 }
 
-.modern-position-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: var(--card-accent, #3498db);
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* ELEMENTOS INTERNOS - ESTILO MODERNO */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.player-card-wrapper.card-style-modern .card-element {
+    z-index: 2;
+}
+
+/* Overall/Rating - Esquina Superior Izquierda */
+.player-card-wrapper.card-style-modern .card-element.card-overall {
+    top: 6px;
+    left: 6px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border: 2px solid white;
+    border-radius: 6px;
     color: white;
-    padding: 2px 6px;
-    border-radius: 8px;
-    font-size: 9px;
+    font-size: 0.8em;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
-.modern-image-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    width: 32px;
-    height: 32px;
+/* Posición - Esquina Superior Derecha */
+.player-card-wrapper.card-style-modern .card-element.card-position {
+    top: 8px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: 1px solid white;
     border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid var(--card-accent, #3498db);
-    background: white;
-}
-
-.modern-image-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.modern-player-info {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
-    right: 0;
-    text-align: center;
-}
-
-.modern-number-display {
-    background: var(--card-primary, #2c3e50);
     color: white;
-    display: inline-block;
-    width: 18px;
-    height: 18px;
+    font-size: 0.55em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+    text-transform: uppercase;
+}
+
+/* Foto del jugador - Centro */
+.player-card-wrapper.card-style-modern .card-element.card-image {
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(32px, 55%, 65px);
+    height: clamp(32px, 55%, 65px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.25);
+}
+
+/* Nombre del jugador - Parte inferior */
+.player-card-wrapper.card-style-modern .card-element.card-name {
+    bottom: 30px;
+    left: 4px;
+    right: 4px;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: 600;
+    color: #2c3e50;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    line-height: 1.1;
+    max-height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dorsal/Jersey - Parte muy inferior */
+.player-card-wrapper.card-style-modern .card-element.card-jersey {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    border: 2px solid white;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.75em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* ESTADO HOVER Y SELECCIÓN */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.player-card-wrapper.card-style-modern.player-token:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+    border-color: rgba(52, 152, 219, 0.7);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+}
+
+.player-card-wrapper.card-style-modern.player-token.dragging {
+    background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+    border-color: rgba(52, 152, 219, 0.9);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.25);
+}
+
+.player-card-wrapper.card-style-modern.squad-player-item.selected {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: rgba(39, 174, 96, 0.6);
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* TEMAS ADICIONALES */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+/* Tema Oscuro */
+.player-card-wrapper.card-style-modern.dark-theme {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-color: rgba(52, 152, 219, 0.5);
+}
+
+.player-card-wrapper.card-style-modern.dark-theme .card-element.card-name {
+    color: #ecf0f1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .player-card-wrapper.card-style-modern {
+        border-width: 1.5px;
+    }
+    
+    .player-card-wrapper.card-style-modern .card-element.card-overall {
+        width: 22px;
+        height: 22px;
+        font-size: 0.7em;
+    }
+    
+    .player-card-wrapper.card-style-modern .card-element.card-position {
+        width: 20px;
+        height: 20px;
+        font-size: 0.5em;
+    }
+    
+    .player-card-wrapper.card-style-modern .card-element.card-jersey {
+        width: 18px;
+        height: 18px;
+        font-size: 0.7em;
+    }
+}
+
     border-radius: 50%;
     line-height: 18px;
     font-size: 10px;
