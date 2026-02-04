@@ -261,99 +261,115 @@
 
     <script src="js/freemiumAuthSystem-simple.js"></script>
     <script>
-        const auth = new UltraSimpleAuth();
-        let isProcessing = false;
-        
-        // Elementos del DOM
-        const form = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const messageDiv = document.getElementById('message');
-        const loadingDiv = document.getElementById('loading');
-        
-        // Función para mostrar mensajes
-        function showMessage(text, type = 'error') {
-            if (messageDiv) {
-                messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
-                setTimeout(() => {
-                    messageDiv.innerHTML = '';
-                }, 5000);
-            }
+        // Detectar si está en GitHub Pages o modo desarrollo
+        function isGitHubPagesDev() {
+            return window.location.hostname === 'kmeza.github.io' || 
+                   window.location.hostname === 'localhost' ||
+                   window.location.hostname === '127.0.0.1' ||
+                   localStorage.getItem('DEVELOPMENT_MODE') === 'true';
         }
         
-        // Función para mostrar/ocultar loading
-        function setLoading(show) {
-            if (loadingDiv && loginBtn) {
-                if (show) {
-                    loadingDiv.style.display = 'flex';
-                    loginBtn.disabled = true;
-                    loginBtn.innerHTML = '🔄 Conectando...';
-                } else {
-                    loadingDiv.style.display = 'none';
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = '🔑 Acceder';
-                }
-            }
-        }
-        
-        // Función de login
-        async function doLogin(email, password) {
-            if (isProcessing) return;
-            
-            isProcessing = true;
-            setLoading(true);
-            
-            try {
-                const result = await auth.login(email, password);
-                
-                if (result.success) {
-                    showMessage('✅ Login exitoso! Redirigiendo...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                } else {
-                    showMessage('❌ ' + (result.error || 'Error en el login'), 'error');
-                }
-                
-            } catch (error) {
-                console.error('Error en login:', error);
-                showMessage('❌ Error de conexión: ' + error.message, 'error');
-            } finally {
-                isProcessing = false;
-                setLoading(false);
-            }
-        }
-        
-        // Función para crear cuenta
-        function createAccount() {
-            showMessage('ℹ️ Funcionalidad de registro en desarrollo', 'success');
-        }
-        
-        // Event listener para el formulario
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const email = emailInput ? emailInput.value.trim() : '';
-                const password = passwordInput ? passwordInput.value.trim() : '';
-                
-                if (!email || !password) {
-                    showMessage('Por favor completa todos los campos', 'error');
-                    return;
-                }
-                
-                if (!email.includes('@')) {
-                    showMessage('Por favor ingresa un email válido', 'error');
-                    return;
-                }
-                
-                doLogin(email, password);
-            });
-        }
-        
-        // Verificar si ya está autenticado
+        // Si está en GitHub Pages o desarrollo, redirigir directamente a index.html
         window.addEventListener('DOMContentLoaded', function() {
+            if (isGitHubPagesDev()) {
+                // En GitHub Pages, redirigir directamente sin mostrar login
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Resto del código de login normal
+            const auth = new UltraSimpleAuth();
+            let isProcessing = false;
+            
+            // Elementos del DOM
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
+            const messageDiv = document.getElementById('message');
+            const loadingDiv = document.getElementById('loading');
+            
+            // Función para mostrar mensajes
+            function showMessage(text, type = 'error') {
+                if (messageDiv) {
+                    messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+                    setTimeout(() => {
+                        messageDiv.innerHTML = '';
+                    }, 5000);
+                }
+            }
+            
+            // Función para mostrar/ocultar loading
+            function setLoading(show) {
+                if (loadingDiv && loginBtn) {
+                    if (show) {
+                        loadingDiv.style.display = 'flex';
+                        loginBtn.disabled = true;
+                        loginBtn.innerHTML = '🔄 Conectando...';
+                    } else {
+                        loadingDiv.style.display = 'none';
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '🔑 Acceder';
+                    }
+                }
+            }
+            
+            // Función de login
+            async function doLogin(email, password) {
+                if (isProcessing) return;
+                
+                isProcessing = true;
+                setLoading(true);
+                
+                try {
+                    const result = await auth.login(email, password);
+                    
+                    if (result.success) {
+                        showMessage('✅ Login exitoso! Redirigiendo...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    } else {
+                        showMessage('❌ ' + (result.error || 'Error en el login'), 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error en login:', error);
+                    showMessage('❌ Error de conexión: ' + error.message, 'error');
+                } finally {
+                    isProcessing = false;
+                    setLoading(false);
+                }
+            }
+            
+            // Función para crear cuenta
+            function createAccount() {
+                showMessage('ℹ️ Funcionalidad de registro en desarrollo', 'success');
+            }
+            
+            // Event listener para el formulario
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const email = emailInput ? emailInput.value.trim() : '';
+                    const password = passwordInput ? passwordInput.value.trim() : '';
+                    
+                    if (!email || !password) {
+                        showMessage('Por favor completa todos los campos', 'error');
+                        return;
+                    }
+                    
+                    if (!email.includes('@')) {
+                        showMessage('Por favor ingresa un email válido', 'error');
+                        return;
+                    }
+                    
+                    doLogin(email, password);
+                });
+            }
+            
+            // Verificar si ya está autenticado
             const token = localStorage.getItem('auth_token');
             if (token) {
                 showMessage('Ya tienes una sesión activa', 'success');
@@ -366,15 +382,15 @@
                     }
                 }, 1000);
             }
-        });
-        
-        // Limpiar mensajes al escribir
-        [emailInput, passwordInput].forEach(input => {
-            if (input) {
-                input.addEventListener('input', () => {
-                    if (messageDiv) messageDiv.innerHTML = '';
-                });
-            }
+            
+            // Limpiar mensajes al escribir
+            [emailInput, passwordInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('input', () => {
+                        if (messageDiv) messageDiv.innerHTML = '';
+                    });
+                }
+            });
         });
     </script>
 </body>
