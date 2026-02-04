@@ -1,0 +1,121 @@
+{
+  "version": "2.0.0-gh-pages",
+  "lastUpdated": "2026-02-04T00:00:00.000Z",
+  "environment": "github-pages",
+  "description": "Configuración estática para GitHub Pages - Todas las características desbloqueadas",
+  "plans": {
+    "free": {
+      "name": "GitHub Pages - Todas las características",
+      "price": 0,
+      "description": "Acceso completo sin backend",
+      "features": {
+        "maxPlayers": {
+          "value": 22,
+          "description": "Dos equipos completos",
+          "type": "number",
+          "category": "tactical"
+        },
+        "formations": {
+          "value": "all",
+          "description": "Todas las formaciones",
+          "type": "string",
+          "category": "tactical"
+        },
+        "maxCustomPlayers": {
+          "value": -1,
+          "description": "Jugadores ilimitados",
+          "type": "number",
+          "category": "tactical"
+        },
+        "maxLines": {
+          "value": -1,
+          "description": "Líneas ilimitadas",
+          "type": "number",
+          "category": "drawing"
+        },
+        "colors": {
+          "value": "all",
+          "description": "Todos los colores",
+          "type": "string",
+          "category": "drawing"
+        },
+        "maxAnimationFrames": {
+          "value": -1,
+          "description": "Frames ilimitados",
+          "type": "number",
+          "category": "animation"
+        },
+        "maxAnimationDuration": {
+          "value": -1,
+          "description": "Duración ilimitada",
+          "type": "number",
+          "category": "animation"
+        },
+        "audioRecording": {
+          "value": true,
+          "description": "Grabación de audio",
+          "type": "boolean",
+          "category": "animation"
+        },
+        "videoExport": {
+          "value": true,
+          "description": "Exportar video con audio",
+          "type": "boolean",
+          "category": "sharing"
+        },
+        "jsonExport": {
+          "value": true,
+          "description": "Exportación JSON",
+          "type": "boolean",
+          "category": "sharing"
+        },
+        "fieldStyles": {
+          "value": "all",
+          "description": "Todos los estilos de cancha",
+          "type": "string",
+          "category": "styles"
+        },
+        "cardStyles": {
+          "value": "all",
+          "description": "Todos los estilos de tarjeta",
+          "type": "string",
+          "category": "styles"
+        }
+      }
+    }
+  },
+  "categories": {
+    "tactical": {
+      "name": "Sistema Táctico",
+      "icon": "⚽",
+      "description": "Jugadores, formaciones y posiciones"
+    },
+    "drawing": {
+      "name": "Herramientas de Dibujo",
+      "icon": "🎨",
+      "description": "Líneas, colores y diseño"
+    },
+    "animation": {
+      "name": "Animaciones",
+      "icon": "🎬",
+      "description": "Videos, frames y audio"
+    },
+    "styles": {
+      "name": "Estilos Visuales",
+      "icon": "🎭",
+      "description": "Estilos de cancha y tarjetas"
+    },
+    "sharing": {
+      "name": "Exportar",
+      "icon": "📤",
+      "description": "Exportación y descargas"
+    }
+  },
+  "defaultPlan": "free",
+  "settings": {
+    "allowConfigChanges": false,
+    "requireAdminAuth": false,
+    "logConfigChanges": false,
+    "backupBeforeChanges": false
+  }
+}

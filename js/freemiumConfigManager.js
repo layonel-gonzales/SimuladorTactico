@@ -33,7 +33,7 @@ class FreemiumConfigManager {
                 return this.config;
             }
             
-            // Intentar cargar desde el servidor primero
+            // Intentar cargar desde el servidor primero (para desarrollo con backend)
             let response;
             try {
                 response = await fetch('/api/config');
@@ -43,11 +43,17 @@ class FreemiumConfigManager {
                     throw new Error(`Server response: ${response.status}`);
                 }
             } catch (serverError) {
-                response = await fetch(this.configPath);
-                if (!response.ok) {
-                    throw new Error(`Error loading local config: ${response.status}`);
+                // Fallback a archivo local (para GitHub Pages)
+                try {
+                    response = await fetch(this.configPath);
+                    if (!response.ok) {
+                        throw new Error(`Error loading local config: ${response.status}`);
+                    }
+                    this.config = await response.json();
+                } catch (localError) {
+                    // Último recurso: usar configuración estática hardcodeada (GitHub Pages sin archivos)
+                    this.config = this.getStaticConfig();
                 }
-                this.config = await response.json();
             }
             
             this.isLoaded = true;
@@ -58,10 +64,9 @@ class FreemiumConfigManager {
         } catch (error) {
             console.error('[FreemiumConfigManager] Error cargando configuración:', error);
             
-            // Fallback a configuración por defecto
+            // Fallback a configuración estática
             if (!this.config) {
-                this.config = this.getDefaultConfig();
-                console.warn('[FreemiumConfigManager] Usando configuración por defecto');
+                this.config = this.getStaticConfig();
             }
             
             return this.config;
@@ -79,10 +84,18 @@ class FreemiumConfigManager {
             throw new Error('Configuración inválida: falta estructura de planes');
         }
         
-        const requiredPlans = ['free', 'premium', 'pro'];
-        for (const plan of requiredPlans) {
-            if (!this.config.plans[plan]) {
-                console.warn(`[FreemiumConfigManager] Plan requerido no encontrado: ${plan}`);
+        // En GitHub Pages solo necesitamos el plan 'free'
+        if (this.config.environment === 'github-pages') {
+            if (!this.config.plans['free']) {
+                console.warn('[FreemiumConfigManager] Plan free no encontrado');
+            }
+        } else {
+            // En desarrollo esperamos todos los planes
+            const requiredPlans = ['free', 'premium', 'pro'];
+            for (const plan of requiredPlans) {
+                if (!this.config.plans[plan]) {
+                    console.warn(`[FreemiumConfigManager] Plan requerido no encontrado: ${plan}`);
+                }
             }
         }
     }
@@ -359,6 +372,54 @@ class FreemiumConfigManager {
         if (!this.isLoaded || !this.isConfigCacheValid()) {
             await this.loadConfig();
         }
+    }
+    
+    /**
+     * Configuración estática para GitHub Pages
+     * Se usa como fallback cuando no hay conexión con el servidor
+     */
+    getStaticConfig() {
+        return {
+            "version": "2.0.0-gh-pages",
+            "lastUpdated": new Date().toISOString(),
+            "environment": "github-pages",
+            "description": "Configuración estática para GitHub Pages - Todas las características desbloqueadas",
+            "plans": {
+                "free": {
+                    "name": "GitHub Pages - Todas las características",
+                    "price": 0,
+                    "description": "Acceso completo sin backend",
+                    "features": {
+                        "maxPlayers": { "value": 22, "description": "Dos equipos completos", "type": "number", "category": "tactical" },
+                        "formations": { "value": "all", "description": "Todas las formaciones", "type": "string", "category": "tactical" },
+                        "maxCustomPlayers": { "value": -1, "description": "Jugadores ilimitados", "type": "number", "category": "tactical" },
+                        "maxLines": { "value": -1, "description": "Líneas ilimitadas", "type": "number", "category": "drawing" },
+                        "colors": { "value": "all", "description": "Todos los colores", "type": "string", "category": "drawing" },
+                        "maxAnimationFrames": { "value": -1, "description": "Frames ilimitados", "type": "number", "category": "animation" },
+                        "maxAnimationDuration": { "value": -1, "description": "Duración ilimitada", "type": "number", "category": "animation" },
+                        "audioRecording": { "value": true, "description": "Grabación de audio", "type": "boolean", "category": "animation" },
+                        "videoExport": { "value": true, "description": "Exportar video con audio", "type": "boolean", "category": "sharing" },
+                        "jsonExport": { "value": true, "description": "Exportación JSON", "type": "boolean", "category": "sharing" },
+                        "fieldStyles": { "value": "all", "description": "Todos los estilos de cancha", "type": "string", "category": "styles" },
+                        "cardStyles": { "value": "all", "description": "Todos los estilos de tarjeta", "type": "string", "category": "styles" }
+                    }
+                }
+            },
+            "categories": {
+                "tactical": { "name": "Sistema Táctico", "icon": "⚽", "description": "Jugadores, formaciones y posiciones" },
+                "drawing": { "name": "Herramientas de Dibujo", "icon": "🎨", "description": "Líneas, colores y diseño" },
+                "animation": { "name": "Animaciones", "icon": "🎬", "description": "Videos, frames y audio" },
+                "styles": { "name": "Estilos Visuales", "icon": "🎭", "description": "Estilos de cancha y tarjetas" },
+                "sharing": { "name": "Exportar", "icon": "📤", "description": "Exportación y descargas" }
+            },
+            "defaultPlan": "free",
+            "settings": {
+                "allowConfigChanges": false,
+                "requireAdminAuth": false,
+                "logConfigChanges": false,
+                "backupBeforeChanges": false
+            }
+        };
     }
     
     getDefaultConfig() {
