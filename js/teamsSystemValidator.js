@@ -202,7 +202,7 @@ const TeamsSystemValidator = {
 
         try {
             test.details.loadDefaultPlayersBtn = !!document.getElementById('load-default-players-btn');
-            test.details.teamsManagementBtn = !!document.getElementById('teams-management-btn');
+            // teamsManagementBtn removed - functionality consolidated into customPlayersUI
             test.details.storageManagementBtn = !!document.getElementById('storage-management-btn');
 
             test.passed = Object.values(test.details).every(v => v);

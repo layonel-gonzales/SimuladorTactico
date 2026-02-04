@@ -5,6 +5,14 @@
  */
 
 class TeamsManager {
+    /**
+     * Normaliza un nombre para comparación (mayúsculas + sin espacios)
+     */
+    static normalizeForComparison(text) {
+        if (!text) return '';
+        return String(text).toUpperCase().replace(/\s+/g, '');
+    }
+
     constructor() {
         this.storageKey = 'simulador_teams';
         this.defaultTeam = {
@@ -75,15 +83,24 @@ class TeamsManager {
     }
 
     /**
-     * Crea un nuevo equipo
+     * Crea un nuevo equipo con validación de duplicados
      */
     createTeam(name, color = '#999999', icon = '⚽') {
         if (!name || name.trim() === '') {
-            console.error('El nombre del equipo no puede estar vacío');
-            return null;
+            throw new Error('El nombre del equipo no puede estar vacío');
         }
 
+        const normalizedNewName = TeamsManager.normalizeForComparison(name);
         const teams = this.loadTeamsFromStorage();
+        
+        // Validar que no exista un equipo con el mismo nombre normalizado
+        const existingTeam = teams.find(t => 
+            TeamsManager.normalizeForComparison(t.name) === normalizedNewName
+        );
+        
+        if (existingTeam) {
+            throw new Error(`❌ Ya existe un equipo llamado "${existingTeam.name}"`);
+        }
         
         // Generar ID único
         const id = 'team-' + Date.now();
@@ -103,7 +120,8 @@ class TeamsManager {
     }
 
     /**
-     * Elimina un equipo
+     * Elimina un equipo CON CONFIRMACIÓN
+     * Nota: También elimina todos los jugadores agregados a ese equipo
      */
     deleteTeam(teamId) {
         if (teamId === 'default') {
@@ -111,12 +129,42 @@ class TeamsManager {
             return false;
         }
 
+        // Obtener información del equipo para la confirmación
+        const team = this.getTeamById(teamId);
+        if (!team) {
+            console.error('Equipo no encontrado');
+            return false;
+        }
+
+        // Contar jugadores del equipo
+        const playersCount = window.customPlayersManager 
+            ? window.customPlayersManager.getTeamPlayers(teamId).length 
+            : 0;
+
+        // Construir mensaje de confirmación
+        let message = `¿Estás seguro de que deseas eliminar el equipo "${team.name}"?`;
+        if (playersCount > 0) {
+            message += `\n\n⚠️ ADVERTENCIA: Este equipo tiene ${playersCount} jugador(es) personalizados.\nEstos jugadores también serán ELIMINADOS.`;
+        }
+        message += `\n\nEsta acción NO SE PUEDE DESHACER.`;
+
+        // Solicitar confirmación del usuario
+        if (!confirm(message)) {
+            return false;
+        }
+
+        // Eliminar jugadores del equipo primero
+        if (window.customPlayersManager && playersCount > 0) {
+            window.customPlayersManager.deleteTeamPlayers(teamId);
+        }
+
+        // Eliminar el equipo
         const teams = this.loadTeamsFromStorage();
         const filtered = teams.filter(t => t.id !== teamId);
         
         if (filtered.length < teams.length) {
             this.saveTeamsToStorage(filtered);
-            console.log(`✅ Equipo eliminado: ${teamId}`);
+            console.log(`✅ Equipo eliminado: ${team.name} (${playersCount} jugadores también eliminados)`);
             return true;
         }
         

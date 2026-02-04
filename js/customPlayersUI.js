@@ -166,6 +166,32 @@ export default class CustomPlayersUI {
         });
     }
 
+    /**
+     * Abre el modal de agregar jugadores en una pestaña específica
+     */
+    openCustomPlayersModalOnTab(tabId) {
+        const modalElement = document.getElementById('custom-players-modal');
+        
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            
+            // Activar la pestaña específica
+            const tabButton = document.getElementById(tabId);
+            if (tabButton) {
+                const tab = new bootstrap.Tab(tabButton);
+                tab.show();
+            }
+            
+            // Actualizar listas al abrir
+            this.refreshCustomPlayersList();
+            this.refreshTeamsList();
+            this.updateCalculatedOverall();
+        } else {
+            console.error('[CustomPlayersUI][ERROR] No se encontró el modal custom-players-modal');
+        }
+    }
+
     openCustomPlayersModal() {       
         const modalElement = document.getElementById('custom-players-modal');
 
@@ -176,6 +202,7 @@ export default class CustomPlayersUI {
             
             // Actualizar listas al abrir
             this.refreshCustomPlayersList();
+            this.refreshTeamsList();
             this.updateCalculatedOverall();
         } else {
             console.error('[CustomPlayersUI][ERROR] No se encontró el modal custom-players-modal');
@@ -196,10 +223,11 @@ export default class CustomPlayersUI {
             
             // Validar datos
             if (!formData.name || !formData.position) {
-                throw new Error('Nombre y posición son obligatorios');
+                this.showError('Nombre y posición son obligatorios');
+                return;
             }
 
-            // Agregar jugador
+            // Agregar jugador (puede lanzar error si hay duplicado)
             const newPlayer = this.customPlayersManager.addCustomPlayer(formData);
             
             // Limpiar formulario
@@ -471,6 +499,163 @@ export default class CustomPlayersUI {
         } catch (error) {
             console.error('[CustomPlayersUI] Error importando:', error);
             this.showError('Error al importar: ' + error.message);
+        }
+    }
+
+    // === GESTIÓN DE EQUIPOS ===
+
+    /**
+     * Maneja la creación de un nuevo equipo desde el formulario inline
+     */
+    handleCreateTeam() {
+        const name = document.getElementById('team-name-inline').value.trim();
+        const color = document.getElementById('team-color-inline').value;
+        const icon = document.getElementById('team-icon-inline').value.trim() || '⚽';
+
+        if (!name) {
+            this.showError('❌ El nombre del equipo es requerido');
+            return;
+        }
+
+        try {
+            // Crear el equipo (puede lanzar error si hay duplicado)
+            const newTeam = window.teamsManager.createTeam(name, color, icon);
+            
+            if (newTeam) {
+                // Limpiar formulario
+                document.getElementById('create-team-form-inline').reset();
+                document.getElementById('team-color-inline').value = '#4CAF50';
+                document.getElementById('team-icon-inline').value = '⚽';
+
+                // Actualizar listas
+                this.refreshTeamsList();
+                this.setupTeamSelector();
+                
+                // Mostrar éxito
+                this.showSuccess(`✅ Equipo "${name}" creado exitosamente!`);
+            }
+        } catch (error) {
+            console.error('[CustomPlayersUI] Error creando equipo:', error);
+            this.showError(`❌ ${error.message}`);
+        }
+    }
+
+    /**
+     * Recarga y muestra la lista de equipos con sus jugadores
+     */
+    refreshTeamsList() {
+        const container = document.getElementById('teams-list');
+        const noTeamsDiv = document.getElementById('no-teams');
+        
+        if (!container || !window.teamsManager || !window.customPlayersManager) return;
+        
+        const teams = window.teamsManager.getAllTeams();
+        
+        // Mostrar/ocultar mensaje de "sin equipos"
+        if (teams.length <= 1) { // Solo equipo Default
+            container.innerHTML = '';
+            if (noTeamsDiv) noTeamsDiv.style.display = 'block';
+            return;
+        }
+        
+        container.innerHTML = '';
+        if (noTeamsDiv) noTeamsDiv.style.display = 'none';
+        
+        // Renderizar equipos
+        teams.forEach(team => {
+            const playersCount = window.customPlayersManager.getTeamPlayers(team.id).length;
+            const teamItem = this.createTeamCard(team, playersCount);
+            container.appendChild(teamItem);
+        });
+    }
+
+    /**
+     * Crea una tarjeta con información del equipo y opciones
+     */
+    createTeamCard(team, playersCount) {
+        const isDefault = team.id === 'default';
+        
+        const item = document.createElement('div');
+        item.className = 'list-group-item list-group-item-light d-flex justify-content-between align-items-start p-3 border-start';
+        item.style.borderLeftColor = team.color;
+        item.style.borderLeftWidth = '4px';
+        
+        item.innerHTML = `
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-2">
+                    <span style="font-size: 1.5em; margin-right: 0.5rem;">${team.icon}</span>
+                    <h6 class="mb-0">${team.name}</h6>
+                    <span class="badge bg-secondary ms-2">${playersCount} jugador${playersCount !== 1 ? 'es' : ''}</span>
+                </div>
+                <small class="text-muted">ID: ${team.id}</small>
+            </div>
+            ${!isDefault ? `
+            <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-info" onclick="customPlayersUI.editTeam('${team.id}')" title="Editar equipo">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger" onclick="customPlayersUI.deleteTeam('${team.id}')" title="Eliminar equipo">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            ` : `
+            <small class="text-muted">
+                <i class="fas fa-lock me-1"></i>Equipo por defecto
+            </small>
+            `}
+        `;
+        
+        return item;
+    }
+
+    /**
+     * Abre el modal para editar un equipo
+     */
+    editTeam(teamId) {
+        const team = window.teamsManager.getTeamById(teamId);
+        if (!team) {
+            this.showError('Equipo no encontrado');
+            return;
+        }
+
+        const newName = prompt(`Editar nombre del equipo:\n\nNombre actual: ${team.name}`, team.name);
+        if (newName && newName.trim()) {
+            try {
+                // Validar que no exista otro equipo con el mismo nombre
+                const normalizedNewName = window.teamsManager.constructor.normalizeForComparison(newName);
+                const teams = window.teamsManager.getAllTeams();
+                const existingTeam = teams.find(t => 
+                    t.id !== teamId && 
+                    window.teamsManager.constructor.normalizeForComparison(t.name) === normalizedNewName
+                );
+                
+                if (existingTeam) {
+                    this.showError(`❌ Ya existe un equipo llamado "${existingTeam.name}"`);
+                    return;
+                }
+                
+                window.teamsManager.updateTeam(teamId, { name: newName.trim() });
+                this.refreshTeamsList();
+                this.setupTeamSelector(); // Actualizar selector de equipos
+                this.showSuccess(`✅ Equipo "${newName}" actualizado`);
+            } catch (error) {
+                console.error('[CustomPlayersUI] Error editando equipo:', error);
+                this.showError(`❌ ${error.message}`);
+            }
+        }
+    }
+
+    /**
+     * Elimina un equipo con confirmación (también elimina jugadores del equipo)
+     */
+    deleteTeam(teamId) {
+        if (window.teamsManager.deleteTeam(teamId)) {
+            this.refreshTeamsList();
+            this.setupTeamSelector(); // Actualizar selector de equipos
+            this.showSuccess('✅ Equipo eliminado exitosamente');
+            
+            // Refrescar lista de jugadores
+            this.refreshCustomPlayersList();
         }
     }
 

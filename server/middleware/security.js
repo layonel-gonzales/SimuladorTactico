@@ -23,6 +23,7 @@ const helmetConfig = helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "blob:", "https:"],
+            mediaSrc: ["'self'", "blob:"], // ✨ Permitir audio/video desde blobs
             connectSrc: ["'self'", "http://localhost:*", "https://api.stripe.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://js.stripe.com"],
             frameSrc: ["'self'", "https://js.stripe.com"],
             objectSrc: ["'none'"],

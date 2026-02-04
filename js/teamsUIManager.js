@@ -12,49 +12,19 @@ class TeamsUIManager {
 
     init() {
         this.setupTeamSelector();
-        this.setupCreateTeamForm();
+        // setupCreateTeamForm migrado a customPlayersUI.handleCreateTeam()
         this.updateTeamButtons();
     }
 
     /**
-     * Configura el formulario de creación de equipos
+     * Configura el formulario de creación de equipos - MIGRADO
+     * Ahora la lógica está en customPlayersUI.handleCreateTeam()
      */
     setupCreateTeamForm() {
-        const saveTeamBtn = document.getElementById('save-team-btn');
-        const teamForm = document.getElementById('create-team-form');
-        
-        if (!saveTeamBtn || !teamForm) return;
-
-        saveTeamBtn.addEventListener('click', () => {
-            const name = document.getElementById('team-name').value.trim();
-            const color = document.getElementById('team-color').value;
-            const icon = document.getElementById('team-icon').value.trim() || '⚽';
-
-            if (!name) {
-                alert('El nombre del equipo es requerido');
-                return;
-            }
-
-            // Crear el equipo
-            const newTeam = this.teamsManager.createTeam(name, color, icon);
-            
-            if (newTeam) {
-                // Limpiar formulario
-                teamForm.reset();
-                document.getElementById('team-color').value = '#4CAF50';
-                document.getElementById('team-icon').value = '⚽';
-
-                // Cerrar modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('create-team-modal'));
-                if (modal) modal.hide();
-
-                // Actualizar selector de equipos
-                this.setupTeamSelector();
-                
-                // Mostrar confirmación
-                alert(`✅ Equipo "${name}" creado exitosamente`);
-            }
-        });
+        // Este método ya no se usa
+        // La creación de equipos ahora se maneja desde el tab "Administrar Equipos"
+        // en el modal de agregar jugadores
+        return;
     }
 
     /**
@@ -253,7 +223,8 @@ class TeamsUIManager {
 
             if (name.trim()) {
                 this.teamsManager.createTeam(name, style, color, description);
-                this.updateTeamFilter();
+                // Actualizar selector de equipos
+                this.setupTeamSelector();
                 bsModal.hide();
                 modal.remove();
             }

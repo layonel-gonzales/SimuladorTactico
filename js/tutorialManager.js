@@ -537,61 +537,6 @@ export default class TutorialManager {
                 text: `
                     <div class="tutorial-content">
                         <p><strong>Función:</strong> Graba una narración de audio para tu animación</p>
-                        <p><em>Útil para:</em> Explicar la táctica mientras se reproduce</p>
-                        <p>🎙️ <strong>Tip:</strong> Perfecto para crear tutoriales tácticos completos</p>
-                    </div>
-                `,
-                attachTo: {
-                    element: '#audio-record-btn',
-                    on: 'top'
-                },
-                buttons: [
-                    {
-                        text: '← Anterior',
-                        classes: 'shepherd-button-secondary',
-                        action: () => this.currentTour.back()
-                    },
-                    {
-                        text: 'Siguiente →',
-                        classes: 'shepherd-button-primary',
-                        action: () => this.currentTour.next()
-                    }
-                ]
-            },
-            {
-                title: '🔊 Reproducir Audio',
-                text: `
-                    <div class="tutorial-content">
-                        <p><strong>Función:</strong> Reproduce el audio grabado para tu animación</p>
-                        <p><em>Útil para:</em> Escuchar tu narración antes de exportar</p>
-                        <p>🎧 <strong>Tip:</strong> Verifica que el audio sincroniza bien con la animación</p>
-                    </div>
-                `,
-                attachTo: {
-                    element: '#audio-play-btn',
-                    on: 'top'
-                },
-                buttons: [
-                    {
-                        text: '← Anterior',
-                        classes: 'shepherd-button-secondary',
-                        action: () => this.currentTour.back()
-                    },
-                    {
-                        text: 'Siguiente →',
-                        classes: 'shepherd-button-primary',
-                        action: () => this.currentTour.next()
-                    }
-                ]
-            },
-            {
-                title: '💾 Exportar JSON',
-                text: `
-                    <div class="tutorial-content">
-                        <p><strong>Función:</strong> Exporta tu animación como archivo JSON</p>
-                        <p><em>Útil para:</em> Guardar y compartir animaciones completas (incluye audio)</p>
-                        <p>📁 <strong>Tip:</strong> Formato perfecto para importar en otras sesiones</p>
-                    </div>
                 `,
                 attachTo: {
                     element: '#export-animation-json',

@@ -2,6 +2,14 @@
 // Sistema de gestión de jugadores personalizados usando localStorage
 
 export default class CustomPlayersManager {
+    /**
+     * Normaliza un nombre para comparación (mayúsculas + sin espacios)
+     */
+    static normalizeForComparison(text) {
+        if (!text) return '';
+        return String(text).toUpperCase().replace(/\s+/g, '');
+    }
+
     constructor() {
         this.STORAGE_KEY = 'soccerTactics_customPlayers';
         this.TEAMS_KEY = 'soccerTactics_customTeams';
@@ -65,6 +73,16 @@ export default class CustomPlayersManager {
         // Validar datos obligatorios
         if (!this.validatePlayerData(playerData)) {
             throw new Error('Datos del jugador incompletos o inválidos');
+        }
+
+        // Validar que no exista un jugador con el mismo nombre normalizado
+        const normalizedNewName = CustomPlayersManager.normalizeForComparison(playerData.name);
+        const existingPlayer = this.customPlayers.find(p => 
+            CustomPlayersManager.normalizeForComparison(p.name) === normalizedNewName
+        );
+        
+        if (existingPlayer) {
+            throw new Error(`❌ Ya existe un jugador llamado "${existingPlayer.name}"`);
         }
 
         // Obtener equipo por defecto si no se proporciona
@@ -202,6 +220,51 @@ export default class CustomPlayersManager {
         if (customPlayer) return customPlayer;
 
         return staticPlayers.find(p => p.id === playerId);
+    }
+
+    /**
+     * Obtiene SOLO los jugadores creados por el usuario (excluye los por defecto)
+     */
+    getUserCreatedPlayers() {
+        return this.customPlayers.filter(p => !p.isDefault);
+    }
+
+    /**
+     * Obtiene los jugadores de un equipo específico (solo los creados por usuario)
+     */
+    getTeamPlayers(teamId) {
+        return this.customPlayers.filter(p => !p.isDefault && p.teamId === teamId);
+    }
+
+    /**
+     * Elimina todos los jugadores de un equipo específico
+     * Retorna la cantidad de jugadores eliminados
+     */
+    deleteTeamPlayers(teamId) {
+        const playersToDelete = this.customPlayers.filter(p => p.teamId === teamId);
+        const countBefore = this.customPlayers.length;
+        
+        this.customPlayers = this.customPlayers.filter(p => p.teamId !== teamId);
+        
+        if (this.customPlayers.length < countBefore) {
+            this.saveToStorage();
+        }
+        
+        return playersToDelete.length;
+    }
+
+    /**
+     * Elimina un jugador de un equipo específico
+     */
+    deletePlayerFromTeam(playerId, teamId) {
+        const playerIndex = this.customPlayers.findIndex(p => p.id === playerId && p.teamId === teamId);
+        if (playerIndex === -1) {
+            throw new Error('Jugador del equipo no encontrado');
+        }
+
+        const deletedPlayer = this.customPlayers.splice(playerIndex, 1)[0];
+        this.saveToStorage();
+        return deletedPlayer;
     }
 
     // === VALIDACIÓN DE DATOS ===

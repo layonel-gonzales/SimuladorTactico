@@ -144,41 +144,13 @@ const DefaultPlayersData = {
     },
 
     /**
-     * Carga los jugadores por defecto en localStorage automáticamente
+     * Carga los jugadores por defecto en memoria (NO en localStorage)
+     * Los 11 jugadores por defecto SIEMPRE están disponibles
+     * Solo se guardan en localStorage los jugadores CREADOS por el usuario
      */
     async loadDefaultPlayers() {
-        // Esperar a que customPlayersManager esté disponible
-        let attempts = 0;
-        const maxAttempts = 50; // 5 segundos máximo
-        
-        while (!window.customPlayersManager && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
-        
-        if (!window.customPlayersManager) {
-            console.error('❌ customPlayersManager no está disponible después de esperar');
-            return { loaded: false, added: 0, total: 0 };
-        }
-
-        const existing = window.customPlayersManager.getPlayers();
-        const defaultPlayerIds = new Set(this.getAllDefaultPlayers().map(p => p.id));
-        
-        // Agregar solo los que no existen
-        let added = 0;
-        this.getAllDefaultPlayers().forEach(player => {
-            const exists = existing.some(p => p.id === player.id);
-            if (!exists) {
-                window.customPlayersManager.addPlayer(player);
-                added++;
-            }
-        });
-
-        if (added > 0) {
-            console.log(`✅ Se cargaron ${added} jugadores por defecto automáticamente`);
-        }
-
-        return { loaded: true, added, total: this.getAllDefaultPlayers().length };
+        console.log(`✅ Jugadores por defecto cargados en memoria: ${this.getAllDefaultPlayers().length}`);
+        return { loaded: true, added: 0, total: this.getAllDefaultPlayers().length };
     }
 };
 

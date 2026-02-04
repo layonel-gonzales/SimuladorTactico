@@ -371,6 +371,98 @@ export default class AnimationManager {
         return a + (b - a) * t;
     }
     
+    // Versión async de playAnimation que espera hasta completarse
+    async playAnimationAsync() {
+        return new Promise((resolve) => {
+            if (this.isPlaying || this.frames.length < 2) {
+                resolve();
+                return;
+            }
+            
+            // Limpiar líneas antes de animar
+            if (this.uiManager && this.uiManager.drawingManager) {
+                this.uiManager.drawingManager.lines = [];
+                this.uiManager.drawingManager.redrawLines();
+            }
+            
+            // NO reproducir audio automáticamente en este modo
+            // (porque podría estar grabando narración)
+            
+            this.isPlaying = true;
+            if (this.playBtn) {
+                this.playBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            }
+            
+            const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
+            let i = 0;
+            
+            const animateFrameTransition = (fromFrame, toFrame, onComplete) => {
+                const duration = (600 * 1.75) / speed;
+                const start = performance.now();
+                const fromPlayers = fromFrame.players.map(p => ({ ...p }));
+                const toPlayers = toFrame.players.map(p => ({ ...p }));
+                
+                const animate = (currentTime) => {
+                    if (!this.isPlaying) {
+                        onComplete();
+                        return;
+                    }
+                    
+                    const elapsed = currentTime - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const interpolatedPlayers = fromPlayers.map((fromPlayer, idx) => {
+                        const toPlayer = toPlayers[idx];
+                        if (!toPlayer) return fromPlayer;
+                        
+                        return {
+                            ...fromPlayer,
+                            x: this.lerp(fromPlayer.x, toPlayer.x, progress),
+                            y: this.lerp(fromPlayer.y, toPlayer.y, progress)
+                        };
+                    });
+                    
+                    this.setActivePlayers(interpolatedPlayers);
+                    if (this.uiManager) {
+                        this.uiManager.renderPlayersOnPitch();
+                    }
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        onComplete();
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            };
+            
+            const nextStep = () => {
+                if (!this.isPlaying || i >= this.frames.length - 1) {
+                    this.isPlaying = false;
+                    if (this.playBtn) {
+                        this.playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                    resolve();
+                    return;
+                }
+                
+                const currentFrame = this.frames[i];
+                const nextFrame = this.frames[i + 1];
+                
+                this.currentFrame = i + 1;
+                this.updateFrameIndicator();
+                
+                animateFrameTransition(currentFrame, nextFrame, () => {
+                    i++;
+                    setTimeout(nextStep, (200 * 1.35) / speed);
+                });
+            };
+            
+            nextStep();
+        });
+    }
+
     playAnimation() {
         if (this.isPlaying || this.frames.length < 2) return;
         
@@ -499,22 +591,9 @@ export default class AnimationManager {
         }
     }
     
-    // Mostrar tip discreto sobre grabación de audio
+    // Ya no se necesita - la grabación de audio se controla desde el modal
     showAudioRecordingTip() {
-        if (!this.audioManager) return;
-        
-        const audioBtn = document.getElementById('audio-record-btn');
-        if (audioBtn) {
-            // Efecto visual discreto en el botón de audio
-            audioBtn.style.animation = 'pulse 2s infinite';
-            audioBtn.title = '💡 Tip: ¡Graba audio para explicar tu táctica!';
-            
-            // Quitar el efecto después de unos segundos
-            setTimeout(() => {
-                audioBtn.style.animation = '';
-                audioBtn.title = 'Grabar audio';
-            }, 6000);
-        }
+        // Método mantenido por compatibilidad pero no se usa
     }
     
     // Mostrar sugerencia más prominente después de reproducir
@@ -785,16 +864,38 @@ export default class AnimationManager {
         return this.frames.length;
     }
     
-    // Nuevo método para exportar a video MP4 - CAPTURA REAL DE LA ANIMACIÓN
-    async exportToVideo() {
+    // ============ FLUJO: GUARDAR SECUENCIA + AUDIO OPCIONAL + GRABACIÓN DE VIDEO ============
+
+    // Paso 1: Iniciar flujo (guarda frames y pregunta por audio)
+    async startVideoRecordingFlow() {
+        console.log('[AnimationManager] startVideoRecordingFlow() iniciado');
+        
         if (this.frames.length < 2) {
-            alert('❌ Necesitas al menos 2 frames para crear un video');
+            alert('❌ Necesitas al menos 2 frames para grabar un video');
             return;
         }
 
-        // Mostrar modal de progreso
-        this.showVideoExportProgress();
+        try {
+            // PASO 1: Guardar la secuencia de frames
+            console.log('[AnimationManager] Guardando secuencia de frames...');
+            this.savedAnimationData = this.exportAnimationData();
+            console.log('[AnimationManager] Secuencia guardada');
+            
+            // PASO 2: Preguntar si desea agregar audio
+            console.log('[AnimationManager] Mostrando modal para pregunta de audio...');
+            await this.showAudioModal(false);
+            console.log('[AnimationManager] startVideoRecordingFlow() completado');
 
+        } catch (error) {
+            console.error('[AnimationManager] Error en startVideoRecordingFlow:', error);
+            alert('❌ Error: ' + error.message);
+        }
+    }
+
+    // Paso 3: Cuando el usuario hace clic en "Descargar" - AHORA se graba el video
+    async recordVideoAndDownload(audioBlob = null) {
+        console.log('[AnimationManager] recordVideoAndDownload() iniciado');
+        
         try {
             // Obtener el contenedor del campo para capturar
             const pitchContainer = document.getElementById('pitch-container');
@@ -802,248 +903,85 @@ export default class AnimationManager {
                 throw new Error('No se encontró el contenedor del campo');
             }
 
-            // Configurar captura de pantalla del campo
-            const stream = await this.captureApplicationScreen(pitchContainer);
+            console.log('[AnimationManager] Iniciando captura de pantalla...');
             
-            // Si hay audio grabado, combinarlo
-            let finalStream = stream;
-            if (this.audioManager && this.audioManager.hasRecordedAudio()) {
-                finalStream = await this.addAudioToStream(stream);
+            // Configurar captura de pantalla del campo
+            let stream = await this.captureApplicationScreen(pitchContainer);
+            
+            console.log('[AnimationManager] Stream obtenido:', stream.getTracks().length, 'tracks');
+            
+            // SI TIENE AUDIO, agregarlo al stream ANTES de grabar
+            if (audioBlob) {
+                console.log('[AnimationManager] Agregando audio al stream...');
+                stream = await this.addAudioToStream(stream, audioBlob);
+                console.log('[AnimationManager] Audio agregado al stream');
             }
             
-            // Configurar MediaRecorder
-            const mediaRecorder = new MediaRecorder(finalStream, {
+            // MOSTRAR INDICADOR MINIMALISTA EN ESQUINA (no modal que interfiera)
+            this.showMinimalExportIndicator();
+            
+            // Configurar MediaRecorder CON el stream que ya tiene audio
+            const mediaRecorder = new MediaRecorder(stream, {
                 mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: 3000000 // 3 Mbps para alta calidad
+                videoBitsPerSecond: 3000000
             });
+
+            console.log('[AnimationManager] MediaRecorder configurado');
 
             const chunks = [];
             mediaRecorder.ondataavailable = (event) => {
+                console.log('[AnimationManager] ondataavailable -', event.data.size, 'bytes');
                 if (event.data.size > 0) {
                     chunks.push(event.data);
                 }
             };
 
-            // Cuando termine la grabación
+            // Cuando termine la grabación del VIDEO
             mediaRecorder.onstop = async () => {
-                const webmBlob = new Blob(chunks, { type: 'video/webm' });
-                this.downloadVideo(webmBlob, 'webm');
-                this.hideVideoExportProgress();
+                console.log('[AnimationManager] onstop evento disparado');
+                const videoBlob = new Blob(chunks, { type: 'video/webm' });
+                console.log('[AnimationManager] Video blob creado, tamaño:', videoBlob.size, 'bytes');
+                this.hideMinimalExportIndicator();
+                
+                try {
+                    console.log('[AnimationManager] Descargando video');
+                    this.downloadVideo(videoBlob, 'webm');
+                    
+                    // Limpiar
+                    if (this.recordingAudioContext) {
+                        this.recordingAudioContext.close();
+                        this.recordingAudioContext = null;
+                    }
+                    this.scheduledAudioSource = null;
+                    
+                } catch (error) {
+                    console.error('[AnimationManager] Error al descargar:', error);
+                    alert('❌ Error: ' + error.message);
+                }
             };
 
             // Iniciar grabación
+            console.log('[AnimationManager] Iniciando mediaRecorder.start()');
             mediaRecorder.start();
 
+            // ESPERAR UN POCO para que el MediaRecorder esté listo
+            await this.sleep(100);
+
+            console.log('[AnimationManager] Reproduciendo animación para grabación...');
+            
             // Reproducir la animación REAL de la aplicación mientras se graba
             await this.playAnimationForRecording();
 
+            console.log('[AnimationManager] Llamando a mediaRecorder.stop()');
+            
             // Detener grabación
-            setTimeout(() => {
-                mediaRecorder.stop();
-            }, 1000); // Pequeña pausa al final
+            mediaRecorder.stop();
 
         } catch (error) {
-            console.error('[AnimationManager] Error al exportar video:', error);
-            
-            // Mensaje de error más específico
-            let errorMessage = '❌ Error al crear el video.\n\n';
-            
-            if (error.name === 'NotAllowedError') {
-                errorMessage += '🚫 Permisos de captura denegados.\n\n💡 Solución:\n• Permite compartir pantalla\n• Selecciona esta pestaña en el selector';
-            } else if (error.name === 'NotSupportedError') {
-                errorMessage += '⚠️ Tu navegador no soporta captura de pantalla.\n\n💡 Alternativas:\n• Usa Chrome, Firefox o Edge\n• Actualiza tu navegador\n• Usa grabación de pantalla externa';
-            } else {
-                errorMessage += '🔧 Error técnico.\n\n💡 Intenta:\n• Recargar la página\n• Usar otro navegador\n• Verificar conexión a internet';
-            }
-            
-            alert(errorMessage);
-            this.hideVideoExportProgress();
+            console.error('[AnimationManager] Error en recordVideoAndDownload:', error);
+            this.hideMinimalExportIndicator();
+            alert('❌ Error: ' + error.message);
         }
-    }
-
-    // Capturar la pantalla de la aplicación
-    async captureApplicationScreen(element) {
-        try {
-            // Usar getDisplayMedia para capturar pantalla
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                video: {
-                    mediaSource: 'screen',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    frameRate: { ideal: 30 }
-                },
-                audio: false // Audio lo manejaremos por separado
-            });
-
-            return screenStream;
-
-        } catch (error) {
-            console.warn('[AnimationManager] getDisplayMedia no disponible, usando alternativa');
-            
-            // Alternativa: capturar usando canvas del elemento
-            return this.captureElementAsStream(element);
-        }
-    }
-
-    // Alternativa: capturar elemento específico
-    async captureElementAsStream(element) {
-        // Crear canvas del tamaño del elemento
-        const canvas = document.createElement('canvas');
-        const rect = element.getBoundingClientRect();
-        canvas.width = rect.width * 2; // 2x para mejor calidad
-        canvas.height = rect.height * 2;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.scale(2, 2); // Escalar para mejor calidad
-        
-        // Función para capturar el elemento en el canvas
-        const captureFrame = () => {
-            // Usar html2canvas para capturar el elemento
-            if (window.html2canvas) {
-                window.html2canvas(element, {
-                    canvas: canvas,
-                    backgroundColor: null,
-                    scale: 2,
-                    logging: false
-                });
-            } else {
-                // Fallback: dibujar fondo del campo
-                ctx.fillStyle = '#1a5f3f';
-                ctx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
-            }
-        };
-
-        // Iniciar captura continua
-        const interval = setInterval(captureFrame, 33); // ~30 FPS
-        
-        // Limpiar interval cuando termine
-        setTimeout(() => clearInterval(interval), 30000); // Max 30 segundos
-        
-        return canvas.captureStream(30);
-    }
-
-    // Agregar audio al stream de video
-    async addAudioToStream(videoStream) {
-        try {
-            if (!this.audioManager || !this.audioManager.recordedAudioBlob) {
-                return videoStream;
-            }
-
-            // Crear contexto de audio
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Convertir blob de audio a buffer
-            const audioArrayBuffer = await this.audioManager.recordedAudioBlob.arrayBuffer();
-            const audioBuffer = await audioContext.decodeAudioData(audioArrayBuffer);
-
-            // Crear fuente de audio
-            const audioSource = audioContext.createBufferSource();
-            audioSource.buffer = audioBuffer;
-
-            // Crear destino para el stream
-            const audioDestination = audioContext.createMediaStreamDestination();
-            audioSource.connect(audioDestination);
-
-            // Combinar video y audio
-            const combinedStream = new MediaStream([
-                ...videoStream.getVideoTracks(),
-                ...audioDestination.stream.getAudioTracks()
-            ]);
-
-            // Programar inicio del audio sincronizado
-            this.scheduledAudioSource = audioSource;
-
-            return combinedStream;
-
-        } catch (error) {
-            console.warn('[AnimationManager] Error al agregar audio:', error);
-            return videoStream;
-        }
-    }
-
-    // Reproducir animación especificamente para grabación
-    async playAnimationForRecording() {
-        // Preparar para grabación
-        this.isRecordingVideo = true;
-        
-        // Ir al primer frame
-        this.currentFrame = 0;
-        this.setStateFromFrame(this.frames[0]);
-        this.updateFrameIndicator();
-        
-        // Pequeña pausa inicial
-        await this.sleep(1000);
-        
-        // Iniciar audio si está disponible
-        if (this.scheduledAudioSource) {
-            this.scheduledAudioSource.start(0);
-        }
-
-        // Reproducir la animación normal
-        await this.playAnimationSynchronously();
-        
-        // Pausa final
-        await this.sleep(1500);
-        
-        this.isRecordingVideo = false;
-    }
-
-    // Versión síncrona de playAnimation para grabación
-    async playAnimationSynchronously() {
-        const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
-        
-        for (let i = 0; i < this.frames.length - 1; i++) {
-            const fromFrame = this.frames[i];
-            const toFrame = this.frames[i + 1];
-            
-            // Actualizar progreso
-            this.updateVideoProgress(((i + 1) / (this.frames.length - 1)) * 90); // 90% max, dejando 10% para finalización
-            
-            // Animar transición
-            await this.animateFrameTransitionSync(fromFrame, toFrame, speed);
-            
-            // Pausa entre frames
-            await this.sleep((200 * 1.75) / speed);
-        }
-    }
-
-    // Transición de frame síncrona
-    async animateFrameTransitionSync(fromFrame, toFrame, speed) {
-        const duration = (600 * 1.75) / speed;
-        const startTime = performance.now();
-        
-        return new Promise((resolve) => {
-            const animate = (currentTime) => {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Interpolar jugadores
-                const interpolatedPlayers = fromFrame.players.map((fromPlayer, idx) => {
-                    const toPlayer = toFrame.players[idx];
-                    if (!toPlayer) return fromPlayer;
-                    
-                    return {
-                        ...fromPlayer,
-                        x: this.lerp(fromPlayer.x, toPlayer.x, progress),
-                        y: this.lerp(fromPlayer.y, toPlayer.y, progress)
-                    };
-                });
-                
-                // Actualizar pantalla real
-                this.setActivePlayers(interpolatedPlayers);
-                if (this.uiManager) {
-                    this.uiManager.renderPlayersOnPitch();
-                }
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    resolve();
-                }
-            };
-            
-            requestAnimationFrame(animate);
-        });
     }
 
     // Capturar frame actual al canvas del video
@@ -1215,7 +1153,518 @@ export default class AnimationManager {
         ctx.fillText(timestamp, 20, canvas.height - 20);
     }
 
-    // Descargar video
+    // Capturar la pantalla de la aplicación
+    async captureApplicationScreen(element) {
+        try {
+            // Usar getDisplayMedia para capturar pantalla
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    mediaSource: 'screen',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                },
+                audio: false
+            });
+
+            return screenStream;
+
+        } catch (error) {
+            console.warn('[AnimationManager] getDisplayMedia no disponible');
+            throw new Error('Captura de pantalla no disponible en tu navegador');
+        }
+    }
+
+    // Agregar audio al stream de video
+    async addAudioToStream(videoStream, audioBlob = null) {
+        try {
+            // Usar el audioBlob pasado o el del audioManager
+            const blob = audioBlob || (this.audioManager && this.audioManager.recordedAudioBlob);
+            
+            if (!blob) {
+                console.log('[AnimationManager] No hay audio para combinar');
+                return videoStream;
+            }
+
+            console.log('[AnimationManager] Preparando audio para agregar al stream...');
+
+            // Crear un AudioContext que persista durante toda la grabación
+            if (!this.recordingAudioContext) {
+                this.recordingAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const audioContext = this.recordingAudioContext;
+            
+            // Si el contexto está suspendido, reanudarlo
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            const audioArrayBuffer = await blob.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(audioArrayBuffer);
+            
+            console.log('[AnimationManager] Audio decodificado - Duración:', audioBuffer.duration, 'segundos');
+
+            // Crear el source del audio
+            const audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+
+            // Crear el destino del stream de media
+            const audioDestination = audioContext.createMediaStreamDestination();
+            audioSource.connect(audioDestination);
+
+            // Crear el stream combinado: video + audio
+            const videoTracks = videoStream.getVideoTracks();
+            const audioTracks = audioDestination.stream.getAudioTracks();
+
+            console.log('[AnimationManager] Video tracks:', videoTracks.length, 'Audio tracks:', audioTracks.length);
+
+            const combinedStream = new MediaStream([
+                ...videoTracks,
+                ...audioTracks
+            ]);
+
+            console.log('[AnimationManager] Stream combinado creado. Tracks totales:', combinedStream.getTracks().length);
+
+            // Guardar la source de audio para iniciar después
+            this.scheduledAudioSource = audioSource;
+            this.recordingAudioContext = audioContext;
+            
+            return combinedStream;
+
+        } catch (error) {
+            console.error('[AnimationManager] Error al agregar audio:', error);
+            return videoStream;
+        }
+    }
+
+    // Reproducir animación especificamente para grabación
+    async playAnimationForRecording() {
+        console.log('[AnimationManager] playAnimationForRecording() iniciado');
+        this.isRecordingVideo = true;
+        this.currentFrame = 0;
+        this.setStateFromFrame(this.frames[0]);
+        this.updateFrameIndicator();
+        
+        // Esperar a que el MediaRecorder esté listo
+        await this.sleep(500);
+        
+        // Iniciar el audio AHORA
+        if (this.scheduledAudioSource) {
+            console.log('[AnimationManager] Iniciando audio source en time:', this.recordingAudioContext?.currentTime);
+            try {
+                this.scheduledAudioSource.start(0);
+                console.log('[AnimationManager] Audio source iniciado correctamente');
+            } catch (error) {
+                console.error('[AnimationManager] Error al iniciar audio source:', error);
+            }
+        } else {
+            console.log('[AnimationManager] No hay audio source disponible');
+        }
+
+        // Ahora reproducir la animación
+        console.log('[AnimationManager] Iniciando reproducción sincronizada...');
+        await this.playAnimationSynchronously();
+        console.log('[AnimationManager] Reproducción terminada');
+        
+        await this.sleep(1000);
+        
+        this.isRecordingVideo = false;
+        console.log('[AnimationManager] playAnimationForRecording() completado');
+    }
+
+    // Versión síncrona de playAnimation para grabación
+    async playAnimationSynchronously() {
+        const speed = this.speedInput ? parseFloat(this.speedInput.value) : 1;
+        
+        for (let i = 0; i < this.frames.length - 1; i++) {
+            const fromFrame = this.frames[i];
+            const toFrame = this.frames[i + 1];
+            
+            await this.animateFrameTransitionSync(fromFrame, toFrame, speed);
+            await this.sleep((200 * 1.75) / speed);
+        }
+    }
+
+    // Transición de frame síncrona
+    async animateFrameTransitionSync(fromFrame, toFrame, speed) {
+        const duration = (600 * 1.75) / speed;
+        const startTime = performance.now();
+        
+        return new Promise((resolve) => {
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const interpolatedPlayers = fromFrame.players.map((fromPlayer, idx) => {
+                    const toPlayer = toFrame.players[idx];
+                    if (!toPlayer) return fromPlayer;
+                    
+                    return {
+                        ...fromPlayer,
+                        x: this.lerp(fromPlayer.x, toPlayer.x, progress),
+                        y: this.lerp(fromPlayer.y, toPlayer.y, progress)
+                    };
+                });
+                
+                this.setActivePlayers(interpolatedPlayers);
+                if (this.uiManager) {
+                    this.uiManager.renderPlayersOnPitch();
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        });
+    }
+
+    // ============ MODALES Y FLUJO DE AUDIO ============
+
+    // Modal unificado: pregunta si agregar audio O muestra opciones con audio grabado
+    showAudioModal(hasAudio = false) {
+        return new Promise((resolve) => {
+            console.log('[AnimationManager] showAudioModal() iniciado - hasAudio:', hasAudio);
+            
+            // Crear modal
+            const modal = document.createElement('div');
+            modal.id = 'audio-control-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 15px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                text-align: center;
+                min-width: 400px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            `;
+
+            let modalContent = '';
+            
+            if (!hasAudio) {
+                // SIN AUDIO: Pregunta si desea agregar
+                modalContent = `
+                    <h3 style="color: white; margin: 0 0 15px 0; font-size: 20px;">🎙️ ¿Deseas agregar audio/narración?</h3>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin: 0 0 25px 0;">Se reproducirá la secuencia para que puedas narrar la jugada</p>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="btn-add-audio-yes" style="
+                            background: #4CAF50;
+                            color: white;
+                            border: none;
+                            padding: 10px 30px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            transition: all 0.3s ease;
+                        ">Sí, agregar audio</button>
+                        <button id="btn-add-audio-no" style="
+                            background: #f44336;
+                            color: white;
+                            border: none;
+                            padding: 10px 30px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            transition: all 0.3s ease;
+                        ">No, descargar sin audio</button>
+                    </div>
+                `;
+            } else {
+                // CON AUDIO: Muestra opciones de control
+                modalContent = `
+                    <h3 style="color: white; margin: 0 0 15px 0; font-size: 20px;">🎵 Audio grabado</h3>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin: 0 0 25px 0;">¿Qué deseas hacer?</p>
+                    <div style="margin-bottom: 15px;">
+                        <button id="btn-play-audio" style="
+                            background: #2196F3;
+                            color: white;
+                            border: none;
+                            padding: 10px 25px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            width: 100%;
+                            transition: all 0.3s ease;
+                        ">▶️ Reproducir audio</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="btn-re-record" style="
+                            background: #FF9800;
+                            color: white;
+                            border: none;
+                            padding: 10px 25px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            transition: all 0.3s ease;
+                        ">🔄 Volver a grabar</button>
+                        <button id="btn-download-with-audio" style="
+                            background: #4CAF50;
+                            color: white;
+                            border: none;
+                            padding: 10px 25px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            font-weight: bold;
+                            transition: all 0.3s ease;
+                        ">⬇️ Descargar</button>
+                    </div>
+                `;
+            }
+
+            modal.innerHTML = modalContent;
+
+            console.log('[AnimationManager] Modal HTML creado');
+            document.body.appendChild(modal);
+            console.log('[AnimationManager] Modal agregado al DOM');
+
+            if (!hasAudio) {
+                // BOTONES SIN AUDIO
+                document.getElementById('btn-add-audio-yes').addEventListener('click', async () => {
+                    console.log('[AnimationManager] Usuario eligió: SÍ agregar audio');
+                    modal.remove();
+                    await this.startAudioRecordingFlow();
+                    resolve();
+                });
+
+                document.getElementById('btn-add-audio-no').addEventListener('click', async () => {
+                    console.log('[AnimationManager] Usuario eligió: NO, descargar sin audio');
+                    modal.remove();
+                    // AHORA grabar video sin audio
+                    await this.recordVideoAndDownload(null);
+                    resolve();
+                });
+            } else {
+                // BOTONES CON AUDIO
+                document.getElementById('btn-play-audio').addEventListener('click', () => {
+                    console.log('[AnimationManager] Usuario eligió: Reproducir audio');
+                    if (this.audioManager && this.audioManager.recordedAudioBlob) {
+                        const audioURL = URL.createObjectURL(this.audioManager.recordedAudioBlob);
+                        const audio = new Audio(audioURL);
+                        audio.play();
+                    }
+                });
+
+                document.getElementById('btn-re-record').addEventListener('click', async () => {
+                    console.log('[AnimationManager] Usuario eligió: Volver a grabar');
+                    modal.remove();
+                    // Limpiar audio anterior
+                    if (this.audioManager) {
+                        this.audioManager.recordedAudioBlob = null;
+                    }
+                    // Reiniciar el flujo de audio
+                    await this.startAudioRecordingFlow();
+                    resolve();
+                });
+
+                document.getElementById('btn-download-with-audio').addEventListener('click', async () => {
+                    console.log('[AnimationManager] Usuario eligió: Descargar con audio');
+                    modal.remove();
+                    // AHORA grabar video y combinarlo con audio
+                    await this.recordVideoAndDownload(this.audioManager?.recordedAudioBlob);
+                    resolve();
+                });
+            }
+            
+            console.log('[AnimationManager] Event listeners agregados');
+        });
+    }
+
+    // Flujo de grabación de audio
+    async startAudioRecordingFlow() {
+        console.log('[AnimationManager] startAudioRecordingFlow() iniciado');
+        
+        // Mostrar countdown 3, 2, 1
+        await this.showCountdown();
+
+        // Reproducir la secuencia (mientras se graba audio)
+        console.log('[AnimationManager] Iniciando reproducción para narración...');
+        
+        // INMEDIATAMENTE DESPUÉS del countdown, iniciar grabación de audio
+        if (this.audioManager) {
+            await this.audioManager.startRecording();
+            console.log('[AnimationManager] Grabación de audio iniciada');
+        }
+
+        // Reproducir animación usando playAnimationAsync() que espera completamente
+        console.log('[AnimationManager] Reproduciendo animación...');
+        await this.playAnimationAsync();
+
+        // Esperar 1 segundo después de que termina la animación
+        console.log('[AnimationManager] Esperando 1 segundo para asegurar audio completo...');
+        await this.sleep(1000);
+
+        // DESPUÉS de esperar, detener grabación de audio
+        if (this.audioManager) {
+            this.audioManager.stopRecording();
+            console.log('[AnimationManager] Grabación de audio detenida');
+        }
+
+        // Mostrar modal para revisar/re-grabar audio (CON AUDIO ya grabado)
+        console.log('[AnimationManager] Mostrando modal con opciones de audio...');
+        await this.showAudioModal(true);
+        console.log('[AnimationManager] startAudioRecordingFlow() completado');
+    }
+
+    // Mostrar countdown 3, 2, 1
+    showCountdown() {
+        return new Promise((resolve) => {
+            const container = document.createElement('div');
+            container.id = 'countdown-container';
+            container.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 9999;
+                text-align: center;
+            `;
+
+            const number = document.createElement('div');
+            number.style.cssText = `
+                font-size: 150px;
+                font-weight: bold;
+                color: white;
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(76, 175, 80, 0.6);
+                font-family: 'Arial', sans-serif;
+                letter-spacing: 20px;
+                animation: pulse 1s ease-in-out;
+            `;
+
+            container.appendChild(number);
+            document.body.appendChild(container);
+
+            // Agregar estilos de animación
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: scale(0.5); opacity: 0; }
+                    50% { transform: scale(1.2); opacity: 1; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            const countdownNumbers = [3, 2, 1];
+            let index = 0;
+
+            const showNumber = () => {
+                if (index < countdownNumbers.length) {
+                    number.textContent = countdownNumbers[index];
+                    index++;
+                    setTimeout(showNumber, 1000);
+                } else {
+                    // El número 1 desaparece
+                    number.style.opacity = '0';
+                    setTimeout(() => {
+                        container.remove();
+                        style.remove();
+                        resolve();
+                    }, 500);
+                }
+            };
+
+            showNumber();
+        });
+    }
+
+
+    // Combinar video y audio usando FFmpeg.wasm
+    async combineVideoAndAudioWithFFmpeg(videoBlob, audioBlob) {
+        try {
+            if (!videoBlob) {
+                throw new Error('No hay video para combinar');
+            }
+
+            // Si no hay audio, devolver solo el video
+            if (!audioBlob) {
+                console.log('[AnimationManager] Sin audio, devolviendo video sin cambios');
+                return videoBlob;
+            }
+
+            console.log('[AnimationManager] Cargando FFmpeg...');
+
+            // Verificar que FFmpeg esté disponible
+            if (!window.FFmpeg || !window.FFmpeg.FFmpeg) {
+                console.warn('[AnimationManager] FFmpeg no disponible, descargando video sin audio');
+                alert('⚠️ No se pudo cargar FFmpeg. Se descargará el video sin audio.\n\nPuedes combinarlos manualmente con herramientas como VLC o HandBrake.');
+                return videoBlob;
+            }
+
+            const { FFmpeg, toBlobURL } = window.FFmpeg;
+            const ffmpeg = new FFmpeg.FFmpeg();
+
+            // Cargar los binarios de FFmpeg
+            const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+            ffmpeg.on('log', ({ message }) => console.log('[FFmpeg]', message));
+
+            if (!ffmpeg.loaded) {
+                await ffmpeg.load({
+                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+                    workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+                });
+            }
+
+            console.log('[AnimationManager] FFmpeg cargado');
+
+            // Convertir blobs a Uint8Array
+            const videoData = new Uint8Array(await videoBlob.arrayBuffer());
+            const audioData = new Uint8Array(await audioBlob.arrayBuffer());
+
+            // Escribir archivos en el sistema de archivos virtual de FFmpeg
+            ffmpeg.FS('writeFile', 'video.webm', videoData);
+            ffmpeg.FS('writeFile', 'audio.webm', audioData);
+
+            console.log('[AnimationManager] Ejecutando FFmpeg para combinar...');
+
+            // Ejecutar FFmpeg para combinar
+            await ffmpeg.run(
+                '-i', 'video.webm',
+                '-i', 'audio.webm',
+                '-c:v', 'copy',     // Copiar video sin re-encodear
+                '-c:a', 'aac',      // Audio codec
+                '-map', '0:v:0',    // Usar pista de video del primer archivo
+                '-map', '1:a:0',    // Usar pista de audio del segundo archivo
+                '-y',               // Overwrite output file
+                'output.webm'
+            );
+
+            console.log('[AnimationManager] Leyendo archivo combinado...');
+
+            // Leer el archivo resultante
+            const outputData = ffmpeg.FS('readFile', 'output.webm');
+            const outputBlob = new Blob([outputData], { type: 'video/webm' });
+
+            // Limpiar archivos
+            ffmpeg.FS('unlink', 'video.webm');
+            ffmpeg.FS('unlink', 'audio.webm');
+            ffmpeg.FS('unlink', 'output.webm');
+
+            console.log('[AnimationManager] Video y audio combinados exitosamente');
+            return outputBlob;
+
+        } catch (error) {
+            console.error('[AnimationManager] Error en FFmpeg:', error);
+            throw new Error(`Error al combinar: ${error.message}`);
+        }
+    }
+
+
     downloadVideo(blob, extension) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1226,167 +1675,35 @@ export default class AnimationManager {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        // Mostrar mensaje de éxito
-        const hasAudio = this.audioManager && this.audioManager.hasRecordedAudio();
-        const audioText = hasAudio ? '\n🎤 Incluye narración de audio' : '\n🔇 Sin audio (puedes grabarlo antes de exportar)';
-        
         setTimeout(() => {
-            alert(`✅ Video exportado exitosamente como ${extension.toUpperCase()}${audioText}\n\n📱 Puedes compartirlo en:\n• WhatsApp\n• Instagram\n• Facebook\n• YouTube\n• TikTok\n\n🎬 El video está listo para usar!`);
+            alert(`✅ Video exportado exitosamente como ${extension.toUpperCase()}`);
         }, 500);
     }
 
-    // Mostrar modal de progreso
-    showVideoExportProgress() {
-        const modal = document.createElement('div');
-        modal.id = 'video-export-modal';
-        modal.innerHTML = `
-            <div class="video-export-overlay">
-                <div class="video-export-content">
-                    <div class="video-export-header">
-                        <h3>🎬 Capturando Video Real</h3>
-                        <p>Grabando la animación exacta de la aplicación...</p>
-                    </div>
-                    <div class="video-export-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="video-progress-fill"></div>
-                        </div>
-                        <span id="video-progress-text">0%</span>
-                    </div>
-                    <div class="video-export-instructions">
-                        <div class="instruction-step">
-                            <strong>📺 Si aparece selector de pantalla:</strong><br>
-                            <small>• Selecciona esta ventana/pestaña<br>
-                            • Permite compartir pantalla</small>
-                        </div>
-                        <div class="instruction-step">
-                            <strong>⚠️ Durante la grabación:</strong><br>
-                            <small>• NO cambies de pestaña<br>
-                            • NO minimices la ventana<br>
-                            • La animación se reproduce automáticamente</small>
-                        </div>
-                    </div>
-                    <div class="video-export-info">
-                        <small>💡 El video final será idéntico a lo que ves en pantalla</small>
-                    </div>
-                </div>
-            </div>
+    // INDICADOR MINIMALISTA (esquina, NO interfiere)
+    showMinimalExportIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'minimal-export-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #17a2b8;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 5000;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
         `;
-
-        // Estilos para el modal
-        if (!document.getElementById('video-export-styles')) {
-            const style = document.createElement('style');
-            style.id = 'video-export-styles';
-            style.textContent = `
-                .video-export-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.8);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                }
-                
-                .video-export-content {
-                    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-                    border-radius: 15px;
-                    padding: 30px;
-                    max-width: 400px;
-                    width: 90%;
-                    text-align: center;
-                    color: white;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-                }
-                
-                .video-export-header h3 {
-                    margin: 0 0 10px 0;
-                    color: #17a2b8;
-                    font-size: 24px;
-                }
-                
-                .video-export-header p {
-                    margin: 0 0 20px 0;
-                    color: #b8b8b8;
-                }
-                
-                .progress-bar {
-                    width: 100%;
-                    height: 20px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 10px;
-                    overflow: hidden;
-                    margin-bottom: 10px;
-                }
-                
-                .progress-fill {
-                    height: 100%;
-                    background: linear-gradient(90deg, #17a2b8, #28a745);
-                    width: 0%;
-                    transition: width 0.3s ease;
-                    border-radius: 10px;
-                }
-                
-                #video-progress-text {
-                    font-weight: bold;
-                    color: #17a2b8;
-                }
-                
-                .video-export-instructions {
-                    margin: 20px 0;
-                    text-align: left;
-                }
-                
-                .instruction-step {
-                    margin-bottom: 15px;
-                    padding: 10px;
-                    background: rgba(23, 162, 184, 0.1);
-                    border-left: 3px solid #17a2b8;
-                    border-radius: 5px;
-                }
-                
-                .instruction-step strong {
-                    color: #17a2b8;
-                    display: block;
-                    margin-bottom: 5px;
-                }
-                
-                .instruction-step small {
-                    color: #d0d0d0;
-                    line-height: 1.4;
-                }
-                
-                .video-export-info {
-                    margin-top: 20px;
-                    color: #888;
-                    text-align: center;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        document.body.appendChild(modal);
+        indicator.innerHTML = '📹 Grabando...';
+        document.body.appendChild(indicator);
     }
 
-    // Actualizar progreso del video
-    updateVideoProgress(percentage) {
-        const progressFill = document.getElementById('video-progress-fill');
-        const progressText = document.getElementById('video-progress-text');
-        
-        if (progressFill && progressText) {
-            progressFill.style.width = `${percentage}%`;
-            progressText.textContent = `${Math.round(percentage)}%`;
-        }
-    }
-
-    // Ocultar modal de progreso
-    hideVideoExportProgress() {
-        const modal = document.getElementById('video-export-modal');
-        if (modal) {
-            modal.remove();
-        }
+    hideMinimalExportIndicator() {
+        const indicator = document.getElementById('minimal-export-indicator');
+        if (indicator) indicator.remove();
     }
 
     // Utilidad para pausas

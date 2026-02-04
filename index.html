@@ -276,6 +276,33 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     
     <!-- PWA ADVANCED STYLES -->
     <link rel="stylesheet" href="css/pwa-styles.css">
+    
+    <!-- FFmpeg.wasm for video/audio combining -->
+    <!-- Usando la versión más reciente disponible -->
+    <script async src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
+    <script>
+        // Esperar a que FFmpeg esté disponible
+        window.ffmpegReady = new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 100; // 10 segundos con 100ms de intervalo
+            
+            const checkFFmpeg = setInterval(() => {
+                attempts++;
+                // Revisar múltiples formas en que FFmpeg podría estar disponible
+                if ((window.FFmpeg && window.FFmpeg.FFmpeg) || 
+                    (window.FFmpeg && window.FFmpeg.ffmpeg) ||
+                    (typeof FFmpeg !== 'undefined')) {
+                    clearInterval(checkFFmpeg);
+                    console.log('✅ FFmpeg cargado correctamente');
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkFFmpeg);
+                    console.warn('⚠️ FFmpeg no se cargó. La combinación de audio/video no estará disponible.');
+                    resolve();
+                }
+            }, 100);
+        });
+    </script>
 </head>
 <body>
     <!-- Toggle de tema claro/oscuro -->
@@ -340,26 +367,12 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                 data-step="3d">
             <i class="fas fa-database"></i>
         </button>
-
-        <button id="teams-management-btn" class="btn btn-primary btn-sm teams-btn-always-visible" 
-                title="Gestión de equipos"
-                data-intro="Crea y gestiona tus equipos. Cada equipo tiene su propio estilo de card." 
-                data-step="3e">
-            <i class="fas fa-users"></i>
-        </button>
         
-        <button id="field-styles-btn" class="btn btn-info btn-sm field-styles-btn-always-visible" 
-                title="Estilos de cancha"
-                data-intro="Cambia el estilo visual del campo de fútbol entre diferentes temas disponibles." 
+        <button id="styles-selector-btn" class="btn btn-info btn-sm styles-selector-btn-always-visible" 
+                title="Estilos de cancha y cards"
+                data-intro="Personaliza los estilos visuales del campo y las tarjetas de jugadores en un solo lugar." 
                 data-step="3e">
             <i class="fas fa-palette"></i>
-        </button>
-        
-        <button id="card-style-button" class="btn btn-info btn-sm card-style-btn-always-visible" 
-                title="Estilos de cards de jugador"
-                data-intro="Cambia el estilo visual de las cards de jugador entre diferentes temas disponibles." 
-                data-step="3f">
-            <i class="fas fa-credit-card"></i>
         </button>
         
         <button id="fullscreen-toggle-btn" class="btn btn-secondary btn-sm fullscreen-btn-always-visible" 
@@ -449,35 +462,19 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                     data-step="16-delete">
                 <i class="fas fa-trash"></i>
             </button>            
-            <button id="frame-play" class="btn btn-info btn-sm" title="Reproducir"
-                    data-intro="Reproduce toda la secuencia de animación que has creado. ¡Verás tu táctica en movimiento!" 
-                    data-step="18">
-                <i class="fas fa-play"></i>
-            </button>        
-            <!-- Controles de Audio -->
-            <button id="audio-record-btn" class="btn btn-secondary btn-sm" title="Grabar audio"
-                    data-intro="Graba una narración de audio para tu animación táctica. Perfecto para explicar la jugada." 
-                    data-step="20">
-                <i class="fas fa-microphone"></i>
-            </button>
-            <button id="audio-play-btn" class="btn btn-outline-secondary btn-sm" title="Reproducir audio" disabled
-                    data-intro="Reproduce el audio grabado para escuchar tu narración." 
-                    data-step="21">
-                <i class="fas fa-volume-up"></i>
-            </button>
             
             <!-- Separador visual -->
             <div id="animation-separator-1" class="vertical-separator"></div>
+            
+            <button id="record-video-btn" class="btn btn-danger btn-sm" title="Grabar video"
+                    data-intro="Graba la secuencia de animación como video. Podrás agregar audio/narración después.">
+                <i class="fas fa-video"></i> Grabar Video
+            </button>
             
             <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar JSON"
                     data-intro="Exporta tu animación como archivo JSON para guardarla o compartirla (incluye audio si fue grabado)." 
                     data-step="22">
                 <i class="fas fa-share-square"></i>
-            </button>
-            <button id="export-animation-video" class="btn btn-outline-primary btn-sm" title="Exportar Video"
-                    data-intro="Exporta tu animación como video MP4 para compartir en redes sociales, WhatsApp, etc." 
-                    data-step="22b">
-                <i class="fas fa-video"></i>
             </button>
             <button id="reset-animation" class="btn btn-warning btn-sm" title="Reset"
                     data-intro="Borra toda la animación y vuelve al frame inicial. ¡Cuidado! Se perderán todos los frames y el audio." 
@@ -526,7 +523,7 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                             <select id="team-selector" class="form-select form-select-sm">
                                 <option value="default" selected>📌 Default (Jugadores por defecto)</option>
                             </select>
-                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#create-team-modal" title="Crear nuevo equipo">
+                            <button class="btn btn-sm btn-outline-primary" type="button" onclick="customPlayersUI.openCustomPlayersModalOnTab('manage-teams-tab')" title="Crear/Administrar equipos">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -547,7 +544,8 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     </div>
 
     <!-- Modal para crear equipos -->
-    <!-- Modal para crear equipos -->
+    <!-- Modal para crear equipos - MIGRADO al tab "Administrar Equipos" en modal de agregar jugadores -->
+    <!-- 
     <div class="modal fade" id="create-team-modal" tabindex="-1" aria-labelledby="createTeamModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -601,6 +599,11 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="manage-players-tab" data-bs-toggle="tab" data-bs-target="#manage-players-panel" type="button" role="tab">
                                 <i class="fas fa-users me-1"></i>Gestionar Jugadores
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="manage-teams-tab" data-bs-toggle="tab" data-bs-target="#manage-teams-panel" type="button" role="tab">
+                                <i class="fas fa-sitemap me-1"></i>Administrar Equipos
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -762,6 +765,61 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                                 <i class="fas fa-users fa-3x text-muted mb-3"></i>
                                 <h5 class="text-muted">No tienes jugadores personalizados</h5>
                                 <p class="text-muted">Agrega tu primer jugador en la pestaña "Agregar Jugador"</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel: Administrar Equipos -->
+                        <div class="tab-pane fade" id="manage-teams-panel" role="tabpanel">
+                            <!-- Formulario para crear nuevo equipo -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Crear Nuevo Equipo
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="create-team-form-inline">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="team-name-inline" class="form-label"><strong>Nombre del Equipo *</strong></label>
+                                                <input type="text" class="form-control" id="team-name-inline" placeholder="Ej: Mi Barrio, Real Madrid..." required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="team-color-inline" class="form-label"><strong>Color</strong></label>
+                                                <input type="color" class="form-control form-control-color" id="team-color-inline" value="#4CAF50" title="Selecciona un color">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="team-icon-inline" class="form-label"><strong>Icono</strong></label>
+                                                <input type="text" class="form-control" id="team-icon-inline" placeholder="⚽" maxlength="2" value="⚽">
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="button" class="btn btn-success" id="save-team-btn-inline" onclick="customPlayersUI.handleCreateTeam()">
+                                                    <i class="fas fa-plus me-1"></i>Crear Equipo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Lista de equipos -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-sitemap me-2"></i>
+                                        Tus Equipos
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="teams-list" class="list-group">
+                                        <!-- Los equipos se cargarán aquí dinámicamente -->
+                                    </div>
+                                    <div id="no-teams" class="text-center py-4" style="display: none;">
+                                        <i class="fas fa-sitemap fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted">No tienes equipos personalizados</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1164,7 +1222,10 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script src="js/cardStyleManager-refactored.js"></script>
     <script src="js/fieldStyleManager-refactored.js"></script>
     
-    <!-- PASO 4: UI de estilos -->
+    <!-- PASO 4: UI de estilos CONSOLIDADA -->
+    <!-- Nuevo: UI consolidada para campo y cards en un solo modal fullscreen -->
+    <script src="js/stylesSelectorUI.js"></script>
+    <!-- Antiguo: mantener como stubs para compatibilidad (no crean modales, solo redireccionen) -->
     <script src="js/fieldStyleUI.js"></script>
     <script src="js/cardStyleUI.js"></script>
     
@@ -1186,6 +1247,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     <script src="js/pwaIntegration.js"></script>
     
     <!-- PWA VERIFICATION removido - archivo no existe -->
+    
+    <!-- VIDEO EXPORT WORKFLOW - Procesamiento profesional de videos -->
+    <script src="js/videoExportWorkflow.js"></script>
     
     <!-- SYSTEM DE EQUIPOS - Team Management -->
     <script src="js/teamsManager.js"></script>

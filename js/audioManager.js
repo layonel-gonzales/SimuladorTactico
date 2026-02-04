@@ -22,36 +22,16 @@ export default class AudioManager {
     }
     
     init() {
-        this.setupDOMReferences();
-        this.setupEventListeners();
+        // Ya no se usan referencias DOM porque la grabación se controla desde el modal
+        // de exportación de video
     }
     
     setupDOMReferences() {
-        this.recordButton = document.getElementById('audio-record-btn');
-        this.playButton = document.getElementById('audio-play-btn');
-        this.audioIndicator = document.getElementById('audio-indicator');
-        
-        if (!this.recordButton) {
-            console.warn('AudioManager: Botón de grabación de audio no encontrado');
-        }
+        // Métodos heredados mantenidos para compatibilidad pero no se usan
     }
     
     setupEventListeners() {
-        if (this.recordButton) {
-            this.recordButton.addEventListener('click', () => {
-                if (this.isRecording) {
-                    this.stopRecording();
-                } else {
-                    this.startRecording();
-                }
-            });
-        }
-        
-        if (this.playButton) {
-            this.playButton.addEventListener('click', () => {
-                this.playRecordedAudio();
-            });
-        }
+        // Métodos heredados mantenidos para compatibilidad pero no se usan
     }
     
     async startRecording() {
@@ -269,6 +249,11 @@ export default class AudioManager {
         return null;
     }
     
+    // Obtener el Blob de audio grabado (para VideoExportWorkflow)
+    async getAudioBlob() {
+        return this.recordedAudioBlob || null;
+    }
+    
     // Verificar si hay audio grabado
     hasRecordedAudio() {
         return !!this.recordedAudioBase64;
@@ -277,6 +262,16 @@ export default class AudioManager {
     // Método alias para compatibilidad
     hasAudio() {
         return this.hasRecordedAudio();
+    }
+    
+    // Alias para animationManager
+    startAudioRecording() {
+        return this.startRecording();
+    }
+    
+    // Alias para animationManager
+    stopAudioRecording() {
+        return this.stopRecording();
     }
     
     // Verificar si el navegador soporta grabación de audio

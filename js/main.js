@@ -262,15 +262,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Botón de gestión de equipos
-        const teamsBtn = document.getElementById('teams-management-btn');
-        if (teamsBtn && window.teamsUI) {
-            teamsBtn.addEventListener('click', () => {
-                window.teamsUI.showCreateTeamModal();
-            });
-        }
-
-        
     }, 100);
 
     // --- Exportar animación como JSON ---
@@ -291,29 +282,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- Exportar animación como Video MP4 ---
-    const exportVideoBtn = document.getElementById('export-animation-video');
-    if (exportVideoBtn) {
-        exportVideoBtn.addEventListener('click', async () => {
+    // --- GRABAR VIDEO (botón nuevo que inicia todo el flujo) ---
+    const recordVideoBtn = document.getElementById('record-video-btn');
+    if (recordVideoBtn) {
+        recordVideoBtn.addEventListener('click', async () => {
             // Verificar que hay frames suficientes
             if (animationManager.getFrameCount() < 2) {
                 alert('❌ Necesitas al menos 2 frames para crear un video.\n\n💡 Tip: Agrega más frames moviendo jugadores y presionando "Agregar Frame"');
                 return;
             }
 
-            // Confirmar exportación con instrucciones claras
-            const hasAudio = audioManager && audioManager.hasRecordedAudio();
-            const audioText = hasAudio ? '\n🎤 SE INCLUIRÁ el audio grabado' : '\n🔇 Sin audio (graba antes si quieres narrarlo)';
+            console.log('[Main] Usuario presionó "Grabar Video"');
             
-            const confirmed = confirm(`🎬 ¿Exportar animación como video?\n\n📹 Se capturará la animación REAL de la pantalla${audioText}\n\n⚠️ IMPORTANTE:\n• Se abrirá selector de pantalla\n• Selecciona esta ventana/pestaña\n• La animación se reproducirá automáticamente\n• El video se descargará al finalizar\n\n¿Continuar?`);
-            
-            if (confirmed) {
-                try {
-                    await animationManager.exportToVideo();
-                } catch (error) {
-                    console.error('[Main] Error al exportar video:', error);
-                    alert('❌ Error al crear el video.\n\n💡 Asegúrate de:\n• Permitir captura de pantalla\n• Seleccionar esta pestaña\n• No minimizar la ventana durante la grabación');
-                }
+            try {
+                // El flujo completo se maneja desde animationManager:
+                // 1. Graba video
+                // 2. Muestra modal preguntando si desea audio
+                // 3. Si es sí, graba audio durante reproducción
+                // 4. Muestra opciones finales (reproducir/re-grabar/descargar)
+                await animationManager.startVideoRecordingFlow();
+            } catch (error) {
+                console.error('[Main] Error al iniciar flujo de video:', error);
+                alert('❌ Error al crear el video.\n\n💡 Asegúrate de:\n• Permitir captura de pantalla\n• Seleccionar esta pestaña\n• No minimizar la ventana durante la grabación');
             }
         });
     }
@@ -765,66 +755,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     playerManager.renderPlayerSelectionList();
 
     // --- AUDIO RECORDING CONTROLS ---
-    const audioRecordBtn = document.getElementById('audio-record-btn');
-    const audioPlayBtn = document.getElementById('audio-play-btn');
-    
-    if (audioRecordBtn) {
-        audioRecordBtn.addEventListener('click', async () => {
-            if (!audioManager.isRecording) {
-                // Verificar si hay audio previo y advertir al usuario
-                if (audioManager.hasAudio()) {
-                    if (!confirm('Ya existe una grabación de audio. ¿Deseas reemplazarla con una nueva grabación?')) {
-                        return;
-                    }
-                }
-                
-                try {
-                    await audioManager.startRecording();
-                    audioRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
-                    audioRecordBtn.title = 'Detener grabación';
-                    audioRecordBtn.classList.add('recording');
-                } catch (error) {
-                    console.error('[Main] Error al iniciar grabación:', error);
-                    alert('Error al iniciar la grabación. Asegúrate de permitir el acceso al micrófono.');
-                }
-            } else {
-                audioManager.stopRecording();
-                audioRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                audioRecordBtn.title = 'Grabar audio';
-                audioRecordBtn.classList.remove('recording');
-                
-                // Habilitar botón de reproducción si hay audio
-                if (audioPlayBtn && audioManager.hasAudio()) {
-                    audioPlayBtn.disabled = false;
-                }
-            }
-        });
-    }
-    
-    if (audioPlayBtn) {
-        audioPlayBtn.addEventListener('click', () => {
-            if (audioManager.hasAudio()) {
-                if (!audioManager.isPlaying) {
-                    audioManager.playAudio();
-                    audioPlayBtn.innerHTML = '<i class="fas fa-stop"></i>';
-                    audioPlayBtn.title = 'Detener reproducción';
-                    
-                    // Volver al estado normal cuando termine la reproducción
-                    audioManager.onAudioEnd = () => {
-                        audioPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
-                        audioPlayBtn.title = 'Reproducir audio';
-                    };
-                } else {
-                    audioManager.stopAudio();
-                    audioPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
-                    audioPlayBtn.title = 'Reproducir audio';
-                }
-            }
-        });
-        
-        // Deshabilitar inicialmente si no hay audio
-        audioPlayBtn.disabled = !audioManager.hasRecordedAudio();
-    }
+    // ✨ AHORA LA GRABACIÓN DE AUDIO SE CONTROLA DESDE EL MODAL DE EXPORTACIÓN DE VIDEO
+    // Los botones han sido removidos del menú
 
     // --- TUTORIAL MANAGER ---
     // Inicializar el gestor de tutorial al final para que todo esté cargado
