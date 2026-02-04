@@ -52,34 +52,68 @@ class FreemiumController {
         if (window.paymentManager) {
             this.userPlan = await paymentManager.getCurrentUserPlan();
         } else {
-            // Plan GRATUITO por defecto - valores según plan freemium v2.0
-            this.userPlan = {
-                name: 'free',
-                features: {
-                    // Táctico
-                    maxPlayers: { value: 11 },              // Un equipo
-                    formations: { value: ['4-4-2', '4-3-3', '3-5-2'] },  // 3 formaciones
-                    maxCustomPlayers: { value: 5 },         // 5 jugadores personalizados
-                    
-                    // Dibujo
-                    maxLines: { value: 10 },                // 10 líneas
-                    colors: { value: ['#ff0000', '#0000ff', '#ffff00'] },
-                    
-                    // Animación
-                    maxAnimationFrames: { value: 5 },       // 5 frames
-                    maxAnimationDuration: { value: 15 },    // 15 segundos
-                    audioRecording: { value: false },
-                    
-                    // Estilos
-                    fieldStyles: { value: ['classic', 'modern'] },
-                    cardStyles: { value: ['classic', 'fifa'] },
-                    
-                    // Exportar/Compartir
-                    export: { value: 'watermark' },
-                    jsonExport: { value: false },
-                    socialShare: { value: false }
-                }
-            };
+            // Verificar si el usuario tiene plan "pro" (modo desarrollo/GitHub Pages)
+            const userPlan = localStorage.getItem('user_plan');
+            
+            if (userPlan === 'pro') {
+                // Plan PRO COMPLETO - Todos los privilegios
+                this.userPlan = {
+                    name: 'pro',
+                    features: {
+                        // Táctico
+                        maxPlayers: { value: 22 },              // 2 equipos
+                        formations: { value: ['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-2-3-1', '3-3-4', '4-1-4-1', '5-2-2-1'] },
+                        maxCustomPlayers: { value: 99 },        // Sin límite
+                        
+                        // Dibujo
+                        maxLines: { value: -1 },                // Sin límite
+                        colors: { value: 'all' },              // Todos los colores
+                        
+                        // Animación
+                        maxAnimationFrames: { value: -1 },      // Sin límite
+                        maxAnimationDuration: { value: -1 },    // Sin límite
+                        audioRecording: { value: true },        // Habilitado
+                        
+                        // Estilos
+                        fieldStyles: { value: 'all' },         // Todos los estilos
+                        cardStyles: { value: 'all' },          // Todas las tarjetas
+                        
+                        // Exportar/Compartir
+                        export: { value: 'no_watermark' },
+                        jsonExport: { value: true },
+                        socialShare: { value: true }
+                    }
+                };
+            } else {
+                // Plan GRATUITO por defecto - valores según plan freemium v2.0
+                this.userPlan = {
+                    name: 'free',
+                    features: {
+                        // Táctico
+                        maxPlayers: { value: 11 },              // Un equipo
+                        formations: { value: ['4-4-2', '4-3-3', '3-5-2'] },  // 3 formaciones
+                        maxCustomPlayers: { value: 5 },         // 5 jugadores personalizados
+                        
+                        // Dibujo
+                        maxLines: { value: 10 },                // 10 líneas
+                        colors: { value: ['#ff0000', '#0000ff', '#ffff00'] },
+                        
+                        // Animación
+                        maxAnimationFrames: { value: 5 },       // 5 frames
+                        maxAnimationDuration: { value: 15 },    // 15 segundos
+                        audioRecording: { value: false },
+                        
+                        // Estilos
+                        fieldStyles: { value: ['classic', 'modern'] },
+                        cardStyles: { value: ['classic', 'fifa'] },
+                        
+                        // Exportar/Compartir
+                        export: { value: 'watermark' },
+                        jsonExport: { value: false },
+                        socialShare: { value: false }
+                    }
+                };
+            }
         }
     }
     

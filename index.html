@@ -78,8 +78,39 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
     
     <!-- VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR -->
     <script>
+        // Detectar si está en GitHub Pages o modo desarrollo
+        function isGitHubPagesDev() {
+            return window.location.hostname === 'kmeza.github.io' || 
+                   window.location.hostname === 'localhost' ||
+                   window.location.hostname === '127.0.0.1' ||
+                   localStorage.getItem('DEVELOPMENT_MODE') === 'true';
+        }
+        
+        // Setup automático para GitHub Pages/Desarrollo
+        function setupDevelopmentMode() {
+            const testUser = {
+                email: 'test@simulador.app',
+                role: 'admin',
+                plan: 'pro',
+                permissions: 'all'
+            };
+            
+            localStorage.setItem('auth_token', 'dev-token-' + Date.now());
+            localStorage.setItem('user_email', testUser.email);
+            localStorage.setItem('user_role', testUser.role);
+            localStorage.setItem('user_plan', testUser.plan);
+            localStorage.setItem('user_permissions', testUser.permissions);
+        }
+        
         // Verificar autenticación al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // En GitHub Pages o desarrollo, setup automático
+            if (isGitHubPagesDev()) {
+                setupDevelopmentMode();
+                setupUserInterface();
+                return;
+            }
             
             const token = localStorage.getItem('auth_token');
             if (!token) {
@@ -92,12 +123,15 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
         
         function setupUserInterface() {
             const userEmail = localStorage.getItem('user_email');
+            const userPlan = localStorage.getItem('user_plan');
             const userStatus = document.getElementById('user-status');
             const userInfo = document.getElementById('user-info');
             const logoutBtn = document.getElementById('logout-btn');
             
             if (userEmail && userStatus && userInfo) {
-                userInfo.textContent = `${userEmail} (👑 Premium)`;
+                // Mostrar plan del usuario
+                const planBadge = userPlan === 'pro' ? '👑 Premium' : '🆓 Gratuito';
+                userInfo.textContent = `${userEmail} (${planBadge})`;
                 userStatus.style.display = 'block';
                 
                 // Configurar botón de logout
