@@ -1153,10 +1153,20 @@ export default class AnimationManager {
         ctx.fillText(timestamp, 20, canvas.height - 20);
     }
 
-    // Capturar la pantalla de la aplicación
+    // Detectar si es dispositivo móvil
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Capturar la pantalla de la aplicación (Desktop y Mobile)
     async captureApplicationScreen(element) {
+        const isMobile = this.isMobileDevice();
+        return isMobile ? await this.captureCanvasAsStream(element) : await this.captureScreenViaDisplayMedia(element);
+    }
+
+    // Captura por getDisplayMedia (Desktop)
+    async captureScreenViaDisplayMedia(element) {
         try {
-            // Usar getDisplayMedia para capturar pantalla
             const screenStream = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     mediaSource: 'screen',
@@ -1166,12 +1176,52 @@ export default class AnimationManager {
                 },
                 audio: false
             });
-
             return screenStream;
-
         } catch (error) {
-            console.warn('[AnimationManager] getDisplayMedia no disponible');
             throw new Error('Captura de pantalla no disponible en tu navegador');
+        }
+    }
+
+    // Captura por Canvas (Mobile)
+    async captureCanvasAsStream(element) {
+        try {
+            const canvas = element.querySelector('canvas') || document.getElementById('football-field');
+            if (!canvas) throw new Error('Canvas no encontrado');
+
+            const outputCanvas = document.createElement('canvas');
+            outputCanvas.width = canvas.width;
+            outputCanvas.height = canvas.height;
+            const ctx = outputCanvas.getContext('2d');
+            const canvasStream = outputCanvas.captureStream(30); // 30 FPS
+
+            let animationFrameId = null;
+            let isRecording = true;
+
+            const copyCanvasFrame = () => {
+                if (isRecording) {
+                    try {
+                        ctx.drawImage(canvas, 0, 0);
+                    } catch (e) {}
+                    animationFrameId = requestAnimationFrame(copyCanvasFrame);
+                }
+            };
+
+            this.canvasCopyFrameId = animationFrameId;
+            this.isCanvasCopyingActive = true;
+            this.canvasStream = canvasStream;
+            copyCanvasFrame();
+
+            canvasStream.getTracks().forEach(track => {
+                track.onended = () => {
+                    isRecording = false;
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                    this.isCanvasCopyingActive = false;
+                };
+            });
+
+            return canvasStream;
+        } catch (error) {
+            throw new Error('No se puede capturar el canvas: ' + error.message);
         }
     }
 

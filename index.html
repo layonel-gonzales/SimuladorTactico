@@ -297,7 +297,6 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
                     resolve();
                 } else if (attempts >= maxAttempts) {
                     clearInterval(checkFFmpeg);
-                    console.warn('⚠️ FFmpeg no se cargó. La combinación de audio/video no estará disponible.');
                     resolve();
                 }
             }, 100);
@@ -466,9 +465,9 @@ window.addEventListener('DOMContentLoaded', handleOrientationModal);
             <!-- Separador visual -->
             <div id="animation-separator-1" class="vertical-separator"></div>
             
-            <button id="record-video-btn" class="btn btn-danger btn-sm" title="Grabar video"
-                    data-intro="Graba la secuencia de animación como video. Podrás agregar audio/narración después.">
-                <i class="fas fa-video"></i> Grabar Video
+            <button id="record-video-btn" class="btn btn-danger btn-sm" title="Descargar video"
+                    data-intro="Descarga la secuencia de animación como video. Podrás agregar audio/narración en el proceso.">
+                <i class="fas fa-video"></i>&nbsp;&nbsp;Descargar
             </button>
             
             <button id="export-animation-json" class="btn btn-outline-success btn-sm" title="Exportar JSON"

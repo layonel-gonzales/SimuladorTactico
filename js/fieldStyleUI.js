@@ -9,7 +9,6 @@
 
 class FieldStyleUI {
     constructor() {
-        console.warn('⚠️ FieldStyleUI deprecated - usar stylesSelectorUI en su lugar');
         this.isVisible = false;
         this.currentSelectedStyle = null;
         this.modal = null;

@@ -31,8 +31,6 @@ class StylesSelectorUI {
         this.createConsolidatedModal();
         this.setupEventListeners();
         this.initialized = true;
-        
-        console.log('✅ StylesSelectorUI inicializado');
     }
 
     createConsolidatedModal() {

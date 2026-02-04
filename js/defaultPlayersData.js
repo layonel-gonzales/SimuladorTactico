@@ -149,7 +149,6 @@ const DefaultPlayersData = {
      * Solo se guardan en localStorage los jugadores CREADOS por el usuario
      */
     async loadDefaultPlayers() {
-        console.log(`✅ Jugadores por defecto cargados en memoria: ${this.getAllDefaultPlayers().length}`);
         return { loaded: true, added: 0, total: this.getAllDefaultPlayers().length };
     }
 };

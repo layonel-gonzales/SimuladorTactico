@@ -37,7 +37,6 @@ class LocalStorageManager {
      * Inicializar el gestor
      */
     init() {
-        console.log('💾 LocalStorageManager inicializado');
         this.checkStorageAvailability();
         this.monitorStorageUsage();
     }

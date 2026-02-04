@@ -311,6 +311,3 @@ const TeamsSystemValidator = {
 
 // Exportar para acceso global
 window.TeamsSystemValidator = TeamsSystemValidator;
-
-// Auto-ejecutar al cargar (opcional)
-console.log('🔧 Sistema de validación disponible. Ejecuta: window.TeamsSystemValidator.runAllTests()');

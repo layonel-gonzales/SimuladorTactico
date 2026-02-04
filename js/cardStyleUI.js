@@ -9,7 +9,6 @@
 
 class CardStyleUI {
     constructor() {
-        console.warn('⚠️ CardStyleUI deprecated - usar stylesSelectorUI en su lugar');
         this.isVisible = false;
         this.currentSelectedStyle = null;
         this.modal = null;

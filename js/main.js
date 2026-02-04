@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.defaultPlayersData) {
         window.defaultPlayersData.loadDefaultPlayers().then(result => {
             if (result.loaded) {
-                console.log(`✅ Sistema de jugadores por defecto inicializado: ${result.total} jugadores`);
+                // Players loaded successfully
             }
         }).catch(err => {
             console.error('❌ Error cargando jugadores por defecto:', err);
